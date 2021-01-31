@@ -14,7 +14,11 @@
 CHIP PC {
     IN in[16],load,inc,reset;
     OUT out[16];
-
+    
     PARTS:
-    // Put your code here:
+    Inc16(in=fb,out=o1);
+    Mux16(a=fb,b=o1,sel=inc,out=o2);
+    Mux16(a=o2,b=in,sel=load,out=o3);
+    Mux16(a=o3,b=false,sel=reset,out=o4);
+    DFF16(in=o4,out=out,out=fb);
 }
