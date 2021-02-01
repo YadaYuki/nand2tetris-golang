@@ -10,3 +10,41 @@
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
 // Put your code here.
+
+
+// Initialize R2
+
+@R2
+M=0
+
+// Jump into the first LOOP if R0 > 0.
+@R0
+D=M
+@LOOP
+D;JGT
+
+// If it didn't jump, go to END.
+@END
+0;JMP
+
+
+(LOOP)
+
+   @R1
+   D=M
+
+   @R2
+   M=D+M
+
+   @R0
+   M=M-1
+   D=M
+   
+   @LOOP
+   D;JGT
+
+(END)
+   @END
+   0;JMP
+
+
