@@ -39,5 +39,8 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+
+    Or(a=instruction[0],a=instruction[1],out=o1);
+    Or(a=instruction[2],a=o2,out=isJump);
+    PC(in=A,load=isJump,inc=true,reset=reset);
 }
