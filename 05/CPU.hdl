@@ -40,7 +40,26 @@ CHIP CPU {
 
     PARTS:
 
+    // Define Aregister
+
+    // ARegister
+    ARegister(in=instruction,load=instruction[15],out=A,out=addressM);
+
+    // Define mnemonic(A or M)
+    Mux16(a=A,b=inM,sel=instruction[12],out=AM);
+
+    // DRegister
+    DRegister(in=aluFb,load=instruction[4],out=D);
+
+    // ALU
+    ALU(x=D,y=AM,zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6],out=outM1);
+    DFF16(in=outM1,out=outM,out=aluFb);
+
+    // PC
     Or(a=instruction[0],a=instruction[1],out=o1);
     Or(a=instruction[2],a=o2,out=isJump);
-    PC(in=A,load=isJump,inc=true,reset=reset);
+    PC(in=A,load=isJump,inc=true,reset=reset,out=PC[0..14]);
+
+
+    
 }
