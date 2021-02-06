@@ -40,10 +40,17 @@ CHIP CPU {
 
     PARTS:
 
+    Not(in=instruction[15], out=isA);
+    Not(in=isA, out=isC);
+    
+    And(a=isC, b=instruction[5], out=ALUtoA);   
+
     // Define Aregister
+    Mux16(a=instruction,b=aluFb,sel=ALUtoA,out=outMu);
 
     // ARegister
-    ARegister(in=instruction,load=instruction[15],out=A,out=addressM);
+    Or(a=ALUtoA,b=isA,out=loadA)
+    ARegister(in=outMu,load=loadA,out=A,out=addressM);
 
     // Define mnemonic(A or M)
     Mux16(a=A,b=inM,sel=instruction[12],out=AM);
