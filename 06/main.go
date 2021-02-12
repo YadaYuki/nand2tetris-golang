@@ -1,7 +1,6 @@
 package main
 
 import (
-	"Assembly/parser"
 	"bufio"
 	"fmt"
 	"log"
@@ -22,13 +21,8 @@ func main() {
 	for fileScanner.Scan() {
 		s := fileScanner.Text()
 		if len(s) > 0 {
-			commandType, err := parser.GetCommandType(s)
-			if err != nil {
-				fmt.Println(err)
-			}
-			fmt.Println(commandType)
-			symbol, err := parser.GetSymbol(s)
-			fmt.Println(symbol)
+			fmt.Println(s)
+
 		}
 	}
 }

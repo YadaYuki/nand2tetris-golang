@@ -63,3 +63,62 @@ func GetSymbol(commandStr string) (symbol string, err error) {
 	}
 	return "", err
 }
+
+// GetDest returns machine language　Correspond to dest label
+func GetDest(commandStr string) (symbol string, err error) {
+	s := strings.TrimSpace(commandStr)
+	commandType, err := GetCommandType(s)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	if commandType != cCommand {
+		return "", errors.New("only C_COMMAND has dest label")
+	}
+	if strings.Contains(s, "=") == false {
+		return "null", nil
+	}
+	dest := strings.Split(s, "=")[0]
+	return dest, nil
+}
+
+// GetJump returns machine language　Correspond to dest label
+func GetJump(commandStr string) (symbol string, err error) {
+	s := strings.TrimSpace(commandStr)
+	commandType, err := GetCommandType(s)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	if commandType != cCommand {
+		return "", errors.New("only C_COMMAND has jump label")
+	}
+	if strings.Contains(s, ";") == false {
+		return "null", nil
+	}
+	jump := strings.Split(s, ";")[1]
+	return jump, nil
+}
+
+// GetComp returns machine language　Correspond to dest label
+func GetComp(commandStr string) (symbol string, err error) {
+	s := strings.TrimSpace(commandStr)
+	commandType, err := GetCommandType(s)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	if commandType != cCommand {
+		return "", errors.New("only C_COMMAND has jump label")
+	}
+	if GetJump(s) == "null" {
+		comp := strings.Split(s, "=")[1]
+		return comp, nil
+	}
+	if GetDest(s) == "null" {
+		comp := strings.Split(s, ";")[0]
+		return comp, nil
+	}
+	comp = strings.Split((strings.Split(s, "=")[1]), ";")[0]
+	return comp, nil
+}
