@@ -27,6 +27,8 @@ func main() {
 				fmt.Println(err)
 			}
 			fmt.Println(commandType)
+			symbol, err := parser.GetSymbol(s)
+			fmt.Println(symbol)
 		}
 	}
 }

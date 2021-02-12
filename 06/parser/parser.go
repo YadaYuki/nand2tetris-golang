@@ -1,6 +1,10 @@
 package parser
 
-import "strings"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
 // CommandType is type of command
 type CommandType int
@@ -35,5 +39,27 @@ func GetCommandType(commandStr string) (c CommandType, err error) {
 		return lCommand, nil
 	}
 
-	return cCommand, nil
+	// TODO: clarify syntax of C_COMMAND
+	if strings.Contains(s, ";") || strings.Contains(s, "=") {
+		return cCommand, nil
+	}
+
+	return lCommand, errors.New("Invalid CommandType")
+}
+
+// GetSymbol returns Symbol name
+func GetSymbol(commandStr string) (symbol string, err error) {
+	s := strings.TrimSpace(commandStr)
+	commandType, err := GetCommandType(s)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	if commandType == aCommand {
+		return s[1:], nil
+	}
+	if commandType == lCommand {
+		return s[1 : len(s)-1], nil
+	}
+	return "", err
 }
