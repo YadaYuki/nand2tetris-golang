@@ -1,3 +1,3 @@
-module assembly
+module Assembly
 
 go 1.15

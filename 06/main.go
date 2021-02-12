@@ -1,12 +1,11 @@
 package main
 
 import (
+	"Assembly/parser"
 	"bufio"
 	"fmt"
 	"log"
 	"os"
-
-	"assembly/parser"
 )
 
 func main() {
@@ -19,11 +18,9 @@ func main() {
 	defer file.Close()
 
 	fileScanner := bufio.NewScanner(file)
-	for {
-		s, err := parser.Advance(fileScanner)
-		if err != nil {
-			break
-		}
-		fmt.Println(s)
+
+	for fileScanner.Scan() {
+		fmt.Println(fileScanner.Text())
+		fmt.Println(parser.GetCommandType("hoge"))
 	}
 }
