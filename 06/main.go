@@ -20,7 +20,13 @@ func main() {
 	fileScanner := bufio.NewScanner(file)
 
 	for fileScanner.Scan() {
-		fmt.Println(fileScanner.Text())
-		fmt.Println(parser.GetCommandType("hoge"))
+		s := fileScanner.Text()
+		if len(s) > 0 {
+			commandType, err := parser.GetCommandType(s)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(commandType)
+		}
 	}
 }
