@@ -111,14 +111,16 @@ func GetComp(commandStr string) (symbol string, err error) {
 	if commandType != cCommand {
 		return "", errors.New("only C_COMMAND has jump label")
 	}
-	if GetJump(s) == "null" {
+	jump, err := GetJump(s)
+	if jump == "null" {
 		comp := strings.Split(s, "=")[1]
 		return comp, nil
 	}
-	if GetDest(s) == "null" {
+	dest, err := GetDest(s)
+	if dest == "null" {
 		comp := strings.Split(s, ";")[0]
 		return comp, nil
 	}
-	comp = strings.Split((strings.Split(s, "=")[1]), ";")[0]
+	comp := strings.Split((strings.Split(s, "=")[1]), ";")[0]
 	return comp, nil
 }
