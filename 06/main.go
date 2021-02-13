@@ -64,7 +64,6 @@ func main() {
 				}
 			}
 			// TODO:implement Write file
-
 			fmt.Println(binaryCode)
 		}
 	}
