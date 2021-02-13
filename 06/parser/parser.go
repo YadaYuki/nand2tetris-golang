@@ -10,18 +10,18 @@ import (
 type CommandType int
 
 const (
-	aCommand CommandType = iota
-	cCommand
-	lCommand
+	ACommand CommandType = iota
+	CCommand
+	LCommand
 )
 
 func (command CommandType) String() string {
 	switch command {
-	case aCommand:
+	case ACommand:
 		return "A_COMMAND"
-	case cCommand:
+	case CCommand:
 		return "C_COMMAND"
-	case lCommand:
+	case LCommand:
 		return "L_COMMAND"
 	default:
 		return "Unknown"
@@ -33,18 +33,18 @@ func GetCommandType(commandStr string) (c CommandType, err error) {
 	s := strings.TrimSpace(commandStr)
 
 	if s[0:1] == "@" {
-		return aCommand, nil
+		return ACommand, nil
 	}
 	if strings.LastIndexAny(s, "(") == 0 && strings.LastIndexAny(s, ")") == len(s)-1 {
-		return lCommand, nil
+		return LCommand, nil
 	}
 
 	// TODO: clarify syntax of C_COMMAND
 	if strings.Contains(s, ";") || strings.Contains(s, "=") {
-		return cCommand, nil
+		return CCommand, nil
 	}
 
-	return lCommand, errors.New("Invalid CommandType")
+	return LCommand, errors.New("Invalid CommandType")
 }
 
 // GetSymbol returns Symbol name
@@ -55,10 +55,10 @@ func GetSymbol(commandStr string) (symbol string, err error) {
 		fmt.Println(err)
 		return "", err
 	}
-	if commandType == aCommand {
+	if commandType == ACommand {
 		return s[1:], nil
 	}
-	if commandType == lCommand {
+	if commandType == LCommand {
 		return s[1 : len(s)-1], nil
 	}
 	return "", err
@@ -72,7 +72,7 @@ func GetDest(commandStr string) (symbol string, err error) {
 		fmt.Println(err)
 		return "", err
 	}
-	if commandType != cCommand {
+	if commandType != CCommand {
 		return "", errors.New("only C_COMMAND has dest label")
 	}
 	if strings.Contains(s, "=") == false {
@@ -90,7 +90,7 @@ func GetJump(commandStr string) (symbol string, err error) {
 		fmt.Println(err)
 		return "", err
 	}
-	if commandType != cCommand {
+	if commandType != CCommand {
 		return "", errors.New("only C_COMMAND has jump label")
 	}
 	if strings.Contains(s, ";") == false {
@@ -108,7 +108,7 @@ func GetComp(commandStr string) (symbol string, err error) {
 		fmt.Println(err)
 		return "", err
 	}
-	if commandType != cCommand {
+	if commandType != CCommand {
 		return "", errors.New("only C_COMMAND has jump label")
 	}
 	jump, err := GetJump(s)
