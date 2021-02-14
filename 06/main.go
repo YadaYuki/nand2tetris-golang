@@ -3,6 +3,7 @@ package main
 import (
 	"Assembly/code"
 	"Assembly/parser"
+	"Assembly/symbol_table"
 	"Assembly/util"
 	"bufio"
 	"fmt"
@@ -13,24 +14,45 @@ import (
 )
 
 func main() {
-	file, err := os.Open("rect/RectL.asm")
-
+	file, err := os.Open("rect/Rect.asm")
 	if err != nil {
 		log.Fatalf("%s", err)
 	}
 
-	defer file.Close()
-
 	fileScanner := bufio.NewScanner(file)
+	currentRomAddress := 0
+	for fileScanner.Scan() {
+		s := fileScanner.Text()
+		if isComment := strings.Index(s, "//"); len(s) > 0 && isComment == -1 {
+			commandType, err := parser.GetCommandType(s)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if commandType == parser.CCommand || commandType == parser.ACommand {
+				currentRomAddress++
+			}
+			if commandType == parser.LCommand {
+				symbol, _ := parser.GetSymbol(s)
+				symbol_table.AddEntry(symbol, currentRomAddress+1)
+			}
+		}
+	}
 
+	// TODO:Fix File reader
+	file2, err := os.Open("rect/Rect.asm")
+	if err != nil {
+		log.Fatalf("%s", err)
+	}
+	defer file2.Close()
+	fileScanner = bufio.NewScanner(file2)
+	currentCustomVariableAddress := 16
 	for fileScanner.Scan() {
 		s := fileScanner.Text()
 
 		if isComment := strings.Index(s, "//"); len(s) > 0 && isComment == -1 {
 			commandType, err := parser.GetCommandType(s)
 			if err != nil {
-				log.Fetal(err)
-
+				log.Fatal(err)
 			}
 			binaryCode := ""
 			if commandType == parser.CCommand {
@@ -61,16 +83,26 @@ func main() {
 				binaryCode = "111" + compBinary + destBinary + jumpBinary
 			}
 			if commandType == parser.ACommand {
-				symbolStr, err := parser.GetSymbol(s)
-				symbol, err := strconv.Atoi(symbolStr)
+				symbol, err := parser.GetSymbol(s)
+				symbolInt, err := strconv.Atoi(symbol)
 				if err == nil {
-					binaryCode = "0" + util.Fill(strconv.FormatInt(int64(symbol), 2), "0", 15)
+					binaryCode = "0" + util.Fill(strconv.FormatInt(int64(symbolInt), 2), "0", 15)
+				}
+				if err != nil { // custom variable
+					if contains := symbol_table.Contains(symbol); contains == true {
+						address, _ := symbol_table.GetAddress(symbol)
+						binaryCode = "0" + util.Fill(strconv.FormatInt(int64(address), 2), "0", 15)
+					} else {
+						binaryCode = "0" + util.Fill(strconv.FormatInt(int64(currentCustomVariableAddress), 2), "0", 15)
+						symbol_table.AddEntry(symbol, currentCustomVariableAddress)
+						currentCustomVariableAddress++
+					}
 				}
 			}
-			if commandType == parser.LCommand {
+			if commandType != parser.LCommand {
+				fmt.Println(binaryCode)
 			}
-			// TODO:implement Write file
-			fmt.Println(binaryCode)
 		}
 	}
+	defer file2.Close()
 }

@@ -7,7 +7,7 @@ import (
 var symbolTable = map[string]int{}
 
 // CurrentAddress is current ROM Address. It stores custom variable
-var CurrentAddress = 1024
+// var CurrentAddress = 1024
 
 // AddEntry add symbol to symbol table
 func AddEntry(symbol string, address int) {
