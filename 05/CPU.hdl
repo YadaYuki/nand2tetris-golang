@@ -39,7 +39,7 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-
+    // TODO: implement
     Not(in=instruction[15], out=isA);
     Not(in=isA, out=isC);
     
