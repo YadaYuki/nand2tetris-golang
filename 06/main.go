@@ -13,6 +13,8 @@ import (
 	"strings"
 )
 
+//TODO: test
+
 func main() {
 	file, err := os.Open("rect/Rect.asm")
 	if err != nil {
