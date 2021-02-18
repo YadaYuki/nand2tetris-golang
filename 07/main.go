@@ -20,7 +20,11 @@ func main() {
 	fileScanner := bufio.NewScanner(file)
 	for fileScanner.Scan() {
 		s := fileScanner.Text()
-		commandType, _ := parser.GetCommandType(s)
-		fmt.Println(commandType)
+		// commandType, err := parser.GetCommandType(s)
+		// if commandType{
+
+		// }
+		arg1, _ := parser.GetArg1(s)
+		fmt.Println(arg1)
 	}
 }

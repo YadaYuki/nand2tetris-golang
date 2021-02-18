@@ -50,5 +50,32 @@ func GetCommandType(commandStr string) (c CommandType, err error) {
 	if _, ok := arithmeticCommand[s]; ok {
 		return CArithmetic, nil
 	}
-	return CCall, errors.New("Invalid CommandType")
+	if strings.HasPrefix(s, "push") {
+		return CPush, nil
+	}
+	if strings.HasPrefix(s, "pop") {
+		return CPop, nil
+	}
+	return 100, errors.New("Invalid CommandType")
+}
+
+func GetArg1(commandStr string) (arg1 string, err error) {
+	s := strings.TrimSpace(commandStr)
+	commandType, _ := GetCommandType(s)
+	if commandType == CArithmetic {
+		return s, nil
+	}
+	if commandType == CPush {
+		return strings.Split(s, " ")[1], nil
+	}
+	return "", errors.New("Command has no symbol")
+}
+
+func GetArg2(commandStr string) (arg1 string, err error) {
+	s := strings.TrimSpace(commandStr)
+	commandType, _ := GetCommandType(s)
+	if commandType == CPush {
+		return strings.Split(s, " ")[2], nil
+	}
+	return "", errors.New("Command has no symbol")
 }
