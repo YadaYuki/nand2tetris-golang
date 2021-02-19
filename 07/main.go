@@ -1,12 +1,14 @@
 package main
 
 import (
+	"VMtranslator/code_writer"
 	"VMtranslator/parser"
 	"bufio"
 	"flag"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 )
 
 func main() {
@@ -20,11 +22,13 @@ func main() {
 	fileScanner := bufio.NewScanner(file)
 	for fileScanner.Scan() {
 		s := fileScanner.Text()
-		// commandType, err := parser.GetCommandType(s)
-		// if commandType{
-
-		// }
-		arg1, _ := parser.GetArg1(s)
-		fmt.Println(arg1)
+		commandType, _ := parser.GetCommandType(s)
+		if commandType == parser.CPush {
+			segment, _ := parser.GetArg1(s)
+			index, _ := parser.GetArg2(s)
+			indexInt, _ := strconv.Atoi(index)
+			assembly, _ := code_writer.GetPushPop(commandType, segment, indexInt)
+			fmt.Println(assembly)
+		}
 	}
 }

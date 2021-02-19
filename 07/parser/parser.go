@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// CommandType is CommandType
 type CommandType int
 
 const (
@@ -44,6 +45,7 @@ func (command CommandType) String() string {
 	}
 }
 
+// GetCommandType GetCommandType
 func GetCommandType(commandStr string) (c CommandType, err error) {
 	s := strings.TrimSpace(commandStr)
 	arithmeticCommand := map[string]int{"add": 1, "sub": 1, "neg": 1, "eq": 1, "gt": 1, "lt": 1, "and": 1, "or": 1, "not": 1}
@@ -59,6 +61,7 @@ func GetCommandType(commandStr string) (c CommandType, err error) {
 	return 100, errors.New("Invalid CommandType")
 }
 
+// GetArg1 GetArg1
 func GetArg1(commandStr string) (arg1 string, err error) {
 	s := strings.TrimSpace(commandStr)
 	commandType, _ := GetCommandType(s)
@@ -71,7 +74,8 @@ func GetArg1(commandStr string) (arg1 string, err error) {
 	return "", errors.New("Command has no symbol")
 }
 
-func GetArg2(commandStr string) (arg1 string, err error) {
+// GetArg2 a
+func GetArg2(commandStr string) (arg2 string, err error) {
 	s := strings.TrimSpace(commandStr)
 	commandType, _ := GetCommandType(s)
 	if commandType == CPush {
