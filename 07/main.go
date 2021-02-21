@@ -30,5 +30,9 @@ func main() {
 			assembly, _ := code_writer.GetPushPop(commandType, segment, indexInt)
 			fmt.Println(assembly)
 		}
+		if commandType == parser.CArithmetic {
+			assembly, _ := code_writer.GetArithmetic(s)
+			fmt.Println(assembly)
+		}
 	}
 }

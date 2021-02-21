@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+// Flag is for distinguish lt,eq... instructions
+var Flag = 0
+
 // GetPushPop get
 func GetPushPop(commandType parser.CommandType, segment string, index int) (assembly string, err error) {
 
@@ -24,25 +27,31 @@ func GetPushPop(commandType parser.CommandType, segment string, index int) (asse
 // GetArithmetic returns assembly for arithmetic command
 func GetArithmetic(commandStr string) (assembly string, err error) {
 	s := strings.TrimSpace(commandStr)
-	// TODO: to switch
-	if s == "add" {
+	switch s {
+	case "add":
 		return "@SP\n" + "A=M\n" + "D=M\n" + "A=A-1\n" + "D=D+M\n" + "M=D\n" + "@SP\n" + "M=M-1\n", nil
-	}
-	if s == "sub" {
+	case "sub":
 		return "@SP\n" + "A=M\n" + "D=M\n" + "A=A-1\n" + "M=M-D\n" + "@SP\n" + "M=M-1\n", nil
-	}
-	if s == "neg" {
+	case "neg":
 		return "@SP\n" + "A=M\n" + "D=M\n" + "M=-D\n", nil
-	}
-	if s == "and" {
+	case "and":
 		return "@SP\n" + "A=M\n" + "D=M\n" + "A=A-1\n" + "D=D&M\n" + "M=D\n" + "@SP\n" + "M=M-1\n", nil
-	}
-	if s == "or" {
+	case "or":
 		return "@SP\n" + "A=M\n" + "D=M\n" + "A=A-1\n" + "D=D|M\n" + "M=D\n" + "@SP\n" + "M=M-1\n", nil
-	}
-	if s == "not" {
+	case "not":
 		return "@SP\n" + "A=M\n" + "D=M\n" + "M=!D\n", nil
+	case "eq":
+		return getCompareAssembly("JEQ"), nil
+	case "gt":
+		return getCompareAssembly("JGT"), nil
+	case "lt":
+		return getCompareAssembly("JLT"), nil
+	default:
+		return "", errors.New("invalid arithmetic command")
 	}
+}
 
-	return "", errors.New("invalid arithmetic command")
+func getCompareAssembly(assemblyCommand string) string {
+	Flag++
+	return "@SP\n" + "A=M-1\n" + "D=M\n" + "D=D-M\n" + "@SP\n" + "M=M-1\n" + "@TRUE" + strconv.Itoa(Flag) + "\n" + "D;" + assemblyCommand + "\n" + "@SP\n" + "A=M\n" + "M=0\n" + "@NEXT" + strconv.Itoa(Flag) + "\n" + "0;JMP\n" + "(TRUE" + strconv.Itoa(Flag) + ")\n" + "@SP\n" + "A=M\n" + "M=-1\n" + "(NEXT" + strconv.Itoa(Flag) + ")"
 }
