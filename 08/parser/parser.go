@@ -58,6 +58,24 @@ func GetCommandType(commandStr string) (c CommandType, err error) {
 	if strings.HasPrefix(s, "pop") {
 		return CPop, nil
 	}
+	if strings.HasPrefix(s, "label") {
+		return CLabel, nil
+	}
+	if strings.HasPrefix(s, "goto") {
+		return CGoto, nil
+	}
+	if strings.HasPrefix(s, "if-goto") {
+		return CGoto, nil
+	}
+	if strings.HasPrefix(s, "function") {
+		return CFunction, nil
+	}
+	if strings.HasPrefix(s, "call") {
+		return CCall, nil
+	}
+	if s == "return" {
+		return CReturn, nil
+	}
 	return 100, errors.New("Invalid CommandType")
 }
 
@@ -68,7 +86,7 @@ func GetArg1(commandStr string) (arg1 string, err error) {
 	if commandType == CArithmetic {
 		return s, nil
 	}
-	if commandType == CPush {
+	if commandType == CPush || commandType == CPush || commandType == CPop || commandType == CLabel || commandType == CGoto || commandType == CIf || commandType == CFunction || commandType == CReturn || commandType == CCall {
 		return strings.Split(s, " ")[1], nil
 	}
 	return "", errors.New("Command has no symbol")
@@ -78,7 +96,7 @@ func GetArg1(commandStr string) (arg1 string, err error) {
 func GetArg2(commandStr string) (arg2 string, err error) {
 	s := strings.TrimSpace(commandStr)
 	commandType, _ := GetCommandType(s)
-	if commandType == CPush {
+	if commandType == CPush || commandType == CPush || commandType == CPop || commandType == CLabel || commandType == CGoto || commandType == CIf || commandType == CFunction || commandType == CReturn || commandType == CCall {
 		return strings.Split(s, " ")[2], nil
 	}
 	return "", errors.New("Command has no symbol")
