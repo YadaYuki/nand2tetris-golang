@@ -74,6 +74,21 @@ func GetWriteInit() (assembly string) {
 	return "@256\n" + "D=A\n" + "@SP" + "M=D\n"
 }
 
+// GetWriteLabel convert vm "label" to assembly "label"
+func GetWriteLabel(label string) (assembly string) {
+	return "(" + label + ")\n"
+}
+
+// GetWriteGoto convert vm "goto" to assembly
+func GetWriteGoto(label string) (assembly string) {
+	return "@" + label + "\n" + "0;JMP\n"
+}
+
+// GetWriteIf convert vm "if-goto" to assembly
+func GetWriteIf(label string) (assembly string) {
+	return "@SP\n" + "A=M\n" + "D=M\n" + "@SP\n" + "M=M-1\n" + "@" + label + "\n" + "D;JNE\n"
+}
+
 // sub module
 
 var setDtoStackAssembly = "@SP\n" + "A=M\n" + "M=D" + "@SP\n" + "M=M+1\n"
