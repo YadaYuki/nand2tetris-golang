@@ -8,7 +8,7 @@ import (
 )
 
 // Flag is for distinguish lt,eq... instructions
-var Flag = 0
+var flag = 0
 
 // GetPushPop get
 func GetPushPop(commandType parser.CommandType, segment string, index int) (assembly string, err error) {
@@ -68,11 +68,19 @@ func GetArithmetic(commandStr string) (assembly string, err error) {
 	}
 }
 
+// GetWriteInit return vm initialize assembly
+func GetWriteInit() (assembly string) {
+	// set SP 256
+	return "@256\n" + "D=A\n" + "@SP" + "M=D\n"
+}
+
+// sub module
+
 var setDtoStackAssembly = "@SP\n" + "A=M\n" + "M=D" + "@SP\n" + "M=M+1\n"
 
 func getCompareAssembly(assemblyCommand string) string {
-	Flag++
-	return "@SP\n" + "A=M-1\n" + "D=M\n" + "D=D-M\n" + "@SP\n" + "M=M-1\n" + "@TRUE" + strconv.Itoa(Flag) + "\n" + "D;" + assemblyCommand + "\n" + "@SP\n" + "A=M\n" + "M=0\n" + "@NEXT" + strconv.Itoa(Flag) + "\n" + "0;JMP\n" + "(TRUE" + strconv.Itoa(Flag) + ")\n" + "@SP\n" + "A=M\n" + "M=-1\n" + "(NEXT" + strconv.Itoa(Flag) + ")"
+	flag++
+	return "@SP\n" + "A=M-1\n" + "D=M\n" + "D=D-M\n" + "@SP\n" + "M=M-1\n" + "@TRUE" + strconv.Itoa(flag) + "\n" + "D;" + assemblyCommand + "\n" + "@SP\n" + "A=M\n" + "M=0\n" + "@NEXT" + strconv.Itoa(flag) + "\n" + "0;JMP\n" + "(TRUE" + strconv.Itoa(flag) + ")\n" + "@SP\n" + "A=M\n" + "M=-1\n" + "(NEXT" + strconv.Itoa(flag) + ")"
 }
 
 func getPushSegmentAssembly(assemblyCommand string, index int) string {
