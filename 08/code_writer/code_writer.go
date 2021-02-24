@@ -32,7 +32,6 @@ func GetPushPop(commandType parser.CommandType, segment string, index int) (asse
 		case "static":
 			return getPushStaticAssembly(index), nil
 		}
-
 	}
 	// TODO: add pop command
 	if commandType == parser.CPop {
@@ -89,9 +88,23 @@ func GetWriteIf(label string) (assembly string) {
 	return "@SP\n" + "A=M\n" + "D=M\n" + "@SP\n" + "M=M-1\n" + "@" + label + "\n" + "D;JNE\n"
 }
 
-// sub module
-
 var setDtoStackAssembly = "@SP\n" + "A=M\n" + "M=D" + "@SP\n" + "M=M+1\n"
+
+// GetWriteCall convert vm "call (functionName) (numArgs)" to assembly
+func GetWriteCall(functionName string, numArgs int) (assembly string) {
+	flag++
+	returnAddress := "RETURN" + strconv.Itoa(flag)
+	return "@" + returnAddress + "\n" + "D=A\n" + setDtoStackAssembly + // push return-address
+		"@LCL\n" + "A=M\n" + "D=M\n" + setDtoStackAssembly + //  push LCL
+		"@ARG\n" + "A=M\n" + "D=M\n" + setDtoStackAssembly + // push ARG
+		"@THIS\n" + "A=M\n" + "D=M\n" + setDtoStackAssembly + // push THIS
+		"@THAT\n" + "A=M\n" + "D=M\n" + setDtoStackAssembly + // push THAT
+		"@" + strconv.Itoa(numArgs) + "\n" + "D=A\n" + "@SP\n" + "A=M\n" + "D=M-D\n" + "@5\n" + "D=D-A\n" + "@ARG\n" + "M=D\n" + // ARG=SP-n-5
+		"@SP\n" + "A=M\n" + "D=M\n" + "@LCL\n" + "A=M\n" + "M=D\n" + // LCL = SP
+		"(" + returnAddress + ")"
+}
+
+// sub module
 
 func getCompareAssembly(assemblyCommand string) string {
 	flag++
