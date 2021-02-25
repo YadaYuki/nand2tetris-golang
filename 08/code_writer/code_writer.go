@@ -88,7 +88,7 @@ func GetWriteIf(label string) (assembly string) {
 	return "@SP\n" + "A=M\n" + "D=M\n" + "@SP\n" + "M=M-1\n" + "@" + label + "\n" + "D;JNE\n"
 }
 
-var setDtoStackAssembly = "@SP\n" + "A=M\n" + "M=D" + "@SP\n" + "M=M+1\n"
+var setDtoStackAssembly = "@SP\n" + "A=M\n" + "M=D\n" + "@SP\n" + "M=M+1\n"
 
 // GetWriteCall convert vm "call (functionName) (numArgs)" to assembly
 func GetWriteCall(functionName string, numArgs int) (assembly string) {
@@ -102,6 +102,18 @@ func GetWriteCall(functionName string, numArgs int) (assembly string) {
 		"@" + strconv.Itoa(numArgs) + "\n" + "D=A\n" + "@SP\n" + "A=M\n" + "D=M-D\n" + "@5\n" + "D=D-A\n" + "@ARG\n" + "M=D\n" + // ARG=SP-n-5
 		"@SP\n" + "A=M\n" + "D=M\n" + "@LCL\n" + "A=M\n" + "M=D\n" + // LCL = SP
 		"(" + returnAddress + ")"
+}
+
+// GetWriteFunction convert vm "function (functionName) (numLocals)" to assembly
+func GetWriteFunction(functionName string, numLocals int) (assembly string) {
+	// initialize local variable by 0
+	var assemblyByte []byte
+	assemblyByte = append(assemblyByte, "("+functionName+")\n"...)
+	pushZeroToStackAssembly := "@0\n" + "D=A\n" + setDtoStackAssembly
+	for i := 0; i < numLocals; i++ {
+		assemblyByte = append(assemblyByte, pushZeroToStackAssembly...)
+	}
+	return string(assemblyByte)
 }
 
 // sub module
