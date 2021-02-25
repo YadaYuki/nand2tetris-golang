@@ -70,7 +70,7 @@ func GetArithmetic(commandStr string) (assembly string, err error) {
 // GetWriteInit return vm initialize assembly
 func GetWriteInit() (assembly string) {
 	// set SP 256
-	return "@256\n" + "D=A\n" + "@SP" + "M=D\n"
+	return "@256\n" + "D=A\n" + "@SP\n" + "M=D\n"
 }
 
 // GetWriteLabel convert vm "label" to assembly "label"
@@ -89,6 +89,7 @@ func GetWriteIf(label string) (assembly string) {
 }
 
 var setDtoStackAssembly = "@SP\n" + "A=M\n" + "M=D\n" + "@SP\n" + "M=M+1\n"
+var popStackToDAssembly = "@SP\n" + "A=M\n" + "D=M\n" + "M=M-1\n"
 
 // GetWriteCall convert vm "call (functionName) (numArgs)" to assembly
 func GetWriteCall(functionName string, numArgs int) (assembly string) {
@@ -101,7 +102,8 @@ func GetWriteCall(functionName string, numArgs int) (assembly string) {
 		"@THAT\n" + "A=M\n" + "D=M\n" + setDtoStackAssembly + // push THAT
 		"@" + strconv.Itoa(numArgs) + "\n" + "D=A\n" + "@SP\n" + "A=M\n" + "D=M-D\n" + "@5\n" + "D=D-A\n" + "@ARG\n" + "M=D\n" + // ARG=SP-n-5
 		"@SP\n" + "A=M\n" + "D=M\n" + "@LCL\n" + "A=M\n" + "M=D\n" + // LCL = SP
-		"(" + returnAddress + ")"
+		"@" + functionName + "\n" + "0;JMP\n" + // goto function
+		"(" + returnAddress + ")\n"
 }
 
 // GetWriteFunction convert vm "function (functionName) (numLocals)" to assembly
@@ -114,6 +116,19 @@ func GetWriteFunction(functionName string, numLocals int) (assembly string) {
 		assemblyByte = append(assemblyByte, pushZeroToStackAssembly...)
 	}
 	return string(assemblyByte)
+}
+
+// GetWriteReturn convert vm "return" to assembly
+func GetWriteReturn() (assembly string) {
+	return "@LCL\n" + "A=M\n" + "D=M\n" + "@FRAME\n" + "M=D\n" + // FRAME=LCL
+		"@5\n" + "D=A\n" + "@FRAME\n" + "D=M-D\n" + "A=D\n" + "D=M\n" + "@RET\n" + "M=D\n" + // RET=*(FRAME-5)
+		popStackToDAssembly + "@ARG\n" + "A=M\n" + "A=M\n" + "M=D\n" + // *ARG=pop()
+		"@ARG\n" + "A=M\n" + "D=M+1\n" + "@SP\n" + "A=M\n" + "M=D\n" + // SP=ARG+1
+		"@1\n" + "D=A\n" + "@FRAME\n" + "A=M\n" + "A=M-D\n" + "A=M\n" + "D=M\n" + "@THAT\n" + "A=M\n" + "M=D\n" + // THAT=*(FRAME-1)
+		"@2\n" + "D=A\n" + "@FRAME\n" + "A=M\n" + "A=M-D\n" + "A=M\n" + "D=M\n" + "@THIS\n" + "A=M\n" + "M=D\n" + // THIS=*(FRAME-2)
+		"@3\n" + "D=A\n" + "@FRAME\n" + "A=M\n" + "A=M-D\n" + "A=M\n" + "D=M\n" + "@ARG\n" + "A=M\n" + "M=D\n" + // ARG=*(FRAME-3)
+		"@4\n" + "D=A\n" + "@FRAME\n" + "A=M\n" + "A=M-D\n" + "A=M\n" + "D=M\n" + "@LCL\n" + "A=M\n" + "M=D\n" + // LCL=*(FRAME-4)
+		"@RET\n" + "0;JMP\n" + // goto RET
 }
 
 // sub module
