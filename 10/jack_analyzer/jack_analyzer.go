@@ -1,6 +1,8 @@
 package jack_analyzer
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func Analyzer() {
 	fmt.Println("hgoehgoe")
