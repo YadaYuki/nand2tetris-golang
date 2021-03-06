@@ -1,7 +1,8 @@
 package main
 
 import (
-	"jack_compiler/jack_tokenizer"
+	"fmt"
+	"jack_compiler/tokenizer"
 )
 
 func main() {
@@ -17,6 +18,6 @@ func main() {
 	// 	s := fileScanner.Text()
 	// 	fmt.Println(s)
 	// }
-	jt := jack_tokenizer.New("")
-	jt.HasMoreTokens()
+	jt := tokenizer.New("")
+	fmt.Println(jt.Advance())
 }

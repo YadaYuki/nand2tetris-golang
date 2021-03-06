@@ -10,11 +10,11 @@ type Token struct {
 }
 
 const (
-	Keyword       TokenType = "KEYWORD"
-	SymboL        TokenType = "SYMBOL"
-	Identifier    TokenType = "IDENTIFIER"
-	IntConst      TokenType = "INT_CONST"
-	StartingConst TokenType = "STARTING_CONST"
+	KEYWORD       TokenType = "KEYWORD"
+	SYMBOL        TokenType = "SYMBOL"
+	IDENTIFIER    TokenType = "IDENTIFIER"
+	INTCONST      TokenType = "INT_CONST"
+	STARTINGCONST TokenType = "STARTING_CONST"
 )
 
 // KeyWord is keyword type
