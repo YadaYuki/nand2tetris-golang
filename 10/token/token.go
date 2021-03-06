@@ -17,6 +17,7 @@ const (
 	StartingConst TokenType = "STARTING_CONST"
 )
 
+// KeyWord is keyword type
 type KeyWord string
 
 const (
