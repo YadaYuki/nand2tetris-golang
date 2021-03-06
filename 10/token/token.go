@@ -42,4 +42,5 @@ const (
 	FALSE       KeyWord = "FALSE"
 	NULL        KeyWord = "NULL"
 	THIS        KeyWord = "THIS"
+	// EOF
 )
