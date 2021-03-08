@@ -18,12 +18,17 @@ func main() {
 	// 	s := fileScanner.Text()
 	// 	fmt.Println(s)
 	// }
-	jt := tokenizer.New("=(),;")
-	for {
-		if token, err := jt.Advance(); err == nil {
-			fmt.Println(token)
-		} else {
+	jt := tokenizer.New(`var 
+	aa = 
+	'123'; 
+	cc = 'asdfasdfasdfhogehoge'
+	bb = 133; `)
+	for jt.HasMoreTokens() {
+		token, err := jt.Advance()
+		if err != nil {
+			fmt.Println(err)
 			break
 		}
+		fmt.Println(token)
 	}
 }
