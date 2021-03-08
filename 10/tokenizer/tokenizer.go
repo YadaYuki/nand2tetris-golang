@@ -26,10 +26,15 @@ func (jackTokenizer *JackTokenizer) HasMoreTokens() bool {
 
 // Advance returns next token
 func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err error) {
+	symbolMap := map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
 	if jackTokenizer.HasMoreTokens() == false {
-		return nil, errors.New("jackTokenizer has no more token")
+		return token.Token{}, errors.New("jackTokenizer has no more token")
 	}
-	return token.Token{Type: token.KEYWORD, Literal: "HGOE"}, nil
+	if _, ok := symbolMap[jackTokenizer.ch]; ok {
+		return token.Token{Type: token.SYMBOL, Literal: string(jackTokenizer.ch)}, nil
+	}
+	jackTokenizer.readChar()
+	return token.Token{Type: token.KEYWORD, Literal: "HGOE"}, errors.New("hgoehgoe")
 }
 
 func (jackTokenizer *JackTokenizer) readChar() {
