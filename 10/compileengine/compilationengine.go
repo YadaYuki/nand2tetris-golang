@@ -25,3 +25,5 @@ func (ce *CompilationEngine) advanceToken() {
 	ce.curToken = ce.nextToken
 	ce.nextToken, _ = ce.jt.Advance()
 }
+
+func (ce *CompilationEngine) parseStatement
