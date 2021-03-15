@@ -57,7 +57,6 @@ func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err err
 	}
 	if _, ok := symbolMap[jackTokenizer.ch]; ok {
 		tok = token.Token{Type: token.SYMBOL, Literal: string(jackTokenizer.ch)}
-
 	} else if isLetter(jackTokenizer.ch) { // KEYWORD or IDENTIFIER
 		word := jackTokenizer.readWord()
 		if _, ok := keywordMap[word]; ok {
@@ -65,15 +64,12 @@ func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err err
 		} else {
 			tok = token.Token{Type: token.IDENTIFIER, Literal: word}
 		}
-
 	} else if isNumber(jackTokenizer.ch) {
 		word := jackTokenizer.readNumber()
 		tok = token.Token{Type: token.INTCONST, Literal: word}
-
 	} else if isSingleQuote(jackTokenizer.ch) {
 		word := jackTokenizer.readString()
 		tok = token.Token{Type: token.STARTINGCONST, Literal: word[1:]}
-
 	} else {
 		return tok, errors.New("invalide ch")
 	}
