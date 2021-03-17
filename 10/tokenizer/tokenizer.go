@@ -2,7 +2,7 @@ package tokenizer
 
 import (
 	"errors"
-	"jack_compiler/token"
+	"jack/compiler/token"
 )
 
 // JackTokenizer has member necessary for parsing

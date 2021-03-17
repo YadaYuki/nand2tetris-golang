@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"jack_compiler/token"
+	"jack/compiler/token"
 )
 
 // Node is Node of AST
@@ -21,6 +21,11 @@ type Expression interface {
 	expressionNode()
 }
 
+// Program is Ast of all program
+type Program struct {
+	Statements []Statement
+}
+
 // LetStatement is Ast of "let"
 type LetStatement struct {
 	Statement
@@ -28,7 +33,7 @@ type LetStatement struct {
 	Value *Expression
 }
 
-// Identifier is let variable type
+// Identifier is variable identifier type
 type Identifier struct {
 	Token token.Token
 	Value string
