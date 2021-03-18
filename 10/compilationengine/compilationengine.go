@@ -68,5 +68,26 @@ func (ce *CompilationEngine) parseKeyWord() ast.Statement {
 }
 
 func (ce *CompilationEngine) parseLetStatement() ast.Statement {
+	stmt := &ast.LetStatement{Token: ce.curToken}
+	if !ce.expectNext(token.IDENTIFIER) {
+		return nil
+	}
 	return nil
+}
+
+func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
+	return ce.curToken.Type == t
+}
+
+func (ce *CompilationEngine) nextTokenIs(t token.TokenType) bool {
+	return ce.nextToken.Type == t
+}
+
+func (ce *CompilationEngine) expectNext(t token.TokenType) bool {
+	if ce.nextTokenIs(t) {
+		ce.advanceToken()
+		return true
+	} else {
+		return false
+	}
 }
