@@ -21,7 +21,7 @@ func New(input string) *JackTokenizer {
 
 // HasMoreTokens returns whether hasMoreToken
 func (jackTokenizer *JackTokenizer) HasMoreTokens() bool {
-	return len(jackTokenizer.input) != jackTokenizer.readPosition
+	return len(jackTokenizer.input) > jackTokenizer.readPosition
 }
 
 // Advance returns next token
@@ -62,7 +62,11 @@ func KeyWord(tok token.Token) (keyword token.KeyWord, err error) {
 }
 
 func (jackTokenizer *JackTokenizer) readChar() {
-	jackTokenizer.ch = jackTokenizer.input[jackTokenizer.readPosition]
+	if jackTokenizer.readPosition >= len(jackTokenizer.input) {
+		jackTokenizer.ch = 0
+	} else {
+		jackTokenizer.ch = jackTokenizer.input[jackTokenizer.readPosition]
+	}
 	jackTokenizer.position = jackTokenizer.readPosition
 	jackTokenizer.readPosition++
 }

@@ -31,9 +31,9 @@ func (ce *CompilationEngine) ParseProgram() *ast.Program {
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
-		ce.nextToken()
+		ce.advanceToken()
 	}
-	return nil
+	return program
 }
 
 func (ce *CompilationEngine) advanceToken() {
@@ -59,7 +59,8 @@ func (ce *CompilationEngine) parseStatement() ast.Statement {
 }
 
 func (ce *CompilationEngine) parseKeyWord() ast.Statement {
-	switch tokenizer.KeyWord(ce.curToken) {
+	keyWord, _ := tokenizer.KeyWord(ce.curToken)
+	switch keyWord {
 	case token.LET:
 		return ce.parseLetStatement()
 	default:
@@ -67,12 +68,24 @@ func (ce *CompilationEngine) parseKeyWord() ast.Statement {
 	}
 }
 
-func (ce *CompilationEngine) parseLetStatement() ast.Statement {
+func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{Token: ce.curToken}
 	if !ce.expectNext(token.IDENTIFIER) {
 		return nil
 	}
-	return nil
+	stmt.Name = &ast.Identifier{Token: ce.curToken, Value: ce.curToken.Literal}
+	if !ce.expectNext(token.SYMBOL) {
+		// TODO:Add ASSIGN
+		return nil
+	}
+	for {
+		if ce.curTokenIs(token.SYMBOL) {
+			// TODO:Add SEMICOLON
+			break
+		}
+		ce.advanceToken()
+	}
+	return stmt
 }
 
 func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
@@ -87,7 +100,6 @@ func (ce *CompilationEngine) expectNext(t token.TokenType) bool {
 	if ce.nextTokenIs(t) {
 		ce.advanceToken()
 		return true
-	} else {
-		return false
 	}
+	return false
 }

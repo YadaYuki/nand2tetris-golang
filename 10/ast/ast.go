@@ -29,8 +29,9 @@ type Program struct {
 // LetStatement is Ast of "let"
 type LetStatement struct {
 	Statement
+	Token token.Token
 	Name  *Identifier
-	Value *Expression
+	Value Expression
 }
 
 // Identifier is variable identifier type

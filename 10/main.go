@@ -15,7 +15,7 @@ func main() {
 	
 	class {
 		hoge = 123
-	}`)
+	}        `)
 	for jt.HasMoreTokens() {
 		token, err := jt.Advance()
 		if err != nil {
