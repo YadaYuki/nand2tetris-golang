@@ -22,7 +22,11 @@ func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
 	return ce
 }
 
+// ParseProgram is parser for all program
 func (ce *CompilationEngine) ParseProgram() *ast.Program {
+	program := &ast.Program{}
+	program.Statements = []ast.Statement{}
+
 	return nil
 }
 

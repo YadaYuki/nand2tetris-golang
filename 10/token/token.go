@@ -15,6 +15,7 @@ const (
 	IDENTIFIER    TokenType = "IDENTIFIER"
 	INTCONST      TokenType = "INT_CONST"
 	STARTINGCONST TokenType = "STARTING_CONST"
+	EOF           TokenType = "EOF"
 )
 
 // KeyWord is keyword type

@@ -15,7 +15,7 @@ type Statement interface {
 	statementNode()
 }
 
-// Expression is Expressiont Node of AST
+// Expression is Expression Node of AST
 type Expression interface {
 	Node
 	expressionNode()

@@ -53,7 +53,7 @@ func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err err
 	var tok token.Token
 	jackTokenizer.skipWhitespace()
 	if jackTokenizer.HasMoreTokens() == false {
-		return token.Token{}, errors.New("jackTokenizer has no more token")
+		return token.Token{Type: token.EOF, Literal: ""}, nil
 	}
 	if _, ok := symbolMap[jackTokenizer.ch]; ok {
 		tok = token.Token{Type: token.SYMBOL, Literal: string(jackTokenizer.ch)}
