@@ -13,30 +13,6 @@ type JackTokenizer struct {
 	ch           byte
 }
 
-var symbolMap = map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
-var keywordMap = map[string]token.KeyWord{
-	"class":       token.CLASS,
-	"method":      token.METHOD,
-	"function":    token.FUNCTION,
-	"constructor": token.CONSTRUCTOR,
-	"field":       token.FIELD,
-	"static":      token.STATIC,
-	"var":         token.VAR,
-	"int":         token.INT,
-	"char":        token.CHAR,
-	"boolean":     token.BOOLEAN,
-	"void":        token.VOID,
-	"true":        token.TRUE,
-	"false":       token.FALSE,
-	"null":        token.NULL,
-	"this":        token.THIS,
-	"let":         token.LET,
-	"do":          token.DO,
-	"if":          token.IF,
-	"else":        token.ELSE,
-	"while":       token.WHILE,
-	"return":      token.RETURN}
-
 // New is initializer of jack tokenizer
 func New(input string) *JackTokenizer {
 	jt := &JackTokenizer{input: input, ch: input[0], readPosition: 0, position: 0}
@@ -55,11 +31,11 @@ func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err err
 	if jackTokenizer.HasMoreTokens() == false {
 		return token.Token{Type: token.EOF, Literal: ""}, nil
 	}
-	if _, ok := symbolMap[jackTokenizer.ch]; ok {
+	if _, ok := token.SymbolMap[jackTokenizer.ch]; ok {
 		tok = token.Token{Type: token.SYMBOL, Literal: string(jackTokenizer.ch)}
 	} else if isLetter(jackTokenizer.ch) { // KEYWORD or IDENTIFIER
 		word := jackTokenizer.readWord()
-		if _, ok := keywordMap[word]; ok {
+		if _, ok := token.KeyWordMap[word]; ok {
 			tok = token.Token{Type: token.KEYWORD, Literal: word}
 		} else {
 			tok = token.Token{Type: token.IDENTIFIER, Literal: word}
@@ -82,7 +58,7 @@ func KeyWord(tok token.Token) (keyword token.KeyWord, err error) {
 	if tok.Type != token.KEYWORD {
 		return token.NULL, errors.New("KeyWord Function can call only token type is KEYWORD")
 	}
-	return keywordMap[tok.Literal], nil
+	return token.KeyWordMap[tok.Literal], nil
 }
 
 func (jackTokenizer *JackTokenizer) readChar() {

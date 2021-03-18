@@ -26,7 +26,13 @@ func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
 func (ce *CompilationEngine) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
-
+	for ce.curToken.Type != token.EOF {
+		stmt := ce.parseStatement()
+		if stmt != nil {
+			program.Statements = append(program.Statements, stmt)
+		}
+		ce.nextToken()
+	}
 	return nil
 }
 
@@ -35,4 +41,32 @@ func (ce *CompilationEngine) advanceToken() {
 	ce.nextToken, _ = ce.jt.Advance()
 }
 
-func (ce *CompilationEngine) parseStatement() {}
+func (ce *CompilationEngine) parseStatement() ast.Statement {
+	switch ce.curToken.Type {
+	// case token.SYMBOL:
+	// return nil
+	case token.KEYWORD:
+		return ce.parseKeyWord()
+	// case token.IDENTIFIER:
+	// return nil
+	// case token.INTCONST:
+	// return nil
+	// case token.STARTINGCONST:
+	// return nil
+	default:
+		return nil
+	}
+}
+
+func (ce *CompilationEngine) parseKeyWord() ast.Statement {
+	switch tokenizer.KeyWord(ce.curToken) {
+	case token.LET:
+		return ce.parseLetStatement()
+	default:
+		return nil
+	}
+}
+
+func (ce *CompilationEngine) parseLetStatement() ast.Statement {
+	return nil
+}

@@ -10,8 +10,8 @@ type Token struct {
 }
 
 const (
-	KEYWORD       TokenType = "KEYWORD"
 	SYMBOL        TokenType = "SYMBOL"
+	KEYWORD       TokenType = "KEYWORD"
 	IDENTIFIER    TokenType = "IDENTIFIER"
 	INTCONST      TokenType = "INT_CONST"
 	STARTINGCONST TokenType = "STARTING_CONST"
@@ -45,3 +45,27 @@ const (
 	THIS        KeyWord = "THIS"
 	// EOF
 )
+
+var SymbolMap = map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
+var KeyWordMap = map[string]KeyWord{
+	"class":       token.CLASS,
+	"method":      token.METHOD,
+	"function":    token.FUNCTION,
+	"constructor": token.CONSTRUCTOR,
+	"field":       token.FIELD,
+	"static":      token.STATIC,
+	"var":         token.VAR,
+	"int":         token.INT,
+	"char":        token.CHAR,
+	"boolean":     token.BOOLEAN,
+	"void":        token.VOID,
+	"true":        token.TRUE,
+	"false":       token.FALSE,
+	"null":        token.NULL,
+	"this":        token.THIS,
+	"let":         token.LET,
+	"do":          token.DO,
+	"if":          token.IF,
+	"else":        token.ELSE,
+	"while":       token.WHILE,
+	"return":      token.RETURN}
