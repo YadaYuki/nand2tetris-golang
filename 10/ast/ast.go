@@ -28,11 +28,14 @@ type Program struct {
 
 // LetStatement is Ast of "let"
 type LetStatement struct {
-	Statement
 	Token token.Token // KEYWORD
 	Name  *Identifier
 	Value Expression
 }
+
+func (ls *LetStatement) statementNode() {}
+
+func (ls *LetStatement) TokenLiteral() string {return ls.Token.Literal}
 
 // Identifier is variable identifier type
 type Identifier struct {
@@ -48,9 +51,10 @@ func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 
 // ReturnStatement is Ast of "return"
 type ReturnStatement struct{
-	Statement
 	Token token.Token // KEYWORD
 	Value Expression
 }
+func (rs *ReturnStatement) statementNode() {}
 
+func (rs *ReturnStatement) TokenLiteral() string {return rs.Token.Literal}
 

@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	"jack/compiler/tokenizer"
+	"jack/compiler/compilationengine"
 )
 
 func main() {
-	// TODO:Fix bug related near EOF
+	TODO:Fix bug related near EOF
 	jt := tokenizer.New(`var 
 	aa = 
 	'123'; 
@@ -24,4 +25,12 @@ func main() {
 		}
 		fmt.Println(token)
 	}
+// 	input := `
+// 	return x ;
+// 	return 1 ;
+// 	return ;
+// `
+// jt := tokenizer.New(input)
+// ce := compilationengine.New(jt)
+// program := ce.ParseProgram()
 }
