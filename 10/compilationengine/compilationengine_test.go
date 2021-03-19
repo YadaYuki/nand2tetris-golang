@@ -59,3 +59,47 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	}
 	return true
 }
+
+func TestReturnStatements(t *testing.T){
+	input = `
+	  return x;
+		return 1;
+		return;
+	`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	program := ce.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+	if len(program.Statements) != 3 {
+		t.Fatalf("program.Statements does not contain 4 statements. got=%d", len(program.Statements))
+	}
+	testCases := []struct {
+		expectedIdentifier string
+	}{
+		{"x"},
+		{"1"},
+		{}
+	}
+	for i,tt := range testCases{
+		stmt := program.Statements[i]
+		if !testReturnStatements(t,stmt,tt.expectedIdentifier){
+			return 
+		}
+	}
+}
+
+func testReturnStatement(t *testing.T, s ast.Statement, name string) bool {	
+	if s.TokenLiteral() != "return" {
+		t.Errorf("s.TokenLiteral not 'return'. got %q", s.TokenLiteral())
+		return false
+	}
+	returnStmt, ok := s.(*ast.ReturnStatement)
+	if !ok {
+		t.Errorf("s not *ast.ReturnStatement. got %T", s)
+		return false
+	}
+	 
+	return true
+}
