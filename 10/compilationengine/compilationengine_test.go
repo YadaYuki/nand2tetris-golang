@@ -32,7 +32,6 @@ func TestLetStatements(t *testing.T) {
 	}
 	for i, tt := range testCases {
 		stmt := program.Statements[i]
-		// fmt.Println(stmt.TokenLiteral())
 		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
 			return
 		}

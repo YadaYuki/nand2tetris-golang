@@ -29,7 +29,7 @@ type Program struct {
 // LetStatement is Ast of "let"
 type LetStatement struct {
 	Statement
-	Token token.Token
+	Token token.Token // KEYWORD
 	Name  *Identifier
 	Value Expression
 }
@@ -44,3 +44,13 @@ func (i *Identifier) expressionNode() {}
 
 // TokenLiteral returns literal of token
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
+
+
+// ReturnStatement is Ast of "return"
+type ReturnStatement struct{
+	Statement
+	Token token.Token // KEYWORD
+	Value Expression
+}
+
+
