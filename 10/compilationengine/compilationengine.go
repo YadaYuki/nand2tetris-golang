@@ -4,6 +4,7 @@ import (
 	"jack/compiler/ast"
 	"jack/compiler/token"
 	"jack/compiler/tokenizer"
+	"fmt"
 )
 
 // CompilationEngine is struct
@@ -28,6 +29,7 @@ func (ce *CompilationEngine) ParseProgram() *ast.Program {
 	program.Statements = []ast.Statement{}
 	for ce.curToken.Type != token.EOF {
 		stmt := ce.parseStatement()
+		fmt.Println(ce.curToken.Type)
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
@@ -42,6 +44,7 @@ func (ce *CompilationEngine) advanceToken() {
 }
 
 func (ce *CompilationEngine) parseStatement() ast.Statement {
+
 	switch ce.curToken.Type {
 	// case token.SYMBOL:
 	// return nil
@@ -63,6 +66,8 @@ func (ce *CompilationEngine) parseKeyWord() ast.Statement {
 	switch keyWord {
 	case token.LET:
 		return ce.parseLetStatement()
+	case token.RETURN:
+		return ce.parseReturnStatement()
 	default:
 		return nil
 	}
@@ -78,6 +83,7 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 		// TODO:Add ASSIGN
 		return nil
 	}
+	// TODO: Add Expression
 	for {
 		if ce.curTokenIs(token.SYMBOL) {
 			// TODO:Add SEMICOLON
@@ -86,6 +92,19 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 		ce.advanceToken()
 	}
 	return stmt
+}
+
+func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement{
+	stmt := &ast.ReturnStatement{Token:ce.curToken}
+		// TODO: Add Expression
+		for {
+			if ce.curTokenIs(token.SYMBOL) {
+				// TODO:Add SEMICOLON
+				break
+			}
+			ce.advanceToken()
+		}
+		return stmt
 }
 
 func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
