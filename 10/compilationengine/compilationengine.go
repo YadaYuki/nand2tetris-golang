@@ -4,7 +4,8 @@ import (
 	"jack/compiler/ast"
 	"jack/compiler/token"
 	"jack/compiler/tokenizer"
-	"fmt"
+	"strconv"
+	// "fmt"
 )
 
 type (
@@ -47,13 +48,10 @@ func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
 	ce := &CompilationEngine{jt: jt}
 	ce.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	ce.registerPrefix(token.IDENTIFIER,ce.parseIdentifier)
+	ce.registerPrefix(token.INTCONST,ce.parseIntConst)
 	ce.advanceToken()
 	ce.advanceToken()
 	return ce
-}
-
-func (ce *CompilationEngine) parseIdentifier() ast.Expression{
-	return &ast.Identifier{Token:ce.curToken,Value:ce.curToken.Literal}
 }
 
 // ParseProgram is parser for all program
@@ -62,7 +60,6 @@ func (ce *CompilationEngine) ParseProgram() *ast.Program {
 	program.Statements = []ast.Statement{}
 	for ce.curToken.Type != token.EOF {
 		stmt := ce.parseStatement()
-		fmt.Println(ce.curToken.Type)
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
@@ -116,6 +113,7 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 		// TODO:Add ASSIGN
 		return nil
 	}
+
 	// TODO: Add Expression
 	for {
 		if ce.curTokenIs(token.SYMBOL) {
@@ -157,6 +155,22 @@ func (ce *CompilationEngine) parseExpression(precedence int) ast.Expression{
 	}
 	leftExp := prefix()
 	return leftExp
+}
+
+
+func (ce *CompilationEngine) parseIdentifier() ast.Expression{
+	return &ast.Identifier{Token:ce.curToken,Value:ce.curToken.Literal}
+}
+
+func (ce *CompilationEngine) parseIntConst() ast.Expression{
+	il := &ast.IntConst{Token:ce.curToken}
+	value,err := strconv.ParseInt(ce.curToken.Literal,0,64)
+	if err != nil{
+		// msg := fmt.Sprintf("could not parse %q as integer",ce.curToken.Literal)
+		return nil
+	}
+	il.Value = value
+	return il
 }
  
 func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {

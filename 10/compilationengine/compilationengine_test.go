@@ -9,10 +9,10 @@ import (
 
 func TestLetStatements(t *testing.T) {
 	input := `
-		let x = 5;
-		let y = 10;
-		let hoge = 111;
-		let foobar = 838383;
+		let x=5 ;
+		let y=10 ;
+		let hoge=111 ;
+		let foobar=838383 ;
 		`
 
 	jt := tokenizer.New(input)
@@ -64,9 +64,9 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 
 func TestReturnStatements(t *testing.T){
 	input := `
-	return x;
-	return 1;
-	return ;
+	return x ;
+	return 1 ;
+	return ; 
 `
 	jt := tokenizer.New(input)
 	ce := New(jt)
@@ -126,6 +126,30 @@ func TestIdentifierExpression(t *testing.T){
 	}
 	if ident.TokenLiteral() != "foobar"{
 		t.Errorf("ident.TokenLiteral() not %s. got %s","foobar",ident.TokenLiteral())
+	}
+}
+
+func TestIntConstExpression(t *testing.T){
+	input := "5;"
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	program := ce.ParseProgram()
+	if len(program.Statements) != 1{
+		t.Fatalf("program has not enough statements. got=%d",len(program.Statements))
+	}
+	stmt,ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok{
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",program.Statements[0])
+	}
+	ident,ok := stmt.Expression.(*ast.IntConst)
+	if !ok{
+		t.Fatalf("exp not *ast.IntConst. got=%T",stmt.Expression)
+	}
+	if ident.Value != 5{
+		t.Errorf("ident.Value not %d. got %d",5,ident.Value)
+	}
+	if ident.TokenLiteral() != "5"{
+		t.Errorf("ident.TokenLiteral() not %s. got %s","5",ident.TokenLiteral())
 	}
 }
 

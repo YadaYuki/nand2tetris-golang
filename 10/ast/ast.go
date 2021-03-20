@@ -66,7 +66,6 @@ func (ls *LetStatement) String() string{
 	out.WriteString(";")
 	return out.String()
 }
- 
 
 // Identifier is variable identifier type
 type Identifier struct {
@@ -81,6 +80,20 @@ func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 
 func (i *Identifier) String() string {
 	return i.Value
+}
+
+type IntConst struct {
+	Token token.Token
+	Value int64
+}
+
+func (i *IntConst) expressionNode() {}
+
+// TokenLiteral returns literal of token
+func (i *IntConst) TokenLiteral() string { return i.Token.Literal }
+
+func (i *IntConst) String() string {
+	return i.Token.Literal
 }
 
 // ReturnStatement is Ast of "return"
