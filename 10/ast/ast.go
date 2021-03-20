@@ -7,6 +7,7 @@ import (
 // Node is Node of AST
 type Node interface {
 	TokenLiteral() string
+	String() string
 }
 
 // Statement is Statement Node of AST
@@ -26,6 +27,14 @@ type Program struct {
 	Statements []Statement
 }
 
+func (p *Program) TokenLiteral() string{
+	if len(p.Statements) > 0{
+		return p.Statements[0].TokenLiteral()
+	}else{
+		return ""
+	}
+}
+
 // LetStatement is Ast of "let"
 type LetStatement struct {
 	Token token.Token // KEYWORD
@@ -36,6 +45,7 @@ type LetStatement struct {
 func (ls *LetStatement) statementNode() {}
 
 func (ls *LetStatement) TokenLiteral() string {return ls.Token.Literal}
+
 
 // Identifier is variable identifier type
 type Identifier struct {
@@ -57,4 +67,13 @@ type ReturnStatement struct{
 func (rs *ReturnStatement) statementNode() {}
 
 func (rs *ReturnStatement) TokenLiteral() string {return rs.Token.Literal}
+
+type ExpressionStatement struct {
+	Token token.Token // 式の最初のトークン
+	Expression Expression  
+}
+
+func (es *ExpressionStatement) statementNode(){}
+
+func (es *ExpressionStatement) TokenLiteral() string {return es.Token.Literal}
 
