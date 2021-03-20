@@ -7,20 +7,53 @@ import (
 	"fmt"
 )
 
+type (
+	prefixParseFn func() ast.Expression
+  infixParseFn  func(ast.Expression) ast.Expression
+)
+
 // CompilationEngine is struct
 type CompilationEngine struct {
 	jt *tokenizer.JackTokenizer
-
+	errors  []string
 	curToken  token.Token
 	nextToken token.Token
+
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns map[token.TokenType]infixParseFn
+}
+
+const (
+	_ int =iota
+	LOWEST
+	EQUALS
+	LESSGREATER
+	SUM
+	PRODUCT
+	PREFIX
+	CALL
+)
+
+func (ce *CompilationEngine) registerPrefix(tokenType token.TokenType, fn prefixParseFn){
+	ce.prefixParseFns[tokenType] = fn
+}
+
+func (ce *CompilationEngine) registerInfix(tokenType token.TokenType, fn infixParseFn){
+	ce.infixParseFns[tokenType] = fn
 }
 
 // New is initializer of compilation engine
 func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
 	ce := &CompilationEngine{jt: jt}
+	ce.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	ce.registerPrefix(token.IDENTIFIER,ce.parseIdentifier)
 	ce.advanceToken()
 	ce.advanceToken()
 	return ce
+}
+
+func (ce *CompilationEngine) parseIdentifier() ast.Expression{
+	return &ast.Identifier{Token:ce.curToken,Value:ce.curToken.Literal}
 }
 
 // ParseProgram is parser for all program
@@ -57,7 +90,7 @@ func (ce *CompilationEngine) parseStatement() ast.Statement {
 	// case token.STARTINGCONST:
 	// return nil
 	default:
-		return nil
+		return ce.parseExpressionStatement()
 	}
 }
 
@@ -107,6 +140,25 @@ func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement{
 		return stmt
 }
 
+func (ce *CompilationEngine) parseExpressionStatement() *ast.ExpressionStatement{
+	stmt := &ast.ExpressionStatement{Token:ce.curToken}
+	stmt.Expression = ce.parseExpression(LOWEST)
+	if ce.nextTokenIs(token.SYMBOL){
+		// TODO:Add SEMICOLON
+		ce.advanceToken()
+	}
+	return stmt
+}
+
+func (ce *CompilationEngine) parseExpression(precedence int) ast.Expression{
+	prefix := ce.prefixParseFns[ce.curToken.Type]
+	if prefix == nil{
+		return nil
+	}
+	leftExp := prefix()
+	return leftExp
+}
+ 
 func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
 	return ce.curToken.Type == t
 }
