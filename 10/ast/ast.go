@@ -39,7 +39,7 @@ func (p *Program) TokenLiteral() string{
 func (p *Program) String() string{
 	var out bytes.Buffer
 	for _,stmt := range p.Statements{
-		out.WriteString(s.String())
+		out.WriteString(stmt.String())
 	}
 	return out.String()
 }
@@ -56,7 +56,7 @@ func (ls *LetStatement) statementNode() {}
 func (ls *LetStatement) TokenLiteral() string {return ls.Token.Literal}
 
 func (ls *LetStatement) String() string{
-	var out byte.Buffer
+	var out bytes.Buffer
 	out.WriteString(ls.TokenLiteral() + " ")
 	out.WriteString(ls.Name.String())
 	out.WriteString("=")
@@ -93,7 +93,7 @@ func (rs *ReturnStatement) statementNode() {}
 func (rs *ReturnStatement) TokenLiteral() string {return rs.Token.Literal}
 
 func (rs *ReturnStatement) String() string{
-	var out byte.Buffer
+	var out bytes.Buffer
 	out.WriteString(rs.TokenLiteral() + " ")
 	if rs.Value != nil{
 		out.WriteString(rs.Value.String())
