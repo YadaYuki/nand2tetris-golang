@@ -153,3 +153,36 @@ func TestIntConstExpression(t *testing.T){
 	}
 }
 
+func TestPrefixExpression(t *testing.T){
+	prefixTestCases := []struct{
+		input string
+		operator string
+		integerValue int64
+	}{
+		{"!5;","!",5}
+		{"-15;","-",15}
+	}
+	for _,tt := range prefixTestCases {
+		jt := tokenizer.New(input)
+		ce := New(jt)
+		program := ce.ParseProgram()
+		if len(program.Statements) != 1{
+			t.Fatalf("program has not enough statements. got=%d",len(program.Statements))
+		}
+		stmt,ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok{
+			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",program.Statements[0])
+		}
+		exp,ok := stmt.Expression.(*ast.PrefixExpression)
+		if !ok{
+			t.Fatalf("exp not *ast.PrefixExpression. got=%T",stmt.Expression)
+		}
+		if exp.Value != tt.integerValue{
+			t.Errorf("exp.Value not %d. got %d",tt.integerValue,exp.Value)
+		}
+		if exp.Operator != tt.operator{
+			t.Fatalf("exp.Operator not %ds got %s",tt.operator,exp.Operator)
+		}
+	}
+}
+

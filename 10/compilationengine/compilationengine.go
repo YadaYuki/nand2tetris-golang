@@ -5,7 +5,6 @@ import (
 	"jack/compiler/token"
 	"jack/compiler/tokenizer"
 	"strconv"
-	// "fmt"
 )
 
 type (
@@ -19,7 +18,6 @@ type CompilationEngine struct {
 	errors  []string
 	curToken  token.Token
 	nextToken token.Token
-
 	prefixParseFns map[token.TokenType]prefixParseFn
 	infixParseFns map[token.TokenType]infixParseFn
 }
@@ -166,7 +164,6 @@ func (ce *CompilationEngine) parseIntConst() ast.Expression{
 	il := &ast.IntConst{Token:ce.curToken}
 	value,err := strconv.ParseInt(ce.curToken.Literal,0,64)
 	if err != nil{
-		// msg := fmt.Sprintf("could not parse %q as integer",ce.curToken.Literal)
 		return nil
 	}
 	il.Value = value
