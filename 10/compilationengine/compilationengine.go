@@ -169,6 +169,14 @@ func (ce *CompilationEngine) parseIntConst() ast.Expression{
 	il.Value = value
 	return il
 }
+
+func (ce *CompilationEngine) parsePrefixExpression() ast.Expression{
+	expression := &ast.PrefixExpression{
+		Token:ce.curToken,
+		Operator: ce.curToken.Literal
+	}
+}
+
  
 func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
 	return ce.curToken.Type == t
@@ -185,3 +193,6 @@ func (ce *CompilationEngine) expectNext(t token.TokenType) bool {
 	}
 	return false
 }
+
+
+
