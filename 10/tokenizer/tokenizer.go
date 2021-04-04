@@ -47,7 +47,7 @@ func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err err
 		word := jackTokenizer.readString()
 		tok = token.Token{Type: token.STARTINGCONST, Literal: word[1:]}
 	} else {
-		return tok, errors.New("invalide ch")
+		return tok, errors.New("invalid ch. ch: %s",ch)
 	}
 	jackTokenizer.readChar()
 	return tok, nil
