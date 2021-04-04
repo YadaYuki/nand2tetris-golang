@@ -4,20 +4,86 @@ import (
 	"jack/compiler/ast"
 	"jack/compiler/token"
 	"jack/compiler/tokenizer"
-	"fmt"
+	"strconv"
+)
+
+type (
+	prefixParseFn func() ast.Expression
+  infixParseFn  func(ast.Expression) ast.Expression
 )
 
 // CompilationEngine is struct
 type CompilationEngine struct {
 	jt *tokenizer.JackTokenizer
-
+	errors  []string
 	curToken  token.Token
 	nextToken token.Token
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns map[token.TokenType]infixParseFn
+}
+
+const (
+	_ int =iota
+	LOWEST
+	EQUALS
+	LESSGREATER
+	SUM
+	PRODUCT
+	PREFIX
+	CALL
+)
+
+
+var precedences = map[token.TokenType]int{
+	token.EQ: EQUALS,
+	token.NOT_EQ: EQUALS,
+	token.LT: LESSGREATER,
+	token.GT: LESSGREATER,
+	token.PLUS:  SUM,
+	token.MINUS:  SUM,
+	token.SLASH:PRODUCT,
+	token.ASTERISK:PRODUCT,
+}
+
+func (ce *CompilationEngine) nextPrecedence() int {
+	if p,ok := precedences[ce.nextToken.Type];ok{
+		return p
+	}
+	return LOWEST
+}
+
+func (ce *CompilationEngine) curPrecedence() int {
+	if p,ok := precedences[ce.curToken.Type];ok{
+		return p
+	}
+	return LOWEST
+}
+
+func (ce *CompilationEngine) registerPrefix(tokenType token.TokenType, fn prefixParseFn){
+	ce.prefixParseFns[tokenType] = fn
+}
+
+func (ce *CompilationEngine) registerInfix(tokenType token.TokenType, fn infixParseFn){
+	ce.infixParseFns[tokenType] = fn
 }
 
 // New is initializer of compilation engine
 func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
 	ce := &CompilationEngine{jt: jt}
+	ce.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	ce.registerPrefix(token.IDENTIFIER,ce.parseIdentifier)
+	ce.registerPrefix(token.INTCONST,ce.parseIntConst)
+	ce.registerPrefix(token.MINUS,ce.parsePrefixExpression)
+	ce.registerPrefix(token.BANG,ce.parsePrefixExpression)
+	ce.infixParseFns = make(map[token.TokenType]infixParseFn)
+	ce.registerInfix(token.PLUS,ce.parseInfixExpression)
+	ce.registerInfix(token.MINUS,ce.parseInfixExpression)
+	ce.registerInfix(token.ASTERISK,ce.parseInfixExpression)
+	ce.registerInfix(token.SLASH,ce.parseInfixExpression)
+	ce.registerInfix(token.LT,ce.parseInfixExpression)
+	ce.registerInfix(token.GT,ce.parseInfixExpression)
+	ce.registerInfix(token.EQ,ce.parseInfixExpression)
+	ce.registerInfix(token.NOT_EQ,ce.parseInfixExpression)
 	ce.advanceToken()
 	ce.advanceToken()
 	return ce
@@ -29,10 +95,10 @@ func (ce *CompilationEngine) ParseProgram() *ast.Program {
 	program.Statements = []ast.Statement{}
 	for ce.curToken.Type != token.EOF {
 		stmt := ce.parseStatement()
-		fmt.Println(ce.curToken.Type)
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
+		fmt.Println(stmt)
 		ce.advanceToken()
 	}
 	return program
@@ -57,7 +123,7 @@ func (ce *CompilationEngine) parseStatement() ast.Statement {
 	// case token.STARTINGCONST:
 	// return nil
 	default:
-		return nil
+		return ce.parseExpressionStatement()
 	}
 }
 
@@ -83,6 +149,7 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 		// TODO:Add ASSIGN
 		return nil
 	}
+
 	// TODO: Add Expression
 	for {
 		if ce.curTokenIs(token.SYMBOL) {
@@ -107,6 +174,71 @@ func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement{
 		return stmt
 }
 
+func (ce *CompilationEngine) parseExpressionStatement() *ast.ExpressionStatement{
+	stmt := &ast.ExpressionStatement{Token:ce.curToken}
+	stmt.Expression = ce.parseExpression(LOWEST)
+	if ce.nextTokenIs(token.SYMBOL){
+		// TODO:Add SEMICOLON
+		ce.advanceToken()
+	}
+	return stmt
+}
+
+func (ce *CompilationEngine) parseExpression(precedence int) ast.Expression{
+	prefix := ce.prefixParseFns[ce.curToken.Type]
+	if prefix == nil{
+		return nil
+	}
+	leftExp := prefix() 
+	// TODO:Fix to SEMICOLON
+	for !p.nextTokenIs(token.SYMBOL) && precedence < ce.nextPrecedence() {
+		infix := ce.infixParseFns(ce.nextToken.Type)
+		if infix == nil{
+			return leftExp
+		}
+		ce.nextToken()
+		leftExp = infix(leftExp)
+	}
+	return leftExp
+}
+
+
+func (ce *CompilationEngine) parseIdentifier() ast.Expression{
+	return &ast.Identifier{Token:ce.curToken,Value:ce.curToken.Literal}
+}
+
+func (ce *CompilationEngine) parseIntConst() ast.Expression{
+	il := &ast.IntConst{Token:ce.curToken}
+	value,err := strconv.ParseInt(ce.curToken.Literal,0,64)
+	if err != nil{
+		return nil
+	}
+	il.Value = value
+	return il
+}
+
+func (ce *CompilationEngine) parsePrefixExpression() ast.Expression{
+	expression := &ast.PrefixExpression{
+		Token:ce.curToken,
+		Operator: ce.curToken.Literal,
+	}
+	ce.advanceToken()
+	expression.Right = ce.parseExpression(PREFIX)
+	return expression
+}
+
+func (ce *CompilationEngine) parseInfixExpression() ast.Expression{
+	expression := &ast.InfixExpression{
+		Token: ce.curToken,
+		Operator: ce.curToken.Literal,
+		Left: left,
+	}
+	precedence := ce.curPrecedence()
+	ce.advanceToken()
+	expression.Right = ce.parseExpression()
+	return expression
+}
+ 
 func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
 	return ce.curToken.Type == t
 }
@@ -122,3 +254,6 @@ func (ce *CompilationEngine) expectNext(t token.TokenType) bool {
 	}
 	return false
 }
+
+
+

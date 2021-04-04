@@ -3,20 +3,11 @@ package main
 import (
 	"fmt"
 	"jack/compiler/tokenizer"
-	"jack/compiler/compilationengine"
+	// "jack/compiler/compilationengine"
 )
 
 func main() {
-	TODO:Fix bug related near EOF
-	jt := tokenizer.New(`var 
-	aa = 
-	'123'; 
-	cc = 'asdfasdfasdfhogehoge'
-	bb = 133; 
-	
-	class {
-		hoge = 123
-	}        `)
+	jt := tokenizer.New(`!1`)
 	for jt.HasMoreTokens() {
 		token, err := jt.Advance()
 		if err != nil {

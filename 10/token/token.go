@@ -46,7 +46,24 @@ const (
 	// EOF
 )
 
+
+// type Symbol string 
+
+const (
+	ASSIGN    TokenType = "="
+	PLUS      TokenType = "+"
+	MINUS     TokenType = "-"
+	BANG      TokenType = "!"
+	ASTERISK  TokenType = "*"
+	SLASH     TokenType = "/"
+	LT        TokenType = "<"
+	GT        TokenType = ">"
+	EQ        TokenType = "=="
+	NOT_EQ    TokenType = "!="
+)
+
 var SymbolMap = map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
+
 var KeyWordMap = map[string]KeyWord{
 	"class":       CLASS,
 	"method":      METHOD,
