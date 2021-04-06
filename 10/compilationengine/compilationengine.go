@@ -75,6 +75,7 @@ func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
 	ce.registerPrefix(token.INTCONST,ce.parseIntConst)
 	ce.registerPrefix(token.MINUS,ce.parsePrefixExpression)
 	ce.registerPrefix(token.BANG,ce.parsePrefixExpression)
+	ce.registerPrefix(token.BANG,ce.parsePrefixGroupedExpression)
 	ce.infixParseFns = make(map[token.TokenType]infixParseFn)
 	ce.registerInfix(token.PLUS,ce.parseInfixExpression)
 	ce.registerInfix(token.MINUS,ce.parseInfixExpression)
@@ -98,7 +99,6 @@ func (ce *CompilationEngine) ParseProgram() *ast.Program {
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
-		fmt.Println(stmt)
 		ce.advanceToken()
 	}
 	return program
@@ -202,6 +202,14 @@ func (ce *CompilationEngine) parseExpression(precedence int) ast.Expression{
 	return leftExp
 }
 
+func (ce *CompilationEngine) parsePrefixGroupedExpression() ast.Expression{
+	ce.advanceToken()
+	exp := ce.parseExpression(LOWEST)
+	if ce.expectNextI(token.RPAREN){
+		return nil
+	}
+	return exp
+}
 
 func (ce *CompilationEngine) parseIdentifier() ast.Expression{
 	return &ast.Identifier{Token:ce.curToken,Value:ce.curToken.Literal}

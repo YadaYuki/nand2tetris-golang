@@ -49,6 +49,8 @@ const (
 
 // type Symbol string 
 
+var SymbolMap = map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
+
 const (
 	ASSIGN    TokenType = "="
 	PLUS      TokenType = "+"
@@ -60,9 +62,15 @@ const (
 	GT        TokenType = ">"
 	EQ        TokenType = "=="
 	NOT_EQ    TokenType = "!="
+	RPAREN    TokenType = ")"
+	LPAREN    TokenType = "("
+	RBRACE    TokenType = "}"
+	LBRACE    TokenType = "{"
+	COMMA     TokenType = ","
+	SEMICOLON TokenType = ";"
 )
 
-var SymbolMap = map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
+
 
 var KeyWordMap = map[string]KeyWord{
 	"class":       CLASS,
