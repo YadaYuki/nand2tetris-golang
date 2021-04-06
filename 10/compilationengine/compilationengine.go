@@ -75,7 +75,8 @@ func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
 	ce.registerPrefix(token.INTCONST,ce.parseIntConst)
 	ce.registerPrefix(token.MINUS,ce.parsePrefixExpression)
 	ce.registerPrefix(token.BANG,ce.parsePrefixExpression)
-	ce.registerPrefix(token.BANG,ce.parsePrefixGroupedExpression)
+	ce.registerPrefix(token.LPAREN,ce.parsePrefixGroupedExpression)
+	ce.registerPrefix(token.IF,ce.parseIfExpression)
 	ce.infixParseFns = make(map[token.TokenType]infixParseFn)
 	ce.registerInfix(token.PLUS,ce.parseInfixExpression)
 	ce.registerInfix(token.MINUS,ce.parseInfixExpression)
@@ -205,7 +206,7 @@ func (ce *CompilationEngine) parseExpression(precedence int) ast.Expression{
 func (ce *CompilationEngine) parsePrefixGroupedExpression() ast.Expression{
 	ce.advanceToken()
 	exp := ce.parseExpression(LOWEST)
-	if ce.expectNextI(token.RPAREN){
+	if ce.expectNext(token.RPAREN){
 		return nil
 	}
 	return exp
@@ -247,6 +248,47 @@ func (ce *CompilationEngine) parseInfixExpression() ast.Expression{
 	return expression
 }
  
+
+func (ce *CompilationEngine) parseIfExpression() ast.Expression {
+	expression := &ast.IfExpression{Toke:ce.curToken}
+	if !ce.expectNext(token.LPAREN) {
+		return nil
+	}
+	ce.advanceToken()
+	expression.Condition = ce.parseExpression(LOWEST)
+	if !ce.expectNext(token.RPAREN) {
+		return nil
+	}
+
+	if !ce.expectNext(token.LBRACE) {
+		return nil
+	}
+	expression.Consequence = ce.parseBlockStatement()
+	if ce.curTokenIs(toke.ELSE) {
+		ce.advanceToken()
+		if !ce.expectNext(token.LBRACE) {
+			return nil
+		}
+		expression.Alternative = ce.parseBlockStatement()
+	}
+	return expression
+}
+
+func (ce *CompilationEngine) parseBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{Token:ce.curToken}
+	block.Statements = []ast.Statement{}
+	ce.advanceToken()
+	for !ce.curTokenIs(token.RBRACE) && !ce.curTokenIs(token.EOF) {
+		stmt := ce.parseStatement()
+		if stmt != nil{
+			block.Statements = append(block.Statements,stmt)
+		}
+		ce.advanceToken()
+	}
+	return block
+}
+
+
 func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
 	return ce.curToken.Type == t
 }
