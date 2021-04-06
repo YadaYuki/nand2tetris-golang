@@ -153,13 +153,9 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 		// TODO:Add ASSIGN
 		return nil
 	}
-
-	// TODO: Add Expression
-	for {
-		if ce.curTokenIs(token.SYMBOL) {
-			// TODO:Add SEMICOLON
-			break
-		}
+	ce.advanceToken()
+	stmt.Value = ce.parseExpression(LOWEST)
+	if ce.nextTokenIs(token.SEMICOLON) {
 		ce.advanceToken()
 	}
 	return stmt
@@ -167,15 +163,16 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 
 func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement{
 	stmt := &ast.ReturnStatement{Token:ce.curToken}
-		// TODO: Add Expression
-		for {
-			if ce.curTokenIs(token.SYMBOL) {
-				// TODO:Add SEMICOLON
-				break
-			}
-			ce.advanceToken()
-		}
-		return stmt
+	
+	ce.advanceToken()
+
+	stmt.ReturnValue = ce.parseExpression(LOWEST)
+	
+	if ce.nextTokenIs(token.SEMICOLON) {
+		ce.advanceToken()
+	}
+
+	return stmt
 }
 
 func (ce *CompilationEngine) parseExpressionStatement() *ast.ExpressionStatement{
