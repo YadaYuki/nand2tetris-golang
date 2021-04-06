@@ -43,6 +43,7 @@ var precedences = map[token.TokenType]int{
 	token.MINUS:  SUM,
 	token.SLASH:PRODUCT,
 	token.ASTERISK:PRODUCT,
+	token.LPAREN : CALL
 }
 
 func (ce *CompilationEngine) nextPrecedence() int {
@@ -77,6 +78,7 @@ func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
 	ce.registerPrefix(token.BANG,ce.parsePrefixExpression)
 	ce.registerPrefix(token.LPAREN,ce.parsePrefixGroupedExpression)
 	ce.registerPrefix(token.IF,ce.parseIfExpression)
+	ce.registerPrefix(token.FUNCTION,ce.parseFunctionLiteral)
 	ce.infixParseFns = make(map[token.TokenType]infixParseFn)
 	ce.registerInfix(token.PLUS,ce.parseInfixExpression)
 	ce.registerInfix(token.MINUS,ce.parseInfixExpression)
@@ -86,6 +88,7 @@ func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
 	ce.registerInfix(token.GT,ce.parseInfixExpression)
 	ce.registerInfix(token.EQ,ce.parseInfixExpression)
 	ce.registerInfix(token.NOT_EQ,ce.parseInfixExpression)
+	ce.registerInfix(token.LPAREN,ce.parseCallFunctionExpression)
 	ce.advanceToken()
 	ce.advanceToken()
 	return ce
@@ -286,6 +289,64 @@ func (ce *CompilationEngine) parseBlockStatement() *ast.BlockStatement {
 		ce.advanceToken()
 	}
 	return block
+}
+
+func (ce *CompilationEngine) parseFunctionLiteral() ast.Expression {
+	lit := &ast.FunctionLiteral{Token: ce.curToken}
+	
+	if !ce.expectNext(token.LPAREN) {
+		return nil
+	}
+	
+	lit.Parameters = ce.parseFunctionParameters()
+	
+	if !ce.expectNext(token.LBRACE) {
+		return nil
+	}
+	
+	lit.Body = ce.parseBlockStatement()
+
+	return lit
+}
+
+func (ce *CompilationEngine) parseFunctionParameters() []*ast.Identifier {
+	identifiers := []*ast.Identifier{}
+	if ce.nextTokenIs(token.RPAREN) {
+		ce.advanceToken()
+		return identifiers
+	}
+	ce.advanceToken()
+	ident := &ast.Identifier{Token:ce.curToken,Value: ce.curToken.Literal}
+	identifiers = append(identifiers,ident)
+	for ce.nextTokenIs(token.COMMA) {
+		ce.advanceToken()
+		ce.advanceToken()
+		ident := &ast.Identifier{Token:ce.curToken,Value :ce.curToken.Literal}
+		identifiers = append(identifiers,ident)
+	}
+	if !ce.expectNext(token.RPAREN){
+		return nil
+	}
+	return identifiers
+}
+
+func (ce *CompilationEngine) parseCallFunctionExpression() []ast.Expression {
+	args := []ast.Expression{}
+	if ce.nextTokenIs(token.RPAREN) {
+		ce.advanceToken()
+		return args
+	}
+	ce.advanceToken()
+	args = append(args,ce.parseExpression(LOWEST))
+	for ce.nextTokenIs(token.COMMA) {
+		ce.advanceToken()
+		ce.advanceToken()
+		args = append(args,ce.parseExpression(LOWEST))
+	}
+	if !expectNext(token.RPAREN) {
+		return nil
+	}
+	return args
 }
 
 
