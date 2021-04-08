@@ -2,7 +2,6 @@ package tokenizer
 
 import (
 	"errors"
-	"log"
 	"jack/compiler/token"
 )
 
@@ -69,7 +68,6 @@ func (jackTokenizer *JackTokenizer) readChar() {
 	} else {
 		jackTokenizer.ch = jackTokenizer.input[jackTokenizer.readPosition]
 	}
-	log.Print(jackTokenizer)
 	jackTokenizer.position = jackTokenizer.readPosition
 
 	jackTokenizer.readPosition++
