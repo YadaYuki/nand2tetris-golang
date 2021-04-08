@@ -46,8 +46,7 @@ const (
 	// EOF
 )
 
-
-// type Symbol string 
+// type Symbol string
 
 var SymbolMap = map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
 
@@ -70,8 +69,6 @@ const (
 	SEMICOLON TokenType = ";"
 )
 
-
-
 var KeyWordMap = map[string]KeyWord{
 	"class":       CLASS,
 	"method":      METHOD,
@@ -93,4 +90,5 @@ var KeyWordMap = map[string]KeyWord{
 	"if":          IF,
 	"else":        ELSE,
 	"while":       WHILE,
-	"return":      RETURN}
+	"return":      RETURN,
+}

@@ -2,6 +2,7 @@ package tokenizer
 
 import (
 	"errors"
+	"log"
 	"jack/compiler/token"
 )
 
@@ -15,13 +16,14 @@ type JackTokenizer struct {
 
 // New is initializer of jack tokenizer
 func New(input string) *JackTokenizer {
-	jt := &JackTokenizer{input: input, ch: input[0], readPosition: 0, position: 0}
+	jt := &JackTokenizer{input: input}
+	jt.readChar()
 	return jt
 }
 
 // HasMoreTokens returns whether hasMoreToken
 func (jackTokenizer *JackTokenizer) HasMoreTokens() bool {
-	return len(jackTokenizer.input) > jackTokenizer.readPosition
+	return len(jackTokenizer.input) > jackTokenizer.position
 }
 
 // Advance returns next token
@@ -29,7 +31,7 @@ func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err err
 	var tok token.Token
 	jackTokenizer.skipWhitespace()
 	if jackTokenizer.HasMoreTokens() == false {
-		return token.Token{Type: token.EOF, Literal: ""}, nil
+		return token.Token{Type: token.EOF}, nil
 	}
 	if _, ok := token.SymbolMap[jackTokenizer.ch]; ok {
 		tok = token.Token{Type: token.SYMBOL, Literal: string(jackTokenizer.ch)}
@@ -47,7 +49,7 @@ func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err err
 		word := jackTokenizer.readString()
 		tok = token.Token{Type: token.STARTINGCONST, Literal: word[1:]}
 	} else {
-		return tok, errors.New("invalid ch. ch: %s",ch)
+		return tok, errors.New("invalid ch.")
 	}
 	jackTokenizer.readChar()
 	return tok, nil
@@ -67,7 +69,9 @@ func (jackTokenizer *JackTokenizer) readChar() {
 	} else {
 		jackTokenizer.ch = jackTokenizer.input[jackTokenizer.readPosition]
 	}
+	log.Print(jackTokenizer)
 	jackTokenizer.position = jackTokenizer.readPosition
+
 	jackTokenizer.readPosition++
 }
 
