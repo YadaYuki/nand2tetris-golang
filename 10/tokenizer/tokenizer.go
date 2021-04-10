@@ -28,6 +28,7 @@ func (jackTokenizer *JackTokenizer) HasMoreTokens() bool {
 // Advance returns next token
 func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err error) {
 	var tok token.Token
+	// TODO: refactoring.
 	jackTokenizer.skipWhitespace()
 	if jackTokenizer.HasMoreTokens() == false {
 		return token.Token{Type: token.EOF}, nil
@@ -41,12 +42,15 @@ func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err err
 		} else {
 			tok = token.Token{Type: token.IDENTIFIER, Literal: word}
 		}
+		return tok, nil
 	} else if isNumber(jackTokenizer.ch) {
 		word := jackTokenizer.readNumber()
 		tok = token.Token{Type: token.INTCONST, Literal: word}
+		return tok, nil
 	} else if isSingleQuote(jackTokenizer.ch) {
 		word := jackTokenizer.readString()
 		tok = token.Token{Type: token.STARTINGCONST, Literal: word[1:]}
+		return tok, nil
 	} else {
 		return tok, errors.New("invalid ch.")
 	}
