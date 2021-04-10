@@ -180,9 +180,6 @@ func (b *Boolean) expressionNode() {}
 func (b *Boolean) TokenLiteral() string { return b.Token.Literal}
 func (b *Boolean) String() string { return b.Token.Literal}
 
-func (ce *CompilationEngine) parseBoolean() ast.Expression {
-	return &ast.Boolean{Token: ce.curToken,Value:ce.curTokenIs(token.TRUE)}
-}
 
 type IfExpression struct {
 	Token       token.Token
@@ -238,7 +235,7 @@ func (fl *FunctionLiteral) String() string {
 	var out bytes.Buffer
 	params := []string{}
 	for _,p := range fl.Parameters {
-		params = append(params,ce.String())
+		params = append(params,p.String())
 	}
 	out.WriteString(fl.TokenLiteral())
 	out.WriteString("(")
@@ -256,7 +253,7 @@ type CallFunctionExpression struct {
 
 
 func (cfe *CallFunctionExpression) expressionNode(){}
-func (cfe *CallFunctionExpression) TokenLiteral() string{ return ce.Token.Literal}
+func (cfe *CallFunctionExpression) TokenLiteral() string{ return cfe.Token.Literal}
 
 func (cfe *CallFunctionExpression) String() string {
 	
@@ -267,7 +264,7 @@ func (cfe *CallFunctionExpression) String() string {
 		args = append(args,a.String())
 	}
 
-	out.WriteString(ce.Function.String())
+	out.WriteString(cfe.Function.String())
 	out.WriteString("(")
 	out.WriteString(strings.Join(args,", "))
 	out.WriteString(")")
