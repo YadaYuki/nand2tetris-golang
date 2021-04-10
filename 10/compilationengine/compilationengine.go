@@ -152,7 +152,9 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 	if !ce.expectNext(token.SYMBOL) {
 		return nil
 	}
+	stmt.Symbol = ce.curToken
 	ce.advanceToken()
+	// todo add parse expression
 	if ce.nextTokenIs(token.SEMICOLON) {
 		ce.advanceToken()
 	}

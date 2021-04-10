@@ -47,8 +47,9 @@ func (p *Program) String() string{
 
 // LetStatement is Ast of "let"
 type LetStatement struct {
-	Token token.Token // KEYWORD
+	Token token.Token // KEYWORD:"let"
 	Name  *Identifier
+	Symbol token.Token // Symbol:"=" 
 	Value Expression
 }
 
@@ -60,7 +61,7 @@ func (ls *LetStatement) String() string{
 	var out bytes.Buffer
 	out.WriteString(ls.TokenLiteral() + " ")
 	out.WriteString(ls.Name.String())
-	out.WriteString("=")
+	out.WriteString(ls.Symbol)
 	if ls.Value != nil{
 		out.WriteString(ls.Value.String())
 	}

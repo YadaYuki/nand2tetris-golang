@@ -51,22 +51,22 @@ const (
 var SymbolMap = map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
 
 const (
-	ASSIGN    TokenType = "="
-	PLUS      TokenType = "+"
-	MINUS     TokenType = "-"
-	BANG      TokenType = "!"
-	ASTERISK  TokenType = "*"
-	SLASH     TokenType = "/"
-	LT        TokenType = "<"
-	GT        TokenType = ">"
-	EQ        TokenType = "=="
-	NOT_EQ    TokenType = "!="
-	RPAREN    TokenType = ")"
-	LPAREN    TokenType = "("
-	RBRACE    TokenType = "}"
-	LBRACE    TokenType = "{"
-	COMMA     TokenType = ","
-	SEMICOLON TokenType = ";"
+	ASSIGN    SymbolType = "="
+	PLUS      SymbolType = "+"
+	MINUS     SymbolType = "-"
+	BANG      SymbolType = "!"
+	ASTERISK  SymbolType = "*"
+	SLASH     SymbolType = "/"
+	LT        SymbolType = "<"
+	GT        SymbolType = ">"
+	EQ        SymbolType = "=="
+	NOT_EQ    SymbolType = "!="
+	RPAREN    SymbolType = ")"
+	LPAREN    SymbolType = "("
+	RBRACE    SymbolType = "}"
+	LBRACE    SymbolType = "{"
+	COMMA     SymbolType = ","
+	SEMICOLON SymbolType = ";"
 )
 
 var KeyWordMap = map[string]KeyWord{
