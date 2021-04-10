@@ -8,9 +8,7 @@ import (
 func TestNextToken(t *testing.T) {
 	input := `
 	class Main {
-    static boolean test;   
-                           
-
+    static boolean test;
     function void main() {
         var SquareGame game;
         let game = game;
@@ -63,6 +61,7 @@ func TestNextToken(t *testing.T) {
 		{token.SYMBOL, ";"},
 		{token.SYMBOL, "}"},
 		{token.SYMBOL, "}"},
+		{token.EOF, ""},
 	}
 	jt := New(input)
 	for i, tt := range tests {
