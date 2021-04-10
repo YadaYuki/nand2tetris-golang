@@ -2,6 +2,7 @@ package tokenizer
 
 import (
 	"errors"
+	"fmt"
 	"jack/compiler/token"
 )
 
@@ -47,12 +48,12 @@ func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err err
 		word := jackTokenizer.readNumber()
 		tok = token.Token{Type: token.INTCONST, Literal: word}
 		return tok, nil
-	} else if isSingleQuote(jackTokenizer.ch) {
+	} else if isDoubleQuote(jackTokenizer.ch) {
 		word := jackTokenizer.readString()
 		tok = token.Token{Type: token.STARTINGCONST, Literal: word[1:]}
 		return tok, nil
 	} else {
-		return tok, errors.New("invalid ch.")
+		return tok, fmt.Errorf("invalid ch. got %s",string(jackTokenizer.ch))
 	}
 	jackTokenizer.readChar()
 	return tok, nil
@@ -95,13 +96,12 @@ func (jackTokenizer *JackTokenizer) readNumber() string {
 
 func (jackTokenizer *JackTokenizer) readString() string {
 	position := jackTokenizer.position
-	for {
+	jackTokenizer.readChar() // read double quote
+	for !isDoubleQuote(jackTokenizer.ch){
 		jackTokenizer.readChar()
-		if isSingleQuote(jackTokenizer.ch) {
-			break
-		}
 	}
-	return jackTokenizer.input[position:jackTokenizer.position]
+	jackTokenizer.readChar()
+	return jackTokenizer.input[position:jackTokenizer.position-1]
 }
 
 func (jackTokenizer *JackTokenizer) skipWhitespace() {
@@ -122,6 +122,6 @@ func isUnderline(ch byte) bool {
 	return ch == '_'
 }
 
-func isSingleQuote(ch byte) bool {
-	return ch == '\''
+func isDoubleQuote(ch byte) bool {
+	return ch == '"'
 }
