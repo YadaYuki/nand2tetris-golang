@@ -14,6 +14,7 @@ func TestString(t *testing.T) {
 					Token: token.Token{Type: token.IDENTIFIER, Literal: "myVar"},
 					Value: "myVar",
 				},
+				Symbol: token.Token{Type: token.SYMBOL, Literal: "="},
 				Value: &Identifier{
 					Token: token.Token{Type: token.IDENTIFIER, Literal: "anotherVar"},
 					Value: "anotherVar",
@@ -24,4 +25,20 @@ func TestString(t *testing.T) {
 	if program.String() != "let myVar=anotherVar;" {
 		t.Errorf("program.String() wrong. got = %q", program.String())
 	}
+}
+
+func TestXml(t *testing.T) {
+	letStatement := &LetStatement{
+		Token: token.Token{Type: token.KEYWORD, Literal: "let"},
+		Name: &Identifier{
+			Token: token.Token{Type: token.IDENTIFIER, Literal: "myVar"},
+			Value: "myVar",
+		},
+		Symbol: token.Token{Type: token.SYMBOL, Literal: "="},
+		Value: &Identifier{
+			Token: token.Token{Type: token.IDENTIFIER, Literal: "anotherVar"},
+			Value: "anotherVar",
+		},
+	}
+	t.Log(letStatement.Xml())
 }
