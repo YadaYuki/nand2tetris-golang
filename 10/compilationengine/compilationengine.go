@@ -142,6 +142,10 @@ func (ce *CompilationEngine) parseKeyWord() ast.Statement {
 		return ce.parseDoStatement()
 	case token.VAR:
 		return ce.parseVarDecStatement()
+	case token.STATIC:
+		return ce.parseClassVarDecStatement()
+	case token.FIELD:
+		return ce.parseClassVarDecStatement()
 	default:
 		return nil
 	}
@@ -195,7 +199,7 @@ func (ce *CompilationEngine) parseDoStatement() *ast.DoStatement {
 }
 
 func (ce *CompilationEngine) parseVarDecStatement() *ast.VarDecStatement {
-	stmt := &ast.VarDecStatement{Token: ce.curToken, Names: []string{}}
+	stmt := &ast.VarDecStatement{Token: ce.curToken, Identifiers: []*ast.Identifier{}}
 	if ce.expectNext(token.KEYWORD) {
 		if token.KeyWord(ce.curToken.Literal) != token.INT && token.KeyWord(ce.curToken.Literal) != token.BOOLEAN && token.KeyWord(ce.curToken.Literal) != token.CHAR {
 			return nil
@@ -204,8 +208,25 @@ func (ce *CompilationEngine) parseVarDecStatement() *ast.VarDecStatement {
 	stmt.ValueType = ce.curToken
 	for token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		ce.advanceToken()
-		name := ce.curToken.Literal
-		stmt.Names = append(stmt.Names, name)
+		identifier := &ast.Identifier{Token: ce.curToken, Value: ce.curToken.Literal}
+		stmt.Identifiers = append(stmt.Identifiers, identifier)
+		ce.advanceToken() //
+	}
+	return stmt
+}
+
+func (ce *CompilationEngine) parseClassVarDecStatement() *ast.ClassVarDecStatement {
+	stmt := &ast.ClassVarDecStatement{Token: ce.curToken, Identifiers: []*ast.Identifier{}}
+	if ce.expectNext(token.KEYWORD) {
+		if token.KeyWord(ce.curToken.Literal) != token.INT && token.KeyWord(ce.curToken.Literal) != token.BOOLEAN && token.KeyWord(ce.curToken.Literal) != token.CHAR {
+			return nil
+		}
+	}
+	stmt.ValueType = ce.curToken
+	for token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
+		ce.advanceToken()
+		identifier := &ast.Identifier{Token: ce.curToken, Value: ce.curToken.Literal}
+		stmt.Identifiers = append(stmt.Identifiers, identifier)
 		ce.advanceToken() //
 	}
 	return stmt

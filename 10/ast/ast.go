@@ -184,9 +184,9 @@ func (ds *DoStatement) Xml() string {
 }
 
 type VarDecStatement struct {
-	Token     token.Token // Keyword:"var"
-	ValueType token.Token // "int","char","boolean"
-	Names     []string
+	Token       token.Token // Keyword:"var"
+	ValueType   token.Token // "int","char","boolean",{class name}
+	Identifiers []*Identifier
 }
 
 func (vds *VarDecStatement) statementNode() {}
@@ -197,11 +197,61 @@ func (vds *VarDecStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(vds.TokenLiteral() + " ")
 	out.WriteString(vds.ValueType.Literal + " ")
-	out.WriteString(vds.Names[0])
-	for _, name := range vds.Names[1:] {
-		out.WriteString("," + name)
+	out.WriteString(vds.Identifiers[0].String())
+	for _, identifier := range vds.Identifiers[1:] {
+		out.WriteString("," + identifier.String())
 	}
 	out.WriteString(";")
+	return out.String()
+}
+func (vds *VarDecStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<varDec>")
+	out.WriteString(keywordXml(vds.TokenLiteral()))
+	out.WriteString(keywordXml(vds.ValueType.Literal))
+	out.WriteString(vds.Identifiers[0].Xml())
+	for _, identifier := range vds.Identifiers[1:] {
+		out.WriteString(keywordXml(","))
+		out.WriteString(identifier.Xml())
+	}
+	out.WriteString(symbolXml(";"))
+	out.WriteString("</varDec>")
+	return out.String()
+}
+
+type ClassVarDecStatement struct {
+	Token       token.Token // Keyword:"static","field"
+	ValueType   token.Token // "int","char","boolean",{class name}
+	Identifiers []*Identifier
+}
+
+func (cvds *ClassVarDecStatement) statementNode() {}
+
+func (cvds *ClassVarDecStatement) TokenLiteral() string { return cvds.Token.Literal }
+
+func (cvds *ClassVarDecStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(cvds.TokenLiteral() + " ")
+	out.WriteString(cvds.ValueType.Literal + " ")
+	out.WriteString(cvds.Identifiers[0].String())
+	for _, identifier := range cvds.Identifiers[1:] {
+		out.WriteString("," + identifier.String())
+	}
+	out.WriteString(";")
+	return out.String()
+}
+func (cvds *ClassVarDecStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<classVarDec>")
+	out.WriteString(keywordXml(cvds.TokenLiteral()))
+	out.WriteString(keywordXml(cvds.ValueType.Literal))
+	out.WriteString(cvds.Identifiers[0].Xml())
+	for _, identifier := range cvds.Identifiers[1:] {
+		out.WriteString(keywordXml(","))
+		out.WriteString(identifier.Xml())
+	}
+	out.WriteString(symbolXml(";"))
+	out.WriteString("</classVarDec>")
 	return out.String()
 }
 
