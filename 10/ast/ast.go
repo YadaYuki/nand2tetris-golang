@@ -183,6 +183,28 @@ func (ds *DoStatement) Xml() string {
 	return out.String()
 }
 
+type VarDecStatement struct {
+	Token     token.Token // Keyword:"var"
+	ValueType token.Token // "int","char","boolean"
+	Names     []string
+}
+
+func (vds *VarDecStatement) statementNode() {}
+
+func (vds *VarDecStatement) TokenLiteral() string { return vds.Token.Literal }
+
+func (vds *VarDecStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(vds.TokenLiteral() + " ")
+	out.WriteString(vds.ValueType.Literal + " ")
+	out.WriteString(vds.Names[0])
+	for _, name := range vds.Names[1:] {
+		out.WriteString("," + name)
+	}
+	out.WriteString(";")
+	return out.String()
+}
+
 type ExpressionStatement struct {
 	Token      token.Token // 式の最初のトークン
 	Expression Expression
@@ -328,7 +350,7 @@ func (cfe *SubroutineCallExpression) String() string {
 
 	out.WriteString(cfe.Function.String())
 	out.WriteString("(")
-	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(strings.Join(args, ","))
 	out.WriteString(")")
 
 	return out.String()
