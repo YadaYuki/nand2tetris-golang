@@ -46,31 +46,28 @@ const (
 	// EOF
 )
 
-
-// type Symbol string 
+type Symbol string
 
 var SymbolMap = map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
 
 const (
-	ASSIGN    TokenType = "="
-	PLUS      TokenType = "+"
-	MINUS     TokenType = "-"
-	BANG      TokenType = "!"
-	ASTERISK  TokenType = "*"
-	SLASH     TokenType = "/"
-	LT        TokenType = "<"
-	GT        TokenType = ">"
-	EQ        TokenType = "=="
-	NOT_EQ    TokenType = "!="
-	RPAREN    TokenType = ")"
-	LPAREN    TokenType = "("
-	RBRACE    TokenType = "}"
-	LBRACE    TokenType = "{"
-	COMMA     TokenType = ","
-	SEMICOLON TokenType = ";"
+	ASSIGN    Symbol = "="
+	PLUS      Symbol = "+"
+	MINUS     Symbol = "-"
+	BANG      Symbol = "!"
+	ASTERISK  Symbol = "*"
+	SLASH     Symbol = "/"
+	LT        Symbol = "<"
+	GT        Symbol = ">"
+	EQ        Symbol = "=="
+	NOT_EQ    Symbol = "!="
+	RPAREN    Symbol = ")"
+	LPAREN    Symbol = "("
+	RBRACE    Symbol = "}"
+	LBRACE    Symbol = "{"
+	COMMA     Symbol = ","
+	SEMICOLON Symbol = ";"
 )
-
-
 
 var KeyWordMap = map[string]KeyWord{
 	"class":       CLASS,
@@ -93,4 +90,5 @@ var KeyWordMap = map[string]KeyWord{
 	"if":          IF,
 	"else":        ELSE,
 	"while":       WHILE,
-	"return":      RETURN}
+	"return":      RETURN,
+}
