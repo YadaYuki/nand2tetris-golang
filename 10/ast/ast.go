@@ -44,9 +44,20 @@ func (p *Program) String() string {
 	}
 	return out.String()
 }
+func (p *Program) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<expression>")
+	// TODO: Implement
+	// for _, stmt := range p.Statements {
+	// 	out.WriteString(stmt.Xml())
+	// }
+	out.WriteString("</expression>")
+	return out.String()
+}
 
 // LetStatement is Ast of "let"
 type LetStatement struct {
+	// TODO:Add array element []
 	Token  token.Token // KEYWORD:"let"
 	Name   *Identifier
 	Symbol token.Token // Symbol:"="
@@ -62,10 +73,24 @@ func (ls *LetStatement) String() string {
 	out.WriteString(ls.TokenLiteral() + " ")
 	out.WriteString(ls.Name.String())
 	if ls.Value != nil {
-		out.WriteString(ls.Token.Literal)
+		out.WriteString(ls.Symbol.Literal)
 		out.WriteString(ls.Value.String())
 	}
 	out.WriteString(";")
+	return out.String()
+}
+
+func (ls *LetStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<letStatement>")
+	out.WriteString(keywordXml(ls.TokenLiteral()))
+	out.WriteString(ls.Name.Xml())
+	if ls.Value != nil {
+		out.WriteString(symbolXml(ls.Symbol.Literal))
+		// TODO:implement expression Xml
+		// out.WriteString(ls.Value.Xml())
+	}
+	out.WriteString("</letStatement>")
 	return out.String()
 }
 
@@ -83,6 +108,8 @@ func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string {
 	return i.Value
 }
+
+func (i *Identifier) Xml() string { return "<identifier> " + i.Value + " </identifier>" }
 
 type IntConst struct {
 	Token token.Token
@@ -115,6 +142,18 @@ func (rs *ReturnStatement) String() string {
 		out.WriteString(rs.Value.String())
 	}
 	out.WriteString(";")
+	return out.String()
+}
+
+func (rs *ReturnStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<returnStatement>")
+	out.WriteString(keywordXml(rs.TokenLiteral()))
+	if rs.Value != nil {
+		// TODO:implement expression Xml
+		// out.WriteString(rs.Value.String())
+	}
+	out.WriteString("</returnStatement>")
 	return out.String()
 }
 
@@ -268,3 +307,7 @@ func (cfe *CallFunctionExpression) String() string {
 
 	return out.String()
 }
+
+func keywordXml(keyword string) string       { return "<keyword> " + keyword + " </keyword>" }
+func symbolXml(symbol string) string         { return "<symbol> " + symbol + " </symbol>" }
+func identifierXml(identifier string) string { return "<identifier> " + identifier + " </identifier>" }
