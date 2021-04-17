@@ -46,27 +46,27 @@ const (
 	// EOF
 )
 
-// type Symbol string
+type Symbol string
 
 var SymbolMap = map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
 
 const (
-	ASSIGN    SymbolType = "="
-	PLUS      SymbolType = "+"
-	MINUS     SymbolType = "-"
-	BANG      SymbolType = "!"
-	ASTERISK  SymbolType = "*"
-	SLASH     SymbolType = "/"
-	LT        SymbolType = "<"
-	GT        SymbolType = ">"
-	EQ        SymbolType = "=="
-	NOT_EQ    SymbolType = "!="
-	RPAREN    SymbolType = ")"
-	LPAREN    SymbolType = "("
-	RBRACE    SymbolType = "}"
-	LBRACE    SymbolType = "{"
-	COMMA     SymbolType = ","
-	SEMICOLON SymbolType = ";"
+	ASSIGN    Symbol = "="
+	PLUS      Symbol = "+"
+	MINUS     Symbol = "-"
+	BANG      Symbol = "!"
+	ASTERISK  Symbol = "*"
+	SLASH     Symbol = "/"
+	LT        Symbol = "<"
+	GT        Symbol = ">"
+	EQ        Symbol = "=="
+	NOT_EQ    Symbol = "!="
+	RPAREN    Symbol = ")"
+	LPAREN    Symbol = "("
+	RBRACE    Symbol = "}"
+	LBRACE    Symbol = "{"
+	COMMA     Symbol = ","
+	SEMICOLON Symbol = ";"
 )
 
 var KeyWordMap = map[string]KeyWord{

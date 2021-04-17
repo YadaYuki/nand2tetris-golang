@@ -1,8 +1,8 @@
 package compilationengine
 
 import (
-	"jack/compiler/ast"
-	"jack/compiler/tokenizer"
+	"jack_compiler/ast"
+	"jack_compiler/tokenizer"
 	"testing"
 	// "fmt"
 )
@@ -59,6 +59,9 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 		t.Errorf("letStmt.Name.TokenLiteral() not '%s'.got '%s'", name, letStmt.Name.TokenLiteral())
 		return false
 	}
+	if s.String() == fmt.Sprintf("let %s = %s;", s.TokenLiteral(), s.Value.String()) {
+		return true
+	}
 	return true
 }
 
@@ -66,7 +69,7 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 // 	input := `
 // 	return x ;
 // 	return 1 ;
-// 	return ; 
+// 	return ;
 // `
 // 	jt := tokenizer.New(input)
 // 	ce := New(jt)
@@ -87,12 +90,12 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 // 	for i,tt := range testCases{
 // 		stmt := program.Statements[i]
 // 		if !testReturnStatement(t,stmt,tt.expectedIdentifier){
-// 			return 
+// 			return
 // 		}
 // 	}
 // }
 
-// func testReturnStatement(t *testing.T, s ast.Statement, name string) bool {	
+// func testReturnStatement(t *testing.T, s ast.Statement, name string) bool {
 // 	if s.TokenLiteral() != "return" {
 // 		t.Errorf("s.TokenLiteral not 'return'. got %q", s.TokenLiteral())
 // 		return false
@@ -181,7 +184,7 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 // 			t.Fatalf("exp.Operator not %s got %s",tt.operator,exp.Operator)
 // 		}
 // 		if !testIntegerLiteral(t,exp.Right,tt.integerValue){
-// 			return 
+// 			return
 // 		}
 // 	}
 // }
@@ -202,4 +205,3 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 // 	}
 // 	return true
 // }
-

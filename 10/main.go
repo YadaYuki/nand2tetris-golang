@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"jack/compiler/tokenizer"
+	"jack_compiler/tokenizer"
 )
 
 func main() {

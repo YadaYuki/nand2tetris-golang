@@ -1,29 +1,29 @@
 package compilationengine
 
 import (
-	"jack/compiler/ast"
-	"jack/compiler/token"
-	"jack/compiler/tokenizer"
+	"jack_compiler/ast"
+	"jack_compiler/token"
+	"jack_compiler/tokenizer"
 	// "strconv"
 )
 
 type (
 	prefixParseFn func() ast.Expression
-  infixParseFn  func(ast.Expression) ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
 )
 
 // CompilationEngine is struct
 type CompilationEngine struct {
-	jt *tokenizer.JackTokenizer
-	errors  []string
-	curToken  token.Token
-	nextToken token.Token
+	jt             *tokenizer.JackTokenizer
+	errors         []string
+	curToken       token.Token
+	nextToken      token.Token
 	prefixParseFns map[token.TokenType]prefixParseFn
-	infixParseFns map[token.TokenType]infixParseFn
+	infixParseFns  map[token.TokenType]infixParseFn
 }
 
 const (
-	_ int =iota
+	_ int = iota
 	LOWEST
 	EQUALS
 	LESSGREATER
@@ -33,38 +33,37 @@ const (
 	CALL
 )
 
-
-var precedences = map[token.TokenType]int{
-	token.EQ: EQUALS,
-	token.NOT_EQ: EQUALS,
-	token.LT: LESSGREATER,
-	token.GT: LESSGREATER,
-	token.PLUS:  SUM,
-	token.MINUS:  SUM,
-	token.SLASH:PRODUCT,
-	token.ASTERISK:PRODUCT,
-	token.LPAREN : CALL,
+var precedences = map[token.Symbol]int{
+	token.EQ:       EQUALS,
+	token.NOT_EQ:   EQUALS,
+	token.LT:       LESSGREATER,
+	token.GT:       LESSGREATER,
+	token.PLUS:     SUM,
+	token.MINUS:    SUM,
+	token.SLASH:    PRODUCT,
+	token.ASTERISK: PRODUCT,
+	token.LPAREN:   CALL,
 }
 
-func (ce *CompilationEngine) nextPrecedence() int {
-	if p,ok := precedences[ce.nextToken.Type];ok{
-		return p
-	}
-	return LOWEST
-}
+// func (ce *CompilationEngine) nextPrecedence() int {
+// 	if p,ok := precedences[ce.nextToken.Type];ok{
+// 		return p
+// 	}
+// 	return LOWEST
+// }
 
-func (ce *CompilationEngine) curPrecedence() int {
-	if p,ok := precedences[ce.curToken.Type];ok{
-		return p
-	}
-	return LOWEST
-}
+// func (ce *CompilationEngine) curPrecedence() int {
+// 	if p,ok := precedences[ce.curToken.Type];ok{
+// 		return p
+// 	}
+// 	return LOWEST
+// }
 
-func (ce *CompilationEngine) registerPrefix(tokenType token.TokenType, fn prefixParseFn){
+func (ce *CompilationEngine) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
 	ce.prefixParseFns[tokenType] = fn
 }
 
-func (ce *CompilationEngine) registerInfix(tokenType token.TokenType, fn infixParseFn){
+func (ce *CompilationEngine) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	ce.infixParseFns[tokenType] = fn
 }
 
@@ -154,20 +153,20 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 	}
 	stmt.Symbol = ce.curToken
 	ce.advanceToken()
-	// todo add parse expression
+	// TODO: add parse expression
 	if ce.nextTokenIs(token.SEMICOLON) {
 		ce.advanceToken()
 	}
 	return stmt
 }
 
-func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement{
-	stmt := &ast.ReturnStatement{Token:ce.curToken}
-	
+func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement {
+	stmt := &ast.ReturnStatement{Token: ce.curToken}
+
 	ce.advanceToken()
 
 	// stmt.ReturnValue = ce.parseExpression(LOWEST)
-	
+
 	if ce.nextTokenIs(token.SEMICOLON) {
 		ce.advanceToken()
 	}
@@ -190,7 +189,7 @@ func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement{
 // 	if prefix == nil{
 // 		return nil
 // 	}
-// 	leftExp := prefix() 
+// 	leftExp := prefix()
 // 	// TODO:Fix to SEMICOLON
 // 	for !p.nextTokenIs(token.SYMBOL) && precedence < ce.nextPrecedence() {
 // 		infix := ce.infixParseFns(ce.nextToken.Type)
@@ -247,7 +246,6 @@ func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement{
 // 	expression.Right = ce.parseExpression()
 // 	return expression
 // }
- 
 
 // func (ce *CompilationEngine) parseIfExpression() ast.Expression {
 // 	expression := &ast.IfExpression{Token:ce.curToken}
@@ -290,17 +288,17 @@ func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement{
 
 // func (ce *CompilationEngine) parseFunctionLiteral() ast.Expression {
 // 	lit := &ast.FunctionLiteral{Token: ce.curToken}
-	
+
 // 	if !ce.expectNext(token.LPAREN) {
 // 		return nil
 // 	}
-	
+
 // 	lit.Parameters = ce.parseFunctionParameters()
-	
+
 // 	if !ce.expectNext(token.LBRACE) {
 // 		return nil
 // 	}
-	
+
 // 	lit.Body = ce.parseBlockStatement()
 
 // 	return lit
@@ -350,7 +348,6 @@ func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement{
 // 	return args
 // }
 
-
 func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
 	return ce.curToken.Type == t
 }
@@ -366,6 +363,3 @@ func (ce *CompilationEngine) expectNext(t token.TokenType) bool {
 	}
 	return false
 }
-
-
-

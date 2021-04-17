@@ -3,7 +3,7 @@ package tokenizer
 import (
 	"errors"
 	"fmt"
-	"jack/compiler/token"
+	"jack_compiler/token"
 )
 
 // JackTokenizer has member necessary for parsing
@@ -53,7 +53,7 @@ func (jackTokenizer *JackTokenizer) Advance() (advanceToken token.Token, err err
 		tok = token.Token{Type: token.STARTINGCONST, Literal: word[1:]}
 		return tok, nil
 	} else {
-		return tok, fmt.Errorf("invalid ch. got %s",string(jackTokenizer.ch))
+		return tok, fmt.Errorf("invalid ch. got %s", string(jackTokenizer.ch))
 	}
 	jackTokenizer.readChar()
 	return tok, nil
@@ -97,11 +97,11 @@ func (jackTokenizer *JackTokenizer) readNumber() string {
 func (jackTokenizer *JackTokenizer) readString() string {
 	position := jackTokenizer.position
 	jackTokenizer.readChar() // read double quote
-	for !isDoubleQuote(jackTokenizer.ch){
+	for !isDoubleQuote(jackTokenizer.ch) {
 		jackTokenizer.readChar()
 	}
 	jackTokenizer.readChar()
-	return jackTokenizer.input[position:jackTokenizer.position-1]
+	return jackTokenizer.input[position : jackTokenizer.position-1]
 }
 
 func (jackTokenizer *JackTokenizer) skipWhitespace() {
