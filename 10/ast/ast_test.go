@@ -27,7 +27,7 @@ func TestString(t *testing.T) {
 	}
 }
 
-func TestXml(t *testing.T) {
+func TestLetXml(t *testing.T) {
 	letStatement := &LetStatement{
 		Token: token.Token{Type: token.KEYWORD, Literal: "let"},
 		Name: &Identifier{
@@ -40,5 +40,23 @@ func TestXml(t *testing.T) {
 			Value: "anotherVar",
 		},
 	}
+	t.Log(letStatement.String())
 	t.Log(letStatement.Xml())
+}
+
+func TestDoXml(t *testing.T) {
+	doStatement := &DoStatement{
+		Token: token.Token{Type: token.KEYWORD, Literal: "do"},
+		SubroutineCall: &Identifier{
+			Token: token.Token{Type: token.IDENTIFIER, Literal: "anotherVar"},
+			Value: "anotherVar",
+		},
+		// SubroutineCall: &SubroutineCallExpression{
+		// 	Token: token.Token{Type: token.IDENTIFIER, Literal: "anotherVar"},
+		// 	Value: "anotherVar",
+		// 	Arguments:
+		// },
+	}
+	t.Log(doStatement.String())
+	t.Log(doStatement.Xml())
 }

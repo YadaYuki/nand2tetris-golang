@@ -157,6 +157,32 @@ func (rs *ReturnStatement) Xml() string {
 	return out.String()
 }
 
+type DoStatement struct {
+	Token          token.Token // Keyword:"do"
+	SubroutineCall Expression
+}
+
+func (ds *DoStatement) statementNode() {}
+
+func (ds *DoStatement) TokenLiteral() string { return ds.Token.Literal }
+
+func (ds *DoStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(ds.TokenLiteral() + " ")
+	out.WriteString(ds.SubroutineCall.String())
+	out.WriteString(";")
+	return out.String()
+}
+
+func (ds *DoStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<doStatement>")
+	out.WriteString(keywordXml(ds.TokenLiteral()))
+	// out.WriteString(keywordXml(ds.SubroutineCall.Xml))
+	out.WriteString("</doStatement>")
+	return out.String()
+}
+
 type ExpressionStatement struct {
 	Token      token.Token // 式の最初のトークン
 	Expression Expression
@@ -282,16 +308,16 @@ func (fl *FunctionLiteral) String() string {
 	return out.String()
 }
 
-type CallFunctionExpression struct {
+type SubroutineCallExpression struct {
 	Token     token.Token
 	Function  Expression
 	Arguments []Expression
 }
 
-func (cfe *CallFunctionExpression) expressionNode()      {}
-func (cfe *CallFunctionExpression) TokenLiteral() string { return cfe.Token.Literal }
+func (cfe *SubroutineCallExpression) expressionNode()      {}
+func (cfe *SubroutineCallExpression) TokenLiteral() string { return cfe.Token.Literal }
 
-func (cfe *CallFunctionExpression) String() string {
+func (cfe *SubroutineCallExpression) String() string {
 
 	var out bytes.Buffer
 	args := []string{}
