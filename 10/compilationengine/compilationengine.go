@@ -5,6 +5,7 @@ import (
 	"jack_compiler/token"
 	"jack_compiler/tokenizer"
 	// "strconv"
+	// "fmt"
 )
 
 type (
@@ -137,40 +138,57 @@ func (ce *CompilationEngine) parseKeyWord() ast.Statement {
 		return ce.parseLetStatement()
 	case token.RETURN:
 		return ce.parseReturnStatement()
+	case token.DO:
+		return ce.parseDoStatement()
 	default:
 		return nil
 	}
 }
 
+// TODO:Add Error Handling
 func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{Token: ce.curToken}
 	if !ce.expectNext(token.IDENTIFIER) {
 		return nil
 	}
 	stmt.Name = &ast.Identifier{Token: ce.curToken, Value: ce.curToken.Literal}
-	if !ce.expectNext(token.SYMBOL) {
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.ASSIGN {
 		return nil
 	}
 	stmt.Symbol = ce.curToken
 	ce.advanceToken()
 	// TODO: add parse expression
-	if ce.nextTokenIs(token.SEMICOLON) {
-		ce.advanceToken()
+	// stmt.LetValue = ce.parseExpression(LOWEST)
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
+		return nil
 	}
 	return stmt
 }
 
 func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{Token: ce.curToken}
-
 	ce.advanceToken()
-
-	// stmt.ReturnValue = ce.parseExpression(LOWEST)
-
-	if ce.nextTokenIs(token.SEMICOLON) {
-		ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) == token.SEMICOLON {
+		return stmt
 	}
+	// stmt.ReturnValue = ce.parseExpression(LOWEST)
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
+		return nil
+	}
+	return stmt
+}
 
+func (ce *CompilationEngine) parseDoStatement() *ast.DoStatement {
+	stmt := &ast.DoStatement{Token: ce.curToken}
+	ce.advanceToken()
+	// stmt.SubroutineCall = ce.parseExpression(LOWEST)
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
+		return nil
+	}
 	return stmt
 }
 
