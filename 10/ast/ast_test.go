@@ -60,3 +60,12 @@ func TestDoXml(t *testing.T) {
 	t.Log(doStatement.String())
 	t.Log(doStatement.Xml())
 }
+
+func TestVarDecString(t *testing.T) {
+	varDecStatement := &VarDecStatement{
+		Token:     token.Token{Type: token.KEYWORD, Literal: "var"},
+		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
+		Names:     []string{"hogeasdfasdf", "hogeasdfasdf", "hogeasdfasdf"},
+	}
+	t.Log(varDecStatement.String())
+}

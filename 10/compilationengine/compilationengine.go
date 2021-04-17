@@ -140,6 +140,8 @@ func (ce *CompilationEngine) parseKeyWord() ast.Statement {
 		return ce.parseReturnStatement()
 	case token.DO:
 		return ce.parseDoStatement()
+	case token.VAR:
+		return ce.parseVarDecStatement()
 	default:
 		return nil
 	}
@@ -188,6 +190,23 @@ func (ce *CompilationEngine) parseDoStatement() *ast.DoStatement {
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		return nil
+	}
+	return stmt
+}
+
+func (ce *CompilationEngine) parseVarDecStatement() *ast.VarDecStatement {
+	stmt := &ast.VarDecStatement{Token: ce.curToken, Names: []string{}}
+	if ce.expectNext(token.KEYWORD) {
+		if token.KeyWord(ce.curToken.Literal) != token.INT && token.KeyWord(ce.curToken.Literal) != token.BOOLEAN && token.KeyWord(ce.curToken.Literal) != token.CHAR {
+			return nil
+		}
+	}
+	stmt.ValueType = ce.curToken
+	for token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
+		ce.advanceToken()
+		name := ce.curToken.Literal
+		stmt.Names = append(stmt.Names, name)
+		ce.advanceToken() //
 	}
 	return stmt
 }

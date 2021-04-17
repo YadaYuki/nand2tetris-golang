@@ -151,6 +151,60 @@ func testDoStatement(t *testing.T, s ast.Statement, name string) bool {
 	return true
 }
 
+func TestVarDecStatements(t *testing.T) {
+	input := `
+	var int a,b,c;
+	var char casdfasdf;
+	var boolean a1,b2,cx;
+`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	program := ce.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+	if len(program.Statements) != 3 {
+		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
+	}
+	testCases := []struct {
+		expectedValueType   string
+		expectedIdentifiers []string
+	}{
+		{"int", []string{"a", "b", "c"}},
+		{"char", []string{"casdfasdf"}},
+		{"boolean", []string{"a1", "b2", "cx"}},
+	}
+	for i, tt := range testCases {
+		stmt := program.Statements[i]
+		if !testVarDecStatement(t, stmt, tt.expectedValueType, tt.expectedIdentifiers) {
+			return
+		}
+	}
+}
+
+func testVarDecStatement(t *testing.T, s ast.Statement, expectedValueType string, identifiers []string) bool {
+	if s.TokenLiteral() != "var" {
+		t.Errorf("s.TokenLiteral not 'var'. got %q", s.TokenLiteral())
+		return false
+	}
+	vds, ok := s.(*ast.VarDecStatement)
+	if !ok {
+		t.Errorf("s not *ast.VarDecStatement. got %T", s)
+		return false
+	}
+	if vds.ValueType.Literal != expectedValueType {
+		t.Errorf("valueType no %s . got %s", expectedValueType, vds.ValueType.Literal)
+		return false
+	}
+	for i, ident := range vds.Names {
+		if identifiers[i] != ident {
+			t.Errorf("identifiers no %s . got %s", identifiers[i], ident)
+			return false
+		}
+	}
+	return true
+}
+
 // func TestIdentifierExpression(t *testing.T){
 // 	input := "foobar;"
 // 	jt := tokenizer.New(input)
