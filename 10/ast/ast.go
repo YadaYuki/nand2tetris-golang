@@ -255,20 +255,24 @@ func (cvds *ClassVarDecStatement) Xml() string {
 	return out.String()
 }
 
-type ExpressionStatement struct {
-	Token      token.Token // 式の最初のトークン
-	Expression Expression
+type BaseExpression struct {
+	Token token.Token // 式の最初のトークン
+	Terms []TermStatement
 }
 
-func (es *ExpressionStatement) statementNode() {}
+func (bs *BaseExpression) statementNode() {}
 
-func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal }
+func (bs *BaseExpression) TokenLiteral() string { return es.Token.Literal }
 
-func (es *ExpressionStatement) String() string {
-	if es.Expression != nil {
-		return es.Expression.String()
-	}
+func (bs *BaseExpression) String() string {
+	// if bs.Expression != nil {
+	// 	return es.Expression.String()
+	// }
 	return ""
+}
+
+type TermStatement struct {
+	Token token.Token // 式の最初のトークン
 }
 
 type PrefixExpression struct {
