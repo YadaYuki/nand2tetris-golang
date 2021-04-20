@@ -65,7 +65,44 @@ func TestVarDecString(t *testing.T) {
 	varDecStatement := &VarDecStatement{
 		Token:     token.Token{Type: token.KEYWORD, Literal: "var"},
 		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
-		Names:     []string{"hogeasdfasdf", "hogeasdfasdf", "hogeasdfasdf"},
+		Identifiers: []*Identifier{
+			&Identifier{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+			&Identifier{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+			&Identifier{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+		},
 	}
 	t.Log(varDecStatement.String())
+	t.Log(varDecStatement.Xml())
+}
+
+func TestClassVarDecString(t *testing.T) {
+	classVarDecStatement := &ClassVarDecStatement{
+		Token:     token.Token{Type: token.KEYWORD, Literal: "static"},
+		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
+		Identifiers: []*Identifier{
+			&Identifier{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+			&Identifier{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+			&Identifier{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+		},
+	}
+	t.Log(classVarDecStatement.String())
+	t.Log(classVarDecStatement.Xml())
 }

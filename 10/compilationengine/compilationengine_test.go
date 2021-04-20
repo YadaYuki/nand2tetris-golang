@@ -196,8 +196,62 @@ func testVarDecStatement(t *testing.T, s ast.Statement, expectedValueType string
 		t.Errorf("valueType no %s . got %s", expectedValueType, vds.ValueType.Literal)
 		return false
 	}
-	for i, ident := range vds.Names {
-		if identifiers[i] != ident {
+	for i, ident := range vds.Identifiers {
+		if identifiers[i] != ident.String() {
+			t.Errorf("identifiers no %s . got %s", identifiers[i], ident)
+			return false
+		}
+	}
+	return true
+}
+
+func TestClassVarDecStatements(t *testing.T) {
+	input := `
+	static int a,b,c;
+	field char casdfasdf;
+	static boolean a1,b2,cx;
+`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	program := ce.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+	if len(program.Statements) != 3 {
+		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
+	}
+	testCases := []struct {
+		expectedValueType   string
+		expectedIdentifiers []string
+	}{
+		{"int", []string{"a", "b", "c"}},
+		{"char", []string{"casdfasdf"}},
+		{"boolean", []string{"a1", "b2", "cx"}},
+	}
+	for i, tt := range testCases {
+		stmt := program.Statements[i]
+		if !testClassVarDecStatement(t, stmt, tt.expectedValueType, tt.expectedIdentifiers) {
+			return
+		}
+	}
+}
+
+func testClassVarDecStatement(t *testing.T, s ast.Statement, expectedValueType string, identifiers []string) bool {
+	if s.TokenLiteral() != "static" && s.TokenLiteral() != "field" {
+		t.Errorf("s.TokenLiteral not 'static' and 'field'. got %q", s.TokenLiteral())
+		return false
+	}
+	vds, ok := s.(*ast.ClassVarDecStatement)
+	if !ok {
+		t.Errorf("s not *ast.ClassVarDecStatement. got %T", s)
+		return false
+	}
+	if vds.ValueType.Literal != expectedValueType {
+		t.Errorf("valueType no %s . got %s", expectedValueType, vds.ValueType.Literal)
+		return false
+	}
+	for i, ident := range vds.Identifiers {
+		if identifiers[i] != ident.String() {
 			t.Errorf("identifiers no %s . got %s", identifiers[i], ident)
 			return false
 		}
