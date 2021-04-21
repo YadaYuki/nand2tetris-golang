@@ -127,6 +127,7 @@ func (ce *CompilationEngine) parseStatement() ast.Statement {
 	// case token.STARTINGCONST:
 	// return nil
 	default:
+		panic("")
 		return nil
 	}
 }
@@ -231,16 +232,6 @@ func (ce *CompilationEngine) parseClassVarDecStatement() *ast.ClassVarDecStateme
 	}
 	return stmt
 }
-
-// func (ce *CompilationEngine) parseExpressionStatement() *ast.ExpressionStatement{
-// 	stmt := &ast.ExpressionStatement{Token:ce.curToken}
-// 	stmt.Expression = ce.parseExpression(LOWEST)
-// 	if ce.nextTokenIs(token.SYMBOL){
-// 		// TODO:Add SEMICOLON
-// 		ce.advanceToken()
-// 	}
-// 	return stmt
-// }
 
 // func (ce *CompilationEngine) parseExpression(precedence int) ast.Expression{
 // 	prefix := ce.prefixParseFns[ce.curToken.Type]
