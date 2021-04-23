@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"jack_compiler/token"
+	"strconv"
 	"strings"
 )
 
@@ -26,10 +27,9 @@ type Expression interface {
 }
 
 type Term interface {
-	Node 
+	Node
 	termNode()
 }
-
 
 // Program is Ast of all program
 type Program struct {
@@ -264,7 +264,7 @@ func (cvds *ClassVarDecStatement) Xml() string {
 
 type SingleExpression struct {
 	Token token.Token // 式の最初のトークン
-	Prefix Term
+	Value Term
 }
 
 func (se *SingleExpression) expressionNode() {}
@@ -272,30 +272,26 @@ func (se *SingleExpression) expressionNode() {}
 func (se *SingleExpression) TokenLiteral() string { return se.Token.Literal }
 
 func (se *SingleExpression) String() string {
-	return se.Term.String()
+	return se.Value.String()
 }
 
 type InfixExpression struct {
-	Token token.Token // 式の最初のトークン
-	Left Term
+	Token    token.Token // 式の最初のトークン
+	Left     Term
 	Operator string
-	Right Term
+	Right    Term
 }
 
 func (ie *InfixExpression) expressionNode() {}
 
-func (ie *InfixExpression) TokenLiteral() string { return es.Token.Literal }
+func (ie *InfixExpression) TokenLiteral() string { return ie.Token.Literal }
 
 func (ie *InfixExpression) String() string {
-	if ie. != nil {
-		return es.Expression.String()
-	}
-	return ""
+	return ie.Left.String() + ie.Operator + ie.Right.String()
 }
 
-
 type IntergerConstTerm struct {
-	Token token.Token 
+	Token token.Token
 	Value int64
 }
 
@@ -304,7 +300,7 @@ func (ict *IntergerConstTerm) termNode() {}
 func (ict *IntergerConstTerm) TokenLiteral() string { return ict.Token.Literal }
 
 func (ict *IntergerConstTerm) String() string {
-	return string(ict.Value)
+	return strconv.FormatInt(ict.Value, 10)
 }
 
 type Boolean struct {

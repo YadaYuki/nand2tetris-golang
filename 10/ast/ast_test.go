@@ -106,3 +106,15 @@ func TestClassVarDecString(t *testing.T) {
 	t.Log(classVarDecStatement.String())
 	t.Log(classVarDecStatement.Xml())
 }
+
+func TestSingleExpressionString(t *testing.T) {
+	singleExpression := &SingleExpression{
+		Token: token.Token{Type: token.INTCONST, Literal: "4"},
+		Value: &IntergerConstTerm{
+			Token: token.Token{Type: token.INTCONST, Literal: "4"},
+			Value: 4,
+		},
+	}
+	t.Log(singleExpression.String())
+	// t.Log(classVarDecStatement.Xml())
+}
