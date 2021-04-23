@@ -262,18 +262,18 @@ func (cvds *ClassVarDecStatement) Xml() string {
 	return out.String()
 }
 
-type PrefixExpression struct {
+type SingleExpression struct {
 	Token token.Token // 式の最初のトークン
 	Prefix Term
 }
 
-func (pe *PrefixExpression) expressionNode() {}
+func (se *SingleExpression) expressionNode() {}
 
-func (pe *PrefixExpression) TokenLiteral() string { return es.Token.Literal }
+func (se *SingleExpression) TokenLiteral() string { return se.Token.Literal }
 
-func (pe *PrefixExpression) String() string {
-	if pe.Term != nil {
-		return es.Term.String()
+func (se *SingleExpression) String() string {
+	if se.Term != nil {
+		return se.Term.String()
 	}
 	return ""
 }
@@ -296,22 +296,6 @@ func (ie *InfixExpression) String() string {
 	return ""
 }
 
-type IntConstTerm struct {
-	Token token.Token // 式の最初のトークン
-	Value int64
-}
-
-
-func (ict *IntConstTerm) termNode() {}
-
-func (ict *IntConstTerm) TokenLiteral() string { return es.Token.Literal }
-
-func (ict *IntConstTerm) String() string {
-	if ie. != nil {
-		return string(ict.Value)
-	}
-	return ""
-}
 
 
 type Boolean struct {
