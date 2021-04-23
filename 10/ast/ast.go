@@ -272,10 +272,7 @@ func (se *SingleExpression) expressionNode() {}
 func (se *SingleExpression) TokenLiteral() string { return se.Token.Literal }
 
 func (se *SingleExpression) String() string {
-	if se.Term != nil {
-		return se.Term.String()
-	}
-	return ""
+	return se.Term.String()
 }
 
 type InfixExpression struct {
@@ -297,6 +294,18 @@ func (ie *InfixExpression) String() string {
 }
 
 
+type IntergerConstTerm struct {
+	Token token.Token 
+	Value int64
+}
+
+func (ict *IntergerConstTerm) termNode() {}
+
+func (ict *IntergerConstTerm) TokenLiteral() string { return ict.Token.Literal }
+
+func (ict *IntergerConstTerm) String() string {
+	return string(ict.Value)
+}
 
 type Boolean struct {
 	Token token.Token
