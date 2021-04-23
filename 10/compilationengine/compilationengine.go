@@ -127,7 +127,7 @@ func (ce *CompilationEngine) parseStatement() ast.Statement {
 	// case token.STARTINGCONST:
 	// return nil
 	default:
-		return nil
+		panic("")
 	}
 }
 
@@ -232,38 +232,28 @@ func (ce *CompilationEngine) parseClassVarDecStatement() *ast.ClassVarDecStateme
 	return stmt
 }
 
-// func (ce *CompilationEngine) parseExpressionStatement() *ast.ExpressionStatement{
-// 	stmt := &ast.ExpressionStatement{Token:ce.curToken}
-// 	stmt.Expression = ce.parseExpression(LOWEST)
-// 	if ce.nextTokenIs(token.SYMBOL){
-// 		// TODO:Add SEMICOLON
-// 		ce.advanceToken()
-// 	}
-// 	return stmt
-// }
+func (ce *CompilationEngine) parseExpression(precedence int) ast.Expression {
+	prefix := ce.prefixParseFns[ce.curToken.Type]
+	if prefix == nil {
+		return nil
+	}
+	leftExp := prefix()
+	// TODO:Fix to SEMICOLON
+	for !p.nextTokenIs(token.SYMBOL) && precedence < ce.nextPrecedence() {
+		infix := ce.infixParseFns(ce.nextToken.Type)
+		if infix == nil {
+			return leftExp
+		}
+		ce.nextToken()
+		leftExp = infix(leftExp)
+	}
+	return leftExp
+}
 
-// func (ce *CompilationEngine) parseExpression(precedence int) ast.Expression{
-// 	prefix := ce.prefixParseFns[ce.curToken.Type]
-// 	if prefix == nil{
-// 		return nil
-// 	}
-// 	leftExp := prefix()
-// 	// TODO:Fix to SEMICOLON
-// 	for !p.nextTokenIs(token.SYMBOL) && precedence < ce.nextPrecedence() {
-// 		infix := ce.infixParseFns(ce.nextToken.Type)
-// 		if infix == nil{
-// 			return leftExp
-// 		}
-// 		ce.nextToken()
-// 		leftExp = infix(leftExp)
-// 	}
-// 	return leftExp
-// }
-
-// func (ce *CompilationEngine) parsePrefixGroupedExpression() ast.Expression{
+// func (ce *CompilationEngine) parsePrefixGroupedExpression() ast.Expression {
 // 	ce.advanceToken()
 // 	exp := ce.parseExpression(LOWEST)
-// 	if ce.expectNext(token.RPAREN){
+// 	if ce.expectNext(token.RPAREN) {
 // 		return nil
 // 	}
 // 	return exp
