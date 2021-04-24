@@ -116,5 +116,5 @@ func TestSingleExpressionString(t *testing.T) {
 		},
 	}
 	t.Log(singleExpression.String())
-	// t.Log(classVarDecStatement.Xml())
+	t.Log(singleExpression.Xml())
 }

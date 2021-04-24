@@ -259,6 +259,8 @@ func testClassVarDecStatement(t *testing.T, s ast.Statement, expectedValueType s
 	return true
 }
 
+func 
+
 // func TestIdentifierExpression(t *testing.T){
 // 	input := "foobar;"
 // 	jt := tokenizer.New(input)

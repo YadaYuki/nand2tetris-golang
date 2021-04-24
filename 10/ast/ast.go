@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"jack_compiler/token"
 	"strconv"
-	"strings"
 )
 
 // Node is Node of AST
 type Node interface {
 	TokenLiteral() string
 	String() string
-	// Xml()
+	Xml() string
 }
 
 // Statement is Statement Node of AST
@@ -275,6 +274,14 @@ func (se *SingleExpression) String() string {
 	return se.Value.String()
 }
 
+func (se *SingleExpression) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<expression>")
+	out.WriteString(se.Value.Xml())
+	out.WriteString("</expression>")
+	return out.String()
+}
+
 type InfixExpression struct {
 	Token    token.Token // 式の最初のトークン
 	Left     Term
@@ -290,6 +297,16 @@ func (ie *InfixExpression) String() string {
 	return ie.Left.String() + ie.Operator + ie.Right.String()
 }
 
+func (ie *InfixExpression) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<expression>")
+	out.WriteString(ie.Left.Xml())
+	out.WriteString("<symbol>" + ie.Operator + "</symbol>")
+	out.WriteString(ie.Right.Xml())
+	out.WriteString("</expression>")
+	return out.String()
+}
+
 type IntergerConstTerm struct {
 	Token token.Token
 	Value int64
@@ -302,102 +319,11 @@ func (ict *IntergerConstTerm) TokenLiteral() string { return ict.Token.Literal }
 func (ict *IntergerConstTerm) String() string {
 	return strconv.FormatInt(ict.Value, 10)
 }
-
-type Boolean struct {
-	Token token.Token
-	Value bool
-}
-
-func (b *Boolean) expressionNode()      {}
-func (b *Boolean) TokenLiteral() string { return b.Token.Literal }
-func (b *Boolean) String() string       { return b.Token.Literal }
-
-type IfExpression struct {
-	Token       token.Token
-	Condition   Expression
-	Consequence *BlockStatement
-	Alternative *BlockStatement
-}
-
-func (ie *IfExpression) expressionNode() {}
-
-func (ie *IfExpression) TokenLiteral() string { return ie.Token.Literal }
-
-func (ie *IfExpression) String() string {
+func (ict *IntergerConstTerm) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("if")
-	out.WriteString(ie.Condition.String())
-	out.WriteString(" ")
-	out.WriteString(ie.Consequence.String())
-	if ie.Alternative != nil {
-		out.WriteString("else ")
-		out.WriteString(ie.Alternative.String())
-	}
-	return out.String()
-}
-
-type BlockStatement struct {
-	Token      token.Token
-	Statements []Statement
-}
-
-func (pe *BlockStatement) statementNode()       {}
-func (pe *BlockStatement) TokenLiteral() string { return pe.Token.Literal }
-func (pe *BlockStatement) String() string {
-	var out bytes.Buffer
-	for _, s := range pe.Statements {
-		out.WriteString(s.String())
-	}
-	return out.String()
-}
-
-type FunctionLiteral struct {
-	Token      token.Token
-	Parameters []*Identifier
-	Body       *BlockStatement
-}
-
-func (fl *FunctionLiteral) expressionNode() {}
-
-func (fl *FunctionLiteral) TokenLiteral() string { return fl.Token.Literal }
-
-func (fl *FunctionLiteral) String() string {
-	var out bytes.Buffer
-	params := []string{}
-	for _, p := range fl.Parameters {
-		params = append(params, p.String())
-	}
-	out.WriteString(fl.TokenLiteral())
-	out.WriteString("(")
-	out.WriteString(strings.Join(params, ","))
-	out.WriteString(")")
-	out.WriteString(fl.Body.String())
-	return out.String()
-}
-
-type SubroutineCallExpression struct {
-	Token     token.Token
-	Function  Expression
-	Arguments []Expression
-}
-
-func (cfe *SubroutineCallExpression) expressionNode()      {}
-func (cfe *SubroutineCallExpression) TokenLiteral() string { return cfe.Token.Literal }
-
-func (cfe *SubroutineCallExpression) String() string {
-
-	var out bytes.Buffer
-	args := []string{}
-
-	for _, a := range cfe.Arguments {
-		args = append(args, a.String())
-	}
-
-	out.WriteString(cfe.Function.String())
-	out.WriteString("(")
-	out.WriteString(strings.Join(args, ","))
-	out.WriteString(")")
-
+	out.WriteString("<term>")
+	out.WriteString("<integerConstant>" + strconv.FormatInt(ict.Value, 10) + "<integerConstant>")
+	out.WriteString("</term>")
 	return out.String()
 }
 
