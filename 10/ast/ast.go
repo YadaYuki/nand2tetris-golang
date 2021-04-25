@@ -184,7 +184,6 @@ func (ds *DoStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<doStatement>")
 	out.WriteString(keywordXml(ds.TokenLiteral()))
-	// out.WriteString(keywordXml(ds.SubroutineCall.Xml))
 	out.WriteString("</doStatement>")
 	return out.String()
 }
@@ -258,6 +257,71 @@ func (cvds *ClassVarDecStatement) Xml() string {
 	}
 	out.WriteString(symbolXml(";"))
 	out.WriteString("</classVarDec>")
+	return out.String()
+}
+
+type IfStatement struct {
+	Token       token.Token
+	Condition   Expression
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+}
+
+func (ifs *IfStatement) statementNode() {}
+
+func (ifs *IfStatement) TokenLiteral() string { return ifs.Token.Literal }
+
+func (ifs *IfStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("if")
+	out.WriteString(ifs.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ifs.Consequence.String())
+	if ifs.Alternative != nil {
+		out.WriteString("else ")
+		out.WriteString(ifs.Alternative.String())
+	}
+	return out.String()
+}
+
+func (ifs *IfStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString(keywordXml("if"))
+	out.WriteString(ifs.Condition.Xml())
+	out.WriteString(ifs.Consequence.Xml())
+	if ifs.Alternative != nil {
+		out.WriteString(keywordXml("else"))
+		out.WriteString(ifs.Alternative.Xml())
+	}
+	return out.String()
+}
+
+type BlockStatement struct {
+	Token      token.Token // symbol,{
+	Statements []Statement
+}
+
+func (bs *BlockStatement) statementNode() {}
+
+func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
+
+func (bs *BlockStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("{")
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+	out.WriteString("}")
+	return out.String()
+}
+
+func (bs *BlockStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString(symbolXml("{"))
+	for _, s := range bs.Statements {
+		out.WriteString(s.Xml())
+	}
+	out.WriteString(symbolXml("}"))
 	return out.String()
 }
 
@@ -362,7 +426,7 @@ func (ict *IdentifierTerm) String() string {
 func (ict *IdentifierTerm) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<term>")
-	out.WriteString("<identifier>" + ict.String() + "</identifier>")
+	out.WriteString(identifierXml(ict.String()))
 	out.WriteString("</term>")
 	return out.String()
 }
@@ -379,10 +443,11 @@ func (ict *KeywordConstTerm) TokenLiteral() string { return ict.Token.Literal }
 func (ict *KeywordConstTerm) String() string {
 	return string(ict.KeyWord)
 }
+
 func (ict *KeywordConstTerm) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<term>")
-	out.WriteString("<keyword>" + ict.String() + "</keyword>")
+	out.WriteString(keywordXml(ict.String()))
 	out.WriteString("</term>")
 	return out.String()
 }

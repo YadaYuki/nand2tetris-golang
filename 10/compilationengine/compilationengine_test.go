@@ -312,3 +312,30 @@ func TestParseStringConstTermExpression(t *testing.T) {
 		t.Fatalf("stringConstTerm.Value is not hoge,got = %s", stringConstTerm.Value)
 	}
 }
+
+func TestParseIfStatement(t *testing.T) {
+	input := `
+	 if(x=1){
+		do x;
+		do 1;
+		do a;
+	 }else{
+		do x;
+		do 1;
+		do a;
+	 }`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	program := ce.ParseProgram()
+	if len(program.Statements) != 1 {
+		t.Fatalf("len(program.Statements) is not 1,got = %d", len(program.Statements))
+	}
+	ifStmt, ok := program.Statements[0].(*ast.IfStatement)
+	if !ok {
+		t.Fatalf("ifStmt is not ast.IfStatement,got = %T", ifStmt)
+	}
+	if len(ifStmt.Consequence.Statements) != 3 {
+		t.Fatalf("len(ifStmt.Consequence)  is not 3,got = %d", len(ifStmt.Consequence.Statements))
+	}
+	t.Log(ifStmt.Xml())
+}
