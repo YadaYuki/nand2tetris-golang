@@ -108,13 +108,25 @@ func TestClassVarDecString(t *testing.T) {
 }
 
 func TestSingleExpressionString(t *testing.T) {
-	singleExpression := &SingleExpression{
+	SingleExpression := &SingleExpression{
 		Token: token.Token{Type: token.INTCONST, Literal: "4"},
 		Value: &IntergerConstTerm{
 			Token: token.Token{Type: token.INTCONST, Literal: "4"},
 			Value: 4,
 		},
 	}
-	t.Log(singleExpression.String())
-	t.Log(singleExpression.Xml())
+	t.Log(SingleExpression.String())
+	t.Log(SingleExpression.Xml())
+}
+
+func TestKeywordConstTermString(t *testing.T) {
+	SingleExpression := &SingleExpression{
+		Token: token.Token{Type: token.KEYWORD, Literal: "true"},
+		Value: &KeywordConstTerm{
+			Token:   token.Token{Type: token.KEYWORD, Literal: "true"},
+			KeyWord: token.TRUE,
+		},
+	}
+	t.Log(SingleExpression.String())
+	t.Log(SingleExpression.Xml())
 }

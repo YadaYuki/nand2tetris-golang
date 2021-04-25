@@ -266,18 +266,18 @@ type SingleExpression struct {
 	Value Term
 }
 
-func (se *SingleExpression) expressionNode() {}
+func (pe *SingleExpression) expressionNode() {}
 
-func (se *SingleExpression) TokenLiteral() string { return se.Token.Literal }
+func (pe *SingleExpression) TokenLiteral() string { return pe.Token.Literal }
 
-func (se *SingleExpression) String() string {
-	return se.Value.String()
+func (pe *SingleExpression) String() string {
+	return pe.Value.String()
 }
 
-func (se *SingleExpression) Xml() string {
+func (pe *SingleExpression) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<expression>")
-	out.WriteString(se.Value.Xml())
+	out.WriteString(pe.Value.Xml())
 	out.WriteString("</expression>")
 	return out.String()
 }
@@ -322,7 +322,67 @@ func (ict *IntergerConstTerm) String() string {
 func (ict *IntergerConstTerm) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<term>")
-	out.WriteString("<integerConstant>" + strconv.FormatInt(ict.Value, 10) + "<integerConstant>")
+	out.WriteString("<integerConstant>" + strconv.FormatInt(ict.Value, 10) + "</integerConstant>")
+	out.WriteString("</term>")
+	return out.String()
+}
+
+type StringConstTerm struct {
+	Token token.Token
+	Value string
+}
+
+func (sct *StringConstTerm) termNode() {}
+
+func (sct *StringConstTerm) TokenLiteral() string { return sct.Token.Literal }
+
+func (sct *StringConstTerm) String() string {
+	return sct.Value
+}
+func (sct *StringConstTerm) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<term>")
+	out.WriteString("<stringConstant>" + sct.Value + "</stringConstant>")
+	out.WriteString("</term>")
+	return out.String()
+}
+
+type IdentifierTerm struct {
+	Token token.Token
+	Value string
+}
+
+func (ict *IdentifierTerm) termNode() {}
+
+func (ict *IdentifierTerm) TokenLiteral() string { return ict.Token.Literal }
+
+func (ict *IdentifierTerm) String() string {
+	return ict.Value
+}
+func (ict *IdentifierTerm) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<term>")
+	out.WriteString("<identifier>" + ict.String() + "</identifier>")
+	out.WriteString("</term>")
+	return out.String()
+}
+
+type KeywordConstTerm struct {
+	Token   token.Token
+	KeyWord token.KeyWord
+}
+
+func (ict *KeywordConstTerm) termNode() {}
+
+func (ict *KeywordConstTerm) TokenLiteral() string { return ict.Token.Literal }
+
+func (ict *KeywordConstTerm) String() string {
+	return string(ict.KeyWord)
+}
+func (ict *KeywordConstTerm) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<term>")
+	out.WriteString("<keyword>" + ict.String() + "</keyword>")
 	out.WriteString("</term>")
 	return out.String()
 }

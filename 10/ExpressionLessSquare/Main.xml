@@ -45,6 +45,7 @@
           <symbol> ) </symbol>
           <symbol> ; </symbol>
         </doStatement>
+        
         <doStatement>
           <keyword> do </keyword>
           <identifier> game </identifier>
