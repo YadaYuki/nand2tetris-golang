@@ -173,7 +173,7 @@ func TestIfStatementString(t *testing.T) {
 
 func TestExpressionListStatementString(t *testing.T) {
 	expressionListStatement := &ExpressionListStatement{
-		Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+		Token: token.Token{Type: token.SYMBOL, Literal: "("},
 		ExpressionList: []Expression{
 			&SingleExpression{
 				Token: token.Token{Type: token.INTCONST, Literal: "4"},

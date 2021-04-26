@@ -326,7 +326,7 @@ func (bs *BlockStatement) Xml() string {
 }
 
 type ExpressionListStatement struct {
-	Token          token.Token // Token of first Expression
+	Token          token.Token // symbol,(
 	ExpressionList []Expression
 }
 
