@@ -332,19 +332,23 @@ type ExpressionListStatement struct {
 
 func (els *ExpressionListStatement) statementNode() {}
 
-func (els *ExpressionListStatement) TokenLiteral() string { return bs.Token.Literal }
+func (els *ExpressionListStatement) TokenLiteral() string { return els.Token.Literal }
 
 func (els *ExpressionListStatement) String() string {
 	var out bytes.Buffer
-	for _, s := range els.ExpressionList {
-		out.WriteString(s.String())
+	if len(els.ExpressionList) == 0 {
+		return ""
+	}
+	out.WriteString(els.ExpressionList[0].String())
+	for _, s := range els.ExpressionList[1:] {
+		out.WriteString(" ," + s.String())
 	}
 	return out.String()
 }
 
 func (els *ExpressionListStatement) Xml() string {
 	var out bytes.Buffer
-	for _, s := range bs.Statements {
+	for _, s := range els.ExpressionList {
 		out.WriteString(s.Xml())
 		out.WriteString(symbolXml(","))
 	}

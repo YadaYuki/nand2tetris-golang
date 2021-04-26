@@ -170,3 +170,27 @@ func TestIfStatementString(t *testing.T) {
 	t.Log(ifStatement.String())
 	t.Log(ifStatement.Xml())
 }
+
+func TestExpressionListStatementString(t *testing.T) {
+	expressionListStatement := &ExpressionListStatement{
+		Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+		ExpressionList: []Expression{
+			&SingleExpression{
+				Token: token.Token{Type: token.INTCONST, Literal: "4"},
+				Value: &IntergerConstTerm{
+					Token: token.Token{Type: token.INTCONST, Literal: "4"},
+					Value: 4,
+				},
+			},
+			&SingleExpression{
+				Token: token.Token{Type: token.INTCONST, Literal: "4"},
+				Value: &IntergerConstTerm{
+					Token: token.Token{Type: token.INTCONST, Literal: "4"},
+					Value: 4,
+				},
+			},
+		},
+	}
+	t.Log(expressionListStatement.String())
+	t.Log(expressionListStatement.Xml())
+}
