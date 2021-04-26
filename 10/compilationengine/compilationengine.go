@@ -72,7 +72,7 @@ func (ce *CompilationEngine) registerInfix(tokenType token.TokenType, fn infixPa
 func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
 	ce := &CompilationEngine{jt: jt}
 	ce.singleParseFns = make(map[token.TokenType]singleParseFn)
-	ce.registerSingle(token.STARTINGCONST, ce.parseStrincConstExpression)
+	ce.registerSingle(token.STARTINGCONST, ce.parseStringConstExpression)
 	ce.registerSingle(token.INTCONST, ce.parseIntegerConstExpression)
 	ce.registerSingle(token.IDENTIFIER, ce.parseIdentifierExpression)
 	// ce.registerSingle(token.BANG,ce.parseSingleExpression)
@@ -311,8 +311,16 @@ func (ce *CompilationEngine) parseIdentifierExpression() ast.Expression {
 	return expression
 }
 
-func (ce *CompilationEngine) parseStrincConstExpression() ast.Expression {
+func (ce *CompilationEngine) parseStringConstExpression() ast.Expression {
 	expression := &ast.SingleExpression{Token: ce.curToken, Value: &ast.StringConstTerm{Token: ce.curToken, Value: ce.curToken.Literal}}
+	return expression
+}
+
+func (ce *CompilationEngine) parseSubroutineCallExpression() ast.Expression {
+	expression := &ast.SingleExpression{Token: ce.curToken}
+	ce.advanceToken()
+	expressionListStmt := ce.parseExpressionListStatement()
+	expression.Value = &ast.SubroutineCallTerm{Token: ce.curToken, FunctionName: ce.curToken.Literal, ExpressionListStmt: *expressionListStmt}
 	return expression
 }
 
