@@ -194,3 +194,32 @@ func TestExpressionListStatementString(t *testing.T) {
 	t.Log(expressionListStatement.String())
 	t.Log(expressionListStatement.Xml())
 }
+
+func TestSubroutineCallTermString(t *testing.T) {
+	expressionListStatement := &ExpressionListStatement{
+		Token: token.Token{Type: token.SYMBOL, Literal: "("},
+		ExpressionList: []Expression{
+			&SingleExpression{
+				Token: token.Token{Type: token.INTCONST, Literal: "4"},
+				Value: &IntergerConstTerm{
+					Token: token.Token{Type: token.INTCONST, Literal: "4"},
+					Value: 4,
+				},
+			},
+			&SingleExpression{
+				Token: token.Token{Type: token.INTCONST, Literal: "4"},
+				Value: &IntergerConstTerm{
+					Token: token.Token{Type: token.INTCONST, Literal: "4"},
+					Value: 4,
+				},
+			},
+		},
+	}
+	subroutineCallTerm := &SubroutineCallTerm{
+		Token:              token.Token{Type: token.IDENTIFIER, Literal: "hoge"},
+		FunctionName:       "hoge",
+		ExpressionListStmt: *expressionListStatement,
+	}
+	t.Log(subroutineCallTerm.String())
+	t.Log(subroutineCallTerm.Xml())
+}

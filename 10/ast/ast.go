@@ -337,21 +337,28 @@ func (els *ExpressionListStatement) TokenLiteral() string { return els.Token.Lit
 func (els *ExpressionListStatement) String() string {
 	var out bytes.Buffer
 	if len(els.ExpressionList) == 0 {
-		return ""
+		return "()"
 	}
+	out.WriteString("(")
 	out.WriteString(els.ExpressionList[0].String())
 	for _, s := range els.ExpressionList[1:] {
 		out.WriteString(" ," + s.String())
 	}
+	out.WriteString(")")
 	return out.String()
 }
 
 func (els *ExpressionListStatement) Xml() string {
 	var out bytes.Buffer
+	// TODO: Fix from "(" to token.LPAWN. others as well
+	out.WriteString(symbolXml("("))
+	out.WriteString("<expressionList> ")
 	for _, s := range els.ExpressionList {
 		out.WriteString(s.Xml())
 		out.WriteString(symbolXml(","))
 	}
+	out.WriteString(" </expressionList>")
+	out.WriteString(symbolXml(")"))
 	return out.String()
 }
 
@@ -478,6 +485,32 @@ func (ict *KeywordConstTerm) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<term>")
 	out.WriteString(keywordXml(ict.String()))
+	out.WriteString("</term>")
+	return out.String()
+}
+
+type SubroutineCallTerm struct {
+	Token              token.Token // FunctionName
+	FunctionName       string
+	ExpressionListStmt ExpressionListStatement
+}
+
+func (sct *SubroutineCallTerm) termNode() {}
+
+func (sct *SubroutineCallTerm) TokenLiteral() string { return sct.Token.Literal }
+
+func (sct *SubroutineCallTerm) String() string {
+	var out bytes.Buffer
+	out.WriteString(sct.FunctionName)
+	out.WriteString(sct.ExpressionListStmt.String())
+	return out.String()
+}
+
+func (sct *SubroutineCallTerm) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<term>")
+	out.WriteString("<identifier> " + sct.FunctionName + " </identifier>")
+	out.WriteString(sct.ExpressionListStmt.Xml())
 	out.WriteString("</term>")
 	return out.String()
 }
