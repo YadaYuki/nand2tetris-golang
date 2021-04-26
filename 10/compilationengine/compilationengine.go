@@ -262,6 +262,21 @@ func (ce *CompilationEngine) parseBlockStatement() *ast.BlockStatement {
 	return block
 }
 
+func (ce *CompilationEngine) parseExpressionListStatement() *ast.ExpressionListStatement {
+	expressionListStmt := &ast.ExpressionListStatement{Token: ce.curToken}
+	ce.advanceToken()
+	expressionListStmt.ExpressionList = []ast.Expression{}
+	for token.Symbol(ce.curToken.Literal) != token.RPAREN && !ce.curTokenIs(token.EOF) {
+		expression := ce.parseExpression(LOWEST)
+		if expression != nil {
+			expressionListStmt.ExpressionList = append(expressionListStmt.ExpressionList, expression)
+		}
+		ce.advanceToken()
+		ce.advanceToken()
+	}
+	return expressionListStmt
+}
+
 func (ce *CompilationEngine) parseExpression(precedence int) ast.Expression {
 	prefix := ce.singleParseFns[ce.curToken.Type]
 	if prefix == nil {

@@ -325,6 +325,36 @@ func (bs *BlockStatement) Xml() string {
 	return out.String()
 }
 
+type ExpressionListStatement struct {
+	Token          token.Token // symbol,(
+	ExpressionList []Expression
+}
+
+func (els *ExpressionListStatement) statementNode() {}
+
+func (els *ExpressionListStatement) TokenLiteral() string { return els.Token.Literal }
+
+func (els *ExpressionListStatement) String() string {
+	var out bytes.Buffer
+	if len(els.ExpressionList) == 0 {
+		return ""
+	}
+	out.WriteString(els.ExpressionList[0].String())
+	for _, s := range els.ExpressionList[1:] {
+		out.WriteString(" ," + s.String())
+	}
+	return out.String()
+}
+
+func (els *ExpressionListStatement) Xml() string {
+	var out bytes.Buffer
+	for _, s := range els.ExpressionList {
+		out.WriteString(s.Xml())
+		out.WriteString(symbolXml(","))
+	}
+	return out.String()
+}
+
 type SingleExpression struct {
 	Token token.Token // 式の最初のトークン
 	Value Term

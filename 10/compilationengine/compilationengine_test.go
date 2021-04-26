@@ -337,5 +337,14 @@ func TestParseIfStatement(t *testing.T) {
 	if len(ifStmt.Consequence.Statements) != 3 {
 		t.Fatalf("len(ifStmt.Consequence)  is not 3,got = %d", len(ifStmt.Consequence.Statements))
 	}
-	t.Log(ifStmt.Xml())
+}
+
+func TestParseExpressionListStatement(t *testing.T) {
+	input := `(a,b,c,d,e,f)`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	expressionListStmt := ce.parseExpressionListStatement()
+	if len(expressionListStmt.ExpressionList) != 6 {
+		t.Fatalf("len(program.Statements) is not 1,got = %d", len(expressionListStmt.ExpressionList))
+	}
 }
