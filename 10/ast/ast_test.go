@@ -106,3 +106,67 @@ func TestClassVarDecString(t *testing.T) {
 	t.Log(classVarDecStatement.String())
 	t.Log(classVarDecStatement.Xml())
 }
+
+func TestSingleExpressionString(t *testing.T) {
+	SingleExpression := &SingleExpression{
+		Token: token.Token{Type: token.INTCONST, Literal: "4"},
+		Value: &IntergerConstTerm{
+			Token: token.Token{Type: token.INTCONST, Literal: "4"},
+			Value: 4,
+		},
+	}
+	t.Log(SingleExpression.String())
+	t.Log(SingleExpression.Xml())
+}
+
+func TestKeywordConstTermString(t *testing.T) {
+	SingleExpression := &SingleExpression{
+		Token: token.Token{Type: token.KEYWORD, Literal: "true"},
+		Value: &KeywordConstTerm{
+			Token:   token.Token{Type: token.KEYWORD, Literal: "true"},
+			KeyWord: token.TRUE,
+		},
+	}
+	t.Log(SingleExpression.String())
+	t.Log(SingleExpression.Xml())
+}
+
+func TestIfStatementString(t *testing.T) {
+	varDecStatement := &VarDecStatement{
+		Token:     token.Token{Type: token.KEYWORD, Literal: "var"},
+		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
+		Identifiers: []*Identifier{
+			&Identifier{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+			&Identifier{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+			&Identifier{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+		},
+	}
+
+	ifStatement := &IfStatement{
+		Token: token.Token{Type: token.KEYWORD, Literal: "if"},
+		Condition: &SingleExpression{
+			Token: token.Token{Type: token.INTCONST, Literal: "4"},
+			Value: &IntergerConstTerm{
+				Token: token.Token{Type: token.INTCONST, Literal: "4"},
+				Value: 4,
+			},
+		},
+		Consequence: &BlockStatement{
+			Token: token.Token{Type: token.SYMBOL, Literal: "{"},
+			Statements: []Statement{
+				varDecStatement,
+			},
+		},
+	}
+	t.Log(ifStatement.String())
+	t.Log(ifStatement.Xml())
+}

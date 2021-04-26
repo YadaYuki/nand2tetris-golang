@@ -8,6 +8,7 @@
     <identifier> test </identifier>
     <symbol> ; </symbol>
   </classVarDec>
+  
   <subroutineDec>
     <keyword> function </keyword>
     <keyword> void </keyword>
@@ -15,6 +16,7 @@
     <symbol> ( </symbol>
     <parameterList></parameterList>
     <symbol> ) </symbol>
+
     <subroutineBody>
       <symbol> { </symbol>
       <varDec>

@@ -259,100 +259,83 @@ func testClassVarDecStatement(t *testing.T, s ast.Statement, expectedValueType s
 	return true
 }
 
-// func TestIdentifierExpression(t *testing.T){
-// 	input := "foobar;"
-// 	jt := tokenizer.New(input)
-// 	ce := New(jt)
-// 	program := ce.ParseProgram()
-// 	if len(program.Statements) != 1{
-// 		t.Fatalf("program has not enough statements. got=%d",len(program.Statements))
-// 	}
-// 	stmt,ok := program.Statements[0].(*ast.ExpressionStatement)
-// 	if !ok{
-// 		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",program.Statements[0])
-// 	}
-// 	ident,ok := stmt.Expression.(*ast.Identifier)
-// 	if !ok{
-// 		t.Fatalf("exp not *ast.Identifier. got=%T",stmt.Expression)
-// 	}
-// 	if ident.Value != "foobar"{
-// 		t.Errorf("ident.Value not %s. got %s","foobar",ident.Value)
-// 	}
-// 	if ident.TokenLiteral() != "foobar"{
-// 		t.Errorf("ident.TokenLiteral() not %s. got %s","foobar",ident.TokenLiteral())
-// 	}
-// }
+func TestParseIntConstTermExpression(t *testing.T) {
+	input := `33`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	expression := ce.parseExpression(LOWEST)
+	singleExpression, ok := expression.(*ast.SingleExpression)
+	if !ok {
+		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
+	}
+	intergerConstTerm, ok := singleExpression.Value.(*ast.IntergerConstTerm)
+	if !ok {
+		t.Fatalf("intergerConstTerm is not ast.IntergerConstTerm,got = %T", intergerConstTerm)
+	}
+	if intergerConstTerm.Value != 33 {
+		t.Fatalf("intergerConstTerm.Value is not 1,got = %d", intergerConstTerm.Value)
+	}
+}
 
-// func TestIntConstExpression(t *testing.T){
-// 	input := "5;"
-// 	jt := tokenizer.New(input)
-// 	ce := New(jt)
-// 	program := ce.ParseProgram()
-// 	if len(program.Statements) != 1{
-// 		t.Fatalf("program has not enough statements. got=%d",len(program.Statements))
-// 	}
-// 	stmt,ok := program.Statements[0].(*ast.ExpressionStatement)
-// 	if !ok{
-// 		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",program.Statements[0])
-// 	}
-// 	ident,ok := stmt.Expression.(*ast.IntConst)
-// 	if !ok{
-// 		t.Fatalf("exp not *ast.IntConst. got=%T",stmt.Expression)
-// 	}
-// 	if ident.Value != 5{
-// 		t.Errorf("ident.Value not %d. got %d",5,ident.Value)
-// 	}
-// 	if ident.TokenLiteral() != "5"{
-// 		t.Errorf("ident.TokenLiteral() not %s. got %s","5",ident.TokenLiteral())
-// 	}
-// }
+func TestParseIdentifierTermExpression(t *testing.T) {
+	input := `hoge`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	expression := ce.parseExpression(LOWEST)
+	singleExpression, ok := expression.(*ast.SingleExpression)
+	if !ok {
+		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
+	}
+	identifierTerm, ok := singleExpression.Value.(*ast.IdentifierTerm)
+	if !ok {
+		t.Fatalf("identifierTerm is not ast.IdentifierTerm,got = %T", identifierTerm)
+	}
+	if identifierTerm.Value != "hoge" {
+		t.Fatalf("identifierTerm.Value is not hoge,got = %s", identifierTerm.Value)
+	}
+}
 
-// func TestPrefixExpression(t *testing.T){
-// 	prefixTestCases := []struct{
-// 		input string
-// 		operator string
-// 		integerValue int64
-// 	}{
-// 		{"!5;","!",5},
-// 		{"-15;","-",15},
-// 	}
-// 	for _,tt := range prefixTestCases {
-// 		jt := tokenizer.New(tt.input)
-// 		ce := New(jt)
-// 		program := ce.ParseProgram()
-// 		if len(program.Statements) != 1{
-// 			t.Fatalf("program has not enough statements. got=%d",len(program.Statements))
-// 		}
-// 		stmt,ok := program.Statements[0].(*ast.ExpressionStatement)
-// 		if !ok{
-// 			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",program.Statements[0])
-// 		}
-// 		exp,ok := stmt.Expression.(*ast.PrefixExpression)
-// 		if !ok{
-// 			t.Fatalf("exp not *ast.PrefixExpression. got=%T",stmt.Expression)
-// 		}
-// 		if exp.Operator != tt.operator{
-// 			t.Fatalf("exp.Operator not %s got %s",tt.operator,exp.Operator)
-// 		}
-// 		if !testIntegerLiteral(t,exp.Right,tt.integerValue){
-// 			return
-// 		}
-// 	}
-// }
+func TestParseStringConstTermExpression(t *testing.T) {
+	input := `"hoge"`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	expression := ce.parseExpression(LOWEST)
+	singleExpression, ok := expression.(*ast.SingleExpression)
+	if !ok {
+		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
+	}
+	stringConstTerm, ok := singleExpression.Value.(*ast.StringConstTerm)
+	if !ok {
+		t.Fatalf("stringConstTerm is not ast.StringConstTerm,got = %T", stringConstTerm)
+	}
+	if stringConstTerm.Value != "hoge" {
+		t.Fatalf("stringConstTerm.Value is not hoge,got = %s", stringConstTerm.Value)
+	}
+}
 
-// func testIntegerLiteral(t *testing.T,il ast.Expression,value int64)bool{
-// 	integ,ok := il.(*ast.IntConst)
-// 	if !ok {
-// 		t.Errorf("il not *ast.IntegerLiteral. got %T",il)
-// 		return false
-// 	}
-// 	if integ.Value != value{
-// 		t.Errorf("integ.Value not %d. got %d",value,integ.Value)
-// 		return false
-// 	}
-// 	if integ.TokenLiteral() != fmt.Sprintf("%d",value){
-// 		t.Errorf("integ.TokenLiteral not %d. got %s",value,integ.TokenLiteral())
-// 		return false
-// 	}
-// 	return true
-// }
+func TestParseIfStatement(t *testing.T) {
+	input := `
+	 if(x=1){
+		do x;
+		do 1;
+		do a;
+	 }else{
+		do x;
+		do 1;
+		do a;
+	 }`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	program := ce.ParseProgram()
+	if len(program.Statements) != 1 {
+		t.Fatalf("len(program.Statements) is not 1,got = %d", len(program.Statements))
+	}
+	ifStmt, ok := program.Statements[0].(*ast.IfStatement)
+	if !ok {
+		t.Fatalf("ifStmt is not ast.IfStatement,got = %T", ifStmt)
+	}
+	if len(ifStmt.Consequence.Statements) != 3 {
+		t.Fatalf("len(ifStmt.Consequence)  is not 3,got = %d", len(ifStmt.Consequence.Statements))
+	}
+	t.Log(ifStmt.Xml())
+}
