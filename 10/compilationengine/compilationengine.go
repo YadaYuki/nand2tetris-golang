@@ -340,6 +340,20 @@ func (ce *CompilationEngine) parseArrayElementExpression() ast.Expression {
 	return expression
 }
 
+func (ce *CompilationEngine) parsePrefixExpression() ast.Expression {
+	expression := &ast.SingleExpression{Token: ce.curToken}
+	prefixTerm := &ast.PrefixTerm{Token: ce.curToken, Prefix: token.Symbol(ce.curToken.Literal)}
+	ce.advanceToken()
+	prefixTerm.Value = ce.parseTerm()
+	expression.Value = prefixTerm
+	return expression
+}
+
+// TODO:Implement Term Dict
+func (ce *CompilationEngine) parseTerm() ast.Term {
+	return &ast.IntergerConstTerm{Token: token.Token{Type: token.INTCONST, Literal: "4"}, Value: 4}
+}
+
 func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
 	return ce.curToken.Type == t
 }

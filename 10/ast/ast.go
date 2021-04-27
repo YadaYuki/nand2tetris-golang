@@ -541,6 +541,24 @@ func (aet *ArrayElementTerm) Xml() string {
 	return "<term> " + out.String() + " </term>"
 }
 
+type PrefixTerm struct {
+	Token  token.Token  // "-","~"
+	Prefix token.Symbol // "-","~"
+	Value  Term
+}
+
+func (pt *PrefixTerm) termNode() {}
+
+func (pt *PrefixTerm) TokenLiteral() string { return pt.Token.Literal }
+
+func (pt *PrefixTerm) String() string {
+	return string(pt.Prefix) + pt.Value.String()
+}
+
+func (pt *PrefixTerm) Xml() string {
+	return "<term> " + symbolXml(string(pt.Prefix)) + pt.Value.Xml() + " </term>"
+}
+
 func keywordXml(keyword string) string       { return "<keyword> " + keyword + " </keyword>" }
 func symbolXml(symbol string) string         { return "<symbol> " + symbol + " </symbol>" }
 func identifierXml(identifier string) string { return "<identifier> " + identifier + " </identifier>" }

@@ -2,6 +2,7 @@ package compilationengine
 
 import (
 	"jack_compiler/ast"
+	"jack_compiler/token"
 	"jack_compiler/tokenizer"
 	"testing"
 	// "fmt"
@@ -383,4 +384,22 @@ func TestParseArrayElementExpression(t *testing.T) {
 	if arrayElementTerm.Idx.TokenLiteral() == "4" {
 		t.Fatalf("arrayElementTerm.Idx.TokenLiteral() is not `4`,got = %s", arrayElementTerm.Idx.TokenLiteral())
 	}
+}
+func TestParsePrefixExpression(t *testing.T) {
+	input := `-4`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	expression := ce.parsePrefixExpression()
+	singleExpression, ok := expression.(*ast.SingleExpression)
+	if !ok {
+		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
+	}
+	prefixTerm, ok := singleExpression.Value.(*ast.PrefixTerm)
+	if !ok {
+		t.Fatalf("prefixTerm is not ast.PrefixTerm,got = %T", prefixTerm)
+	}
+	if prefixTerm.Prefix != token.MINUS {
+		t.Fatalf("prefixTerm.Prefix is not token.MINUS,got = %s", prefixTerm.Prefix)
+	}
+	t.Log(expression.Xml())
 }
