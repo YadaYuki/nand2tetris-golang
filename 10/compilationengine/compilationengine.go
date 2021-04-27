@@ -324,6 +324,22 @@ func (ce *CompilationEngine) parseSubroutineCallExpression() ast.Expression {
 	return expression
 }
 
+func (ce *CompilationEngine) parseArrayElementExpression() ast.Expression {
+	expression := &ast.SingleExpression{Token: ce.curToken}
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.LBRACKET {
+		return nil
+	}
+	ce.advanceToken()
+	idx := ce.parseExpression(LOWEST)
+	expression.Value = &ast.ArrayElementTerm{Token: ce.curToken, ArrayName: ce.curToken.Literal, Idx: idx}
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.RBRACKET {
+		return nil
+	}
+	return expression
+}
+
 func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
 	return ce.curToken.Type == t
 }
