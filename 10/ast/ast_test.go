@@ -223,3 +223,19 @@ func TestSubroutineCallTermString(t *testing.T) {
 	t.Log(subroutineCallTerm.String())
 	t.Log(subroutineCallTerm.Xml())
 }
+
+func TestArrayElementTermString(t *testing.T) {
+	arrayElementTerm := &ArrayElementTerm{
+		Token:     token.Token{Type: token.IDENTIFIER, Literal: "hoge"},
+		ArrayName: "hoge",
+		Idx: &SingleExpression{
+			Token: token.Token{Type: token.INTCONST, Literal: "4"},
+			Value: &IntergerConstTerm{
+				Token: token.Token{Type: token.INTCONST, Literal: "4"},
+				Value: 4,
+			},
+		},
+	}
+	t.Log(arrayElementTerm.String())
+	t.Log(arrayElementTerm.Xml())
+}

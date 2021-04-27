@@ -366,3 +366,21 @@ func TestParseSubroutineCallExpression(t *testing.T) {
 		t.Fatalf("len(subroutineCallTerm.ExpressionListStmt.ExpressionList) is not 6,got = %d", len(subroutineCallTerm.ExpressionListStmt.ExpressionList))
 	}
 }
+
+func TestParseArrayElementExpression(t *testing.T) {
+	input := `hoge[a]`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	expression := ce.parseArrayElementExpression()
+	singleExpression, ok := expression.(*ast.SingleExpression)
+	if !ok {
+		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
+	}
+	arrayElementTerm, ok := singleExpression.Value.(*ast.ArrayElementTerm)
+	if !ok {
+		t.Fatalf("arrayElementTerm is not ast.ArrayElementTerm,got = %T", arrayElementTerm)
+	}
+	if arrayElementTerm.Idx.TokenLiteral() == "4" {
+		t.Fatalf("arrayElementTerm.Idx.TokenLiteral() is not `4`,got = %s", arrayElementTerm.Idx.TokenLiteral())
+	}
+}

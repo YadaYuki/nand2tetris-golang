@@ -67,6 +67,8 @@ const (
 	LBRACE    Symbol = "{"
 	COMMA     Symbol = ","
 	SEMICOLON Symbol = ";"
+	LBRACKET  Symbol = "["
+	RBRACKET  Symbol = "]"
 )
 
 var KeyWordMap = map[string]KeyWord{
