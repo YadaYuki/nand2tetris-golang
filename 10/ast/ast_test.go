@@ -239,3 +239,16 @@ func TestArrayElementTermString(t *testing.T) {
 	t.Log(arrayElementTerm.String())
 	t.Log(arrayElementTerm.Xml())
 }
+
+func TestPrefixTermString(t *testing.T) {
+	prefixTerm := &PrefixTerm{
+		Token:  token.Token{Type: token.SYMBOL, Literal: "-"},
+		Prefix: token.MINUS,
+		Value: &IntergerConstTerm{
+			Token: token.Token{Type: token.INTCONST, Literal: "4"},
+			Value: 4,
+		},
+	}
+	t.Log(prefixTerm.String())
+	t.Log(prefixTerm.Xml())
+}
