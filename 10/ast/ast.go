@@ -515,6 +515,32 @@ func (sct *SubroutineCallTerm) Xml() string {
 	return out.String()
 }
 
+type ArrayElementTerm struct {
+	Token     token.Token // Identifier
+	ArrayName string
+	Idx       Expression
+}
+
+func (aet *ArrayElementTerm) termNode() {}
+
+func (aet *ArrayElementTerm) TokenLiteral() string { return aet.Token.Literal }
+
+func (aet *ArrayElementTerm) String() string {
+	var out bytes.Buffer
+	out.WriteString(aet.ArrayName)
+	out.WriteString("[" + aet.Idx.String() + "]")
+	return out.String()
+}
+
+func (aet *ArrayElementTerm) Xml() string {
+	var out bytes.Buffer
+	out.WriteString(identifierXml(aet.ArrayName))
+	out.WriteString(symbolXml("["))
+	out.WriteString(aet.Idx.Xml())
+	out.WriteString(symbolXml("]"))
+	return "<term> " + out.String() + " </term>"
+}
+
 func keywordXml(keyword string) string       { return "<keyword> " + keyword + " </keyword>" }
 func symbolXml(symbol string) string         { return "<symbol> " + symbol + " </symbol>" }
 func identifierXml(identifier string) string { return "<identifier> " + identifier + " </identifier>" }
