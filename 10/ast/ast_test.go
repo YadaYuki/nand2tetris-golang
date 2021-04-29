@@ -252,3 +252,18 @@ func TestPrefixTermString(t *testing.T) {
 	t.Log(prefixTerm.String())
 	t.Log(prefixTerm.Xml())
 }
+
+func TestBracketTermString(t *testing.T) {
+	bracketTerm := &BracketTerm{
+		Token: token.Token{Type: token.SYMBOL, Literal: "("},
+		Value: &SingleExpression{
+			Token: token.Token{Type: token.INTCONST, Literal: "4"},
+			Value: &IntergerConstTerm{
+				Token: token.Token{Type: token.INTCONST, Literal: "4"},
+				Value: 4,
+			},
+		},
+	}
+	t.Log(bracketTerm.String())
+	t.Log(bracketTerm.Xml())
+}

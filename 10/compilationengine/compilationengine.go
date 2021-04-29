@@ -349,6 +349,20 @@ func (ce *CompilationEngine) parsePrefixExpression() ast.Expression {
 	return expression
 }
 
+func (ce *CompilationEngine) parseBracketExpression() ast.Expression {
+	expression := &ast.SingleExpression{Token: ce.curToken}
+	bracketTerm := &ast.BracketTerm{Token: ce.curToken}
+	ce.advanceToken()
+	exp := ce.parseExpression(LOWEST)
+	bracketTerm.Value = exp
+	expression.Value = bracketTerm
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
+		return nil
+	}
+	return expression
+}
+
 // TODO:Implement Term Dict
 func (ce *CompilationEngine) parseTerm() ast.Term {
 	return &ast.IntergerConstTerm{Token: token.Token{Type: token.INTCONST, Literal: "4"}, Value: 4}
