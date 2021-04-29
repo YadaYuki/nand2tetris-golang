@@ -559,6 +559,23 @@ func (pt *PrefixTerm) Xml() string {
 	return "<term> " + symbolXml(string(pt.Prefix)) + pt.Value.Xml() + " </term>"
 }
 
+type BracketTerm struct {
+	Token token.Token // "("
+	Value Expression
+}
+
+func (bt *BracketTerm) termNode() {}
+
+func (bt *BracketTerm) TokenLiteral() string { return bt.Token.Literal }
+
+func (bt *BracketTerm) String() string {
+	return "(" + bt.Value.String() + ")"
+}
+
+func (bt *BracketTerm) Xml() string {
+	return "<term> " + symbolXml("(") + bt.Value.Xml() + symbolXml("(") + " </term>"
+}
+
 func keywordXml(keyword string) string       { return "<keyword> " + keyword + " </keyword>" }
 func symbolXml(symbol string) string         { return "<symbol> " + symbol + " </symbol>" }
 func identifierXml(identifier string) string { return "<identifier> " + identifier + " </identifier>" }
