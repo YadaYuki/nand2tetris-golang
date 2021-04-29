@@ -131,6 +131,10 @@ func (i *IntConst) String() string {
 	return i.Token.Literal
 }
 
+func (i *IntConst) Xml() string {
+	return "<integerConstant> " + string(i.Value) + " </integerConstant>"
+}
+
 // ReturnStatement is Ast of "return"
 type ReturnStatement struct {
 	Token token.Token // KEYWORD
@@ -573,7 +577,7 @@ func (bt *BracketTerm) String() string {
 }
 
 func (bt *BracketTerm) Xml() string {
-	return "<term> " + symbolXml("(") + bt.Value.Xml() + symbolXml("(") + " </term>"
+	return "<term> " + symbolXml("(") + bt.Value.Xml() + symbolXml(")") + " </term>"
 }
 
 func keywordXml(keyword string) string       { return "<keyword> " + keyword + " </keyword>" }

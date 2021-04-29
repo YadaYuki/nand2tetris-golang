@@ -403,3 +403,31 @@ func TestParsePrefixExpression(t *testing.T) {
 	}
 	t.Log(expression.Xml())
 }
+
+func TestParseBracketExpression(t *testing.T) {
+	input := `(4)`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	expression := ce.parseBracketExpression()
+	singleExpression, ok := expression.(*ast.SingleExpression)
+	if !ok {
+		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
+	}
+	bracketTerm, ok := singleExpression.Value.(*ast.BracketTerm)
+	if !ok {
+		t.Fatalf("bracketTerm is not ast.BracketTerm,got = %T", bracketTerm)
+	}
+	// t.Log(bracketTerm.Value.TokenLiteral())
+	value, ok := bracketTerm.Value.(*ast.SingleExpression)
+	if !ok {
+		t.Fatalf("bracketTerm.Value is not ast.*ast.SingleExpression,got = %T", bracketTerm.Value)
+	}
+	intergerConstTerm, ok := value.Value.(*ast.IntergerConstTerm)
+	if !ok {
+		t.Fatalf("intergerConstTerm.Value is not ast.*ast.IntergerConstTerm,got = %T", bracketTerm.Value)
+	}
+	if intergerConstTerm.Value != 4 {
+		t.Fatalf("value.Value is not 4,got = %d", value.Value)
+	}
+	t.Log(expression.Xml())
+}
