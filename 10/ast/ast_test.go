@@ -66,15 +66,15 @@ func TestVarDecString(t *testing.T) {
 		Token:     token.Token{Type: token.KEYWORD, Literal: "var"},
 		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
 		Identifiers: []*Identifier{
-			&Identifier{
+			{
 				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
 				Value: "hogehgoe",
 			},
-			&Identifier{
+			{
 				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
 				Value: "hogehgoe",
 			},
-			&Identifier{
+			{
 				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
 				Value: "hogehgoe",
 			},
@@ -89,15 +89,15 @@ func TestClassVarDecString(t *testing.T) {
 		Token:     token.Token{Type: token.KEYWORD, Literal: "static"},
 		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
 		Identifiers: []*Identifier{
-			&Identifier{
+			{
 				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
 				Value: "hogehgoe",
 			},
-			&Identifier{
+			{
 				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
 				Value: "hogehgoe",
 			},
-			&Identifier{
+			{
 				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
 				Value: "hogehgoe",
 			},
@@ -136,15 +136,15 @@ func TestIfStatementString(t *testing.T) {
 		Token:     token.Token{Type: token.KEYWORD, Literal: "var"},
 		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
 		Identifiers: []*Identifier{
-			&Identifier{
+			{
 				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
 				Value: "hogehgoe",
 			},
-			&Identifier{
+			{
 				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
 				Value: "hogehgoe",
 			},
-			&Identifier{
+			{
 				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
 				Value: "hogehgoe",
 			},
