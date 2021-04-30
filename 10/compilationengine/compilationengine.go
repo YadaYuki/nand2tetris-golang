@@ -250,8 +250,8 @@ func (ce *CompilationEngine) parseIfStatement() *ast.IfStatement {
 	return stmt
 }
 
-func (ce *CompilationEngine) parseWhileStatement() *ast.Statement {
-	stmt := &ast.IfStatement{Token: ce.curToken}
+func (ce *CompilationEngine) parseWhileStatement() *ast.WhileStatement {
+	stmt := &ast.WhileStatement{Token: ce.curToken}
 	if ce.expectNext(token.SYMBOL) {
 		if token.Symbol(ce.curToken.Literal) != token.LPAREN {
 			return nil
@@ -263,15 +263,8 @@ func (ce *CompilationEngine) parseWhileStatement() *ast.Statement {
 	}
 
 	ce.advanceToken()
-	stmt.Consequence = ce.parseBlockStatement()
+	stmt.Statements = ce.parseBlockStatement()
 	ce.advanceToken()
-	if token.KeyWord(ce.curToken.Literal) == token.ELSE {
-		ce.advanceToken()
-		if ce.expectNext(token.SYMBOL) {
-			return nil
-		}
-		stmt.Alternative = ce.parseBlockStatement()
-	}
 	return stmt
 }
 
@@ -302,6 +295,40 @@ func (ce *CompilationEngine) parseExpressionListStatement() *ast.ExpressionListS
 		ce.advanceToken()
 	}
 	return expressionListStmt
+}
+
+func (ce *CompilationEngine) parseParameterListStatement() *ast.ParameterListStatement {
+	parameterListStmt := &ast.ParameterListStatement{Token: ce.curToken}
+	ce.advanceToken()
+	parameterListStmt.ParameterList = []ast.ParameterStatement{}
+	for token.Symbol(ce.curToken.Literal) != token.RPAREN {
+		parameterStmt := ce.parseParameterStatement()
+		if parameterStmt == nil {
+
+			return nil
+		}
+		parameterListStmt.ParameterList = append(parameterListStmt.ParameterList, *parameterStmt)
+		ce.advanceToken()
+		if token.Symbol(ce.curToken.Literal) == token.RPAREN {
+			break
+		}
+		ce.advanceToken()
+	}
+	return parameterListStmt
+}
+
+func (ce *CompilationEngine) parseParameterStatement() *ast.ParameterStatement {
+	parameterStmt := &ast.ParameterStatement{Token: ce.curToken}
+	if ce.curToken.Type != token.KEYWORD {
+		return nil
+	}
+	parameterStmt.Type = token.KeyWord(ce.curToken.Literal)
+	ce.advanceToken()
+	if ce.curToken.Type != token.IDENTIFIER {
+		return nil
+	}
+	parameterStmt.Name = ce.curToken.Literal
+	return parameterStmt
 }
 
 func (ce *CompilationEngine) parseExpression(precedence int) ast.Expression {

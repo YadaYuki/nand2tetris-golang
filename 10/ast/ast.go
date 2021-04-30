@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"jack_compiler/token"
 	"strconv"
+	"strings"
 )
 
 // Node is Node of AST
@@ -100,7 +101,7 @@ func (ls *LetStatement) Xml() string {
 	return out.String()
 }
 
-// // Identifier is variable identifier type
+// Identifier is variable identifier type
 type Identifier struct {
 	Token token.Token
 	Value string
@@ -132,7 +133,7 @@ func (i *IntConst) String() string {
 }
 
 func (i *IntConst) Xml() string {
-	return "<integerConstant> " + string(i.Value) + " </integerConstant>"
+	return "<integerConstant> " + strconv.FormatInt(i.Value, 10) + " </integerConstant>"
 }
 
 // ReturnStatement is Ast of "return"
@@ -141,7 +142,7 @@ type ReturnStatement struct {
 	Value Expression
 }
 
-func (rs *ReturnStatement) statementNode() {}
+func (ds *ReturnStatement) statementNode() {}
 
 func (rs *ReturnStatement) TokenLiteral() string { return rs.Token.Literal }
 
@@ -159,10 +160,11 @@ func (rs *ReturnStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<returnStatement>")
 	out.WriteString(keywordXml(rs.TokenLiteral()))
-	if rs.Value != nil {
-		// TODO:implement expression Xml
-		// out.WriteString(rs.Value.String())
-	}
+	// if rs.Value != nil {
+	// 	// TODO:implement expression Xml
+	// 	// out.WriteString(rs.Value.String())
+	// 	return
+	// }
 	out.WriteString("</returnStatement>")
 	return out.String()
 }
@@ -390,6 +392,63 @@ func (els *ExpressionListStatement) Xml() string {
 	}
 	out.WriteString(" </expressionList>")
 	out.WriteString(symbolXml(")"))
+	return out.String()
+}
+
+type ParameterListStatement struct {
+	Token         token.Token // symbol,(
+	ParameterList []ParameterStatement
+}
+
+func (pls *ParameterListStatement) statementNode() {}
+
+func (pls *ParameterListStatement) TokenLiteral() string { return pls.Token.Literal }
+
+func (pls *ParameterListStatement) String() string {
+	if len(pls.ParameterList) == 0 {
+		return "()"
+	}
+	parameterList := []string{}
+	for _, s := range pls.ParameterList {
+		parameterList = append(parameterList, s.String())
+	}
+
+	return "( " + strings.Join(parameterList, ",") + " )"
+}
+
+func (pls *ParameterListStatement) Xml() string {
+	var out bytes.Buffer
+	// TODO: Fix from "(" to token.LPAWN. others as well
+	out.WriteString(symbolXml("("))
+	out.WriteString("<expressionList> ")
+	parameterListXml := []string{}
+	for _, s := range pls.ParameterList {
+		parameterListXml = append(parameterListXml, s.Xml()+symbolXml(","))
+	}
+	out.WriteString(strings.Join(parameterListXml, ""))
+	out.WriteString(" </expressionList>")
+	out.WriteString(symbolXml(")"))
+	return out.String()
+}
+
+type ParameterStatement struct {
+	Token token.Token // 式の最初のトークン
+	Type  token.KeyWord
+	Name  string
+}
+
+func (ps *ParameterStatement) statementNode() {}
+
+func (ps *ParameterStatement) TokenLiteral() string { return ps.Token.Literal }
+
+func (ps *ParameterStatement) String() string {
+	var out bytes.Buffer
+	return out.String()
+}
+
+func (ps *ParameterStatement) Xml() string {
+	var out bytes.Buffer
+	// TODO: Fix from "(" to token.LPAWN. others as well
 	return out.String()
 }
 

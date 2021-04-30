@@ -340,6 +340,29 @@ func TestParseIfStatement(t *testing.T) {
 	}
 }
 
+func TestParseWhileStatement(t *testing.T) {
+	input := `
+	 while(x=1){
+		do x;
+		do 1;
+		do a;
+	 }`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	program := ce.ParseProgram()
+	if len(program.Statements) != 1 {
+		t.Fatalf("len(program.Statements) is not 1,got = %d", len(program.Statements))
+	}
+	whileStmt, ok := program.Statements[0].(*ast.WhileStatement)
+	if !ok {
+		t.Fatalf("whileStmt is not ast.WhileStatement,got = %T", whileStmt)
+	}
+	if len(whileStmt.Statements.Statements) != 3 {
+		t.Fatalf("len(whileStmt.Statements.Statements)  is not 3,got = %d", len(whileStmt.Statements.Statements))
+	}
+	// t.Log(whileStmt.Xml())
+}
+
 func TestParseExpressionListStatement(t *testing.T) {
 	input := `(a,b,c,d,e,f)`
 	jt := tokenizer.New(input)
@@ -430,4 +453,43 @@ func TestParseBracketExpression(t *testing.T) {
 		t.Fatalf("value.Value is not 4,got = %d", value.Value)
 	}
 	t.Log(expression.Xml())
+}
+
+func TestParseParameterStatement(t *testing.T) {
+	input := `int hoge`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	stmt := ce.parseParameterStatement()
+	if stmt.Name != "hoge" {
+		t.Fatalf("stmt.Name is not hoge,got = %s", stmt.Name)
+	}
+	if stmt.Type != token.INT {
+		t.Fatalf("stmt.Type is not token.INT,got = %s", stmt.Type)
+	}
+}
+
+func TestParseParameterListStatement(t *testing.T) {
+	input := `(int hoge,char fuga,boolean pepe)`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	stmt := ce.parseParameterListStatement()
+	if len(stmt.ParameterList) != 3 {
+		t.Fatalf("len(stmt.ParameterList) is not 3 ,got = %d", len(stmt.ParameterList))
+	}
+	testCases := []struct {
+		expectedType       token.KeyWord
+		expectedIdentifier string
+	}{
+		{token.INT, "hoge"},
+		{token.CHAR, "fuga"},
+		{token.BOOLEAN, "pepe"},
+	}
+	for idx, testCase := range testCases {
+		if stmt.ParameterList[idx].Name != testCase.expectedIdentifier {
+			t.Fatalf("stmt.ParameterList[%d].Name is not %s,got %s", idx, testCase.expectedIdentifier, stmt.ParameterList[idx].Name)
+		}
+		if stmt.ParameterList[idx].Type != testCase.expectedType {
+			t.Fatalf("stmt.ParameterList[%d].Type is not %s,got %s", idx, testCase.expectedType, stmt.ParameterList[idx].Type)
+		}
+	}
 }
