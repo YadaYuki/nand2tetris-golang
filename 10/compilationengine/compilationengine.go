@@ -137,6 +137,8 @@ func (ce *CompilationEngine) parseKeyWord() ast.Statement {
 		return ce.parseClassVarDecStatement()
 	case token.IF:
 		return ce.parseIfStatement()
+	case token.WHILE:
+		return ce.parseWhileStatement()
 	default:
 		return nil
 	}
@@ -224,6 +226,31 @@ func (ce *CompilationEngine) parseClassVarDecStatement() *ast.ClassVarDecStateme
 }
 
 func (ce *CompilationEngine) parseIfStatement() *ast.IfStatement {
+	stmt := &ast.IfStatement{Token: ce.curToken}
+	if ce.expectNext(token.SYMBOL) {
+		if token.Symbol(ce.curToken.Literal) != token.LPAREN {
+			return nil
+		}
+	}
+	// TODO:Add parseExpression
+	for token.Symbol(ce.curToken.Literal) != token.RPAREN {
+		ce.advanceToken()
+	}
+
+	ce.advanceToken()
+	stmt.Consequence = ce.parseBlockStatement()
+	ce.advanceToken()
+	if token.KeyWord(ce.curToken.Literal) == token.ELSE {
+		ce.advanceToken()
+		if ce.expectNext(token.SYMBOL) {
+			return nil
+		}
+		stmt.Alternative = ce.parseBlockStatement()
+	}
+	return stmt
+}
+
+func (ce *CompilationEngine) parseWhileStatement() *ast.Statement {
 	stmt := &ast.IfStatement{Token: ce.curToken}
 	if ce.expectNext(token.SYMBOL) {
 		if token.Symbol(ce.curToken.Literal) != token.LPAREN {

@@ -100,7 +100,7 @@ func (ls *LetStatement) Xml() string {
 	return out.String()
 }
 
-// Identifier is variable identifier type
+// // Identifier is variable identifier type
 type Identifier struct {
 	Token token.Token
 	Value string
@@ -297,6 +297,33 @@ func (ifs *IfStatement) Xml() string {
 		out.WriteString(keywordXml("else"))
 		out.WriteString(ifs.Alternative.Xml())
 	}
+	return out.String()
+}
+
+type WhileStatement struct {
+	Token      token.Token
+	Condition  Expression
+	Statements *BlockStatement
+}
+
+func (ws *WhileStatement) statementNode() {}
+
+func (ws *WhileStatement) TokenLiteral() string { return ws.Token.Literal }
+
+func (ws *WhileStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("while")
+	out.WriteString(ws.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ws.Statements.String())
+	return out.String()
+}
+
+func (ws *WhileStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString(keywordXml("while"))
+	out.WriteString(ws.Condition.Xml())
+	out.WriteString(ws.Statements.Xml())
 	return out.String()
 }
 
