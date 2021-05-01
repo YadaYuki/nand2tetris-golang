@@ -64,9 +64,9 @@ func (ce *CompilationEngine) registerSingle(tokenType token.TokenType, fn single
 	ce.singleParseFns[tokenType] = fn
 }
 
-func (ce *CompilationEngine) registerInfix(tokenType token.TokenType, fn infixParseFn) {
-	ce.infixParseFns[tokenType] = fn
-}
+// func (ce *CompilationEngine) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+// 	ce.infixParseFns[tokenType] = fn
+// }
 
 // New is initializer of compilation engine
 func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
@@ -139,9 +139,29 @@ func (ce *CompilationEngine) parseKeyWord() ast.Statement {
 		return ce.parseIfStatement()
 	case token.WHILE:
 		return ce.parseWhileStatement()
+	case token.CLASS:
+		return ce.parseClassStatement()
 	default:
 		return nil
 	}
+}
+
+func (ce *CompilationEngine) parseClassStatement() *ast.ClassStatement {
+	stmt := &ast.ClassStatement{Token: ce.curToken}
+	if !ce.expectNext(token.IDENTIFIER) {
+		return nil
+	}
+	stmt.Name = ce.curToken.Literal
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.LBRACE {
+		return nil
+	}
+	stmt.Statements = ce.parseBlockStatement()
+	if token.Symbol(ce.curToken.Literal) != token.RBRACE {
+		return nil
+	}
+	ce.advanceToken()
+	return stmt
 }
 
 // TODO:Add Error Handling
@@ -304,7 +324,6 @@ func (ce *CompilationEngine) parseParameterListStatement() *ast.ParameterListSta
 	for token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		parameterStmt := ce.parseParameterStatement()
 		if parameterStmt == nil {
-
 			return nil
 		}
 		parameterListStmt.ParameterList = append(parameterListStmt.ParameterList, *parameterStmt)
