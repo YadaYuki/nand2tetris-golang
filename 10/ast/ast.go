@@ -62,6 +62,34 @@ func (p *Program) Xml() string {
 	return out.String()
 }
 
+type ClassStatement struct {
+	Token      token.Token // KEYWORD:"class"
+	Name       string
+	Statements *BlockStatement
+}
+
+func (cs *ClassStatement) statementNode() {}
+
+func (cs *ClassStatement) TokenLiteral() string { return cs.Token.Literal }
+
+func (cs *ClassStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(cs.TokenLiteral() + " ")
+	out.WriteString(cs.Name)
+	out.WriteString(cs.Statements.String())
+	return out.String()
+}
+
+func (cs *ClassStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<class> ")
+	out.WriteString(keywordXml(cs.TokenLiteral()))
+	out.WriteString(identifierXml(cs.Name))
+	out.WriteString(cs.Statements.Xml())
+	out.WriteString(" </class>")
+	return out.String()
+}
+
 // LetStatement is Ast of "let"
 type LetStatement struct {
 	// TODO:Add array element []
@@ -160,11 +188,11 @@ func (rs *ReturnStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<returnStatement>")
 	out.WriteString(keywordXml(rs.TokenLiteral()))
-	// if rs.Value != nil {
-	// 	// TODO:implement expression Xml
-	// 	// out.WriteString(rs.Value.String())
-	// 	return
-	// }
+	if rs.Value != nil {
+		// TODO:implement expression Xml
+		out.WriteString(rs.Value.Xml())
+		// return ""
+	}
 	out.WriteString("</returnStatement>")
 	return out.String()
 }

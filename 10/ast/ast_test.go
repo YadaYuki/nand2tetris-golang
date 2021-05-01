@@ -267,3 +267,37 @@ func TestBracketTermString(t *testing.T) {
 	t.Log(bracketTerm.String())
 	t.Log(bracketTerm.Xml())
 }
+
+func TestClassStatementString(t *testing.T) {
+	varDecStatement := &VarDecStatement{
+		Token:     token.Token{Type: token.KEYWORD, Literal: "var"},
+		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
+		Identifiers: []*Identifier{
+			{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+			{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+			{
+				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
+				Value: "hogehgoe",
+			},
+		},
+	}
+
+	classStatement := &ClassStatement{
+		Token: token.Token{Type: token.KEYWORD, Literal: "class"},
+		Name:  "hoge",
+		Statements: &BlockStatement{
+			Token: token.Token{Type: token.SYMBOL, Literal: "{"},
+			Statements: []Statement{
+				varDecStatement,
+			},
+		},
+	}
+	t.Log(classStatement.String())
+	t.Log(classStatement.Xml())
+}

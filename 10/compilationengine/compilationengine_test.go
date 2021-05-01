@@ -493,3 +493,25 @@ func TestParseParameterListStatement(t *testing.T) {
 		}
 	}
 }
+
+func TestParseClassStatement(t *testing.T) {
+	input := `class hoge {
+		let x=5;
+		let y=10;
+		let hoge=111;
+		let foo=838383;
+		let bar="hogehoge";
+	}`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	stmt := ce.parseClassStatement()
+	if stmt.Name != "hoge" {
+		t.Fatalf("stmt.Name  is not hoge ,got = %s", stmt.Name)
+	}
+	if token.KeyWord(stmt.Token.Literal) != token.CLASS {
+		t.Fatalf("token.KeyWord(stmt.Token.Literal)  is not token.CLASS ,got = %s", token.KeyWord(stmt.Token.Literal))
+	}
+	if len(stmt.Statements.Statements) != 5 {
+		t.Fatalf("len(stmt.Statements.Statements) is not 5 ,got = %d", len(stmt.Statements.Statements))
+	}
+}
