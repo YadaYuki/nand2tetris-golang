@@ -9,8 +9,7 @@ import (
 )
 
 func TestLetStatements(t *testing.T) {
-	input := `
-		let x=5;
+	input := `let x=5;
 		let y=10;
 		let hoge=111;
 		let foo=838383;
@@ -513,5 +512,34 @@ func TestParseClassStatement(t *testing.T) {
 	}
 	if len(stmt.Statements.Statements) != 5 {
 		t.Fatalf("len(stmt.Statements.Statements) is not 5 ,got = %d", len(stmt.Statements.Statements))
+	}
+}
+
+func TestParseSubroutineDecStatement(t *testing.T) {
+	input := `method void fuga (int hoge,boolean fuga){
+		let x=5;
+		let y=10;
+		let hoge=111;
+		let foo=838383;
+		let bar="hogehoge";
+	}`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	stmt := ce.ParseProgram()
+	if len(stmt.Statements) != 1 {
+		t.Fatalf("len(stmt.Statements)  is not hoge ,got = %d", len(stmt.Statements))
+	}
+	subroutineDecStmt, ok := stmt.Statements[0].(*ast.SubroutineDecStatement)
+	if !ok {
+		t.Fatalf("stmt.Statements[0]  is not SubroutineDecStatement ,got = %T", stmt.Statements[0])
+	}
+	if token.KeyWord(subroutineDecStmt.ReturnType.Literal) != token.VOID {
+		t.Fatalf("subroutineDecStmt.ReturnType.Literal  is not void ,got = %s", subroutineDecStmt.ReturnType.Literal)
+	}
+	if len(subroutineDecStmt.ParameterList.ParameterList) != 2 {
+		t.Fatalf("len(subroutineDecStmt.ParameterList.ParameterList)  is not 2 ,got = %d", len(subroutineDecStmt.ParameterList.ParameterList))
+	}
+	if len(subroutineDecStmt.Statements.Statements) != 5 {
+		t.Fatalf("len(subroutineDecStmt.Statements.Statements)  is not 5 ,got = %d", len(subroutineDecStmt.Statements.Statements))
 	}
 }

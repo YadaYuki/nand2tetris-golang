@@ -141,6 +141,12 @@ func (ce *CompilationEngine) parseKeyWord() ast.Statement {
 		return ce.parseWhileStatement()
 	case token.CLASS:
 		return ce.parseClassStatement()
+	case token.METHOD:
+		return ce.parseSubroutineDecStatement()
+	case token.CONSTRUCTOR:
+		return ce.parseSubroutineDecStatement()
+	case token.FUNCTION:
+		return ce.parseSubroutineDecStatement()
 	default:
 		return nil
 	}
@@ -161,6 +167,31 @@ func (ce *CompilationEngine) parseClassStatement() *ast.ClassStatement {
 		return nil
 	}
 	ce.advanceToken()
+	return stmt
+}
+
+func (ce *CompilationEngine) parseSubroutineDecStatement() *ast.SubroutineDecStatement {
+	stmt := &ast.SubroutineDecStatement{Token: ce.curToken}
+	if !ce.nextTokenIs(token.IDENTIFIER) && !ce.nextTokenIs(token.KEYWORD) {
+		return nil
+	}
+	ce.advanceToken()
+	stmt.ReturnType = ce.curToken
+	if !ce.expectNext(token.IDENTIFIER) {
+		return nil
+	}
+	stmt.Name = ce.curToken
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
+		return nil
+	}
+	fmt.Println(ce.curToken)
+	stmt.ParameterList = ce.parseParameterListStatement()
+	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
+		return nil
+	}
+	ce.advanceToken()
+	stmt.Statements = ce.parseBlockStatement()
 	return stmt
 }
 
