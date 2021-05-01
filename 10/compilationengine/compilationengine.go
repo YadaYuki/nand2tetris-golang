@@ -151,7 +151,7 @@ func (ce *CompilationEngine) parseClassStatement() *ast.ClassStatement {
 	if !ce.expectNext(token.IDENTIFIER) {
 		return nil
 	}
-	stmt.Name = ce.curToken.Literal
+	stmt.Name = ce.curToken
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.LBRACE {
 		return nil

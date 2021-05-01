@@ -290,7 +290,7 @@ func TestClassStatementString(t *testing.T) {
 
 	classStatement := &ClassStatement{
 		Token: token.Token{Type: token.KEYWORD, Literal: "class"},
-		Name:  "hoge",
+		Name:  token.Token{Type: token.IDENTIFIER, Literal: "hoge"},
 		Statements: &BlockStatement{
 			Token: token.Token{Type: token.SYMBOL, Literal: "{"},
 			Statements: []Statement{

@@ -505,7 +505,7 @@ func TestParseClassStatement(t *testing.T) {
 	jt := tokenizer.New(input)
 	ce := New(jt)
 	stmt := ce.parseClassStatement()
-	if stmt.Name != "hoge" {
+	if stmt.Name.Literal != "hoge" {
 		t.Fatalf("stmt.Name  is not hoge ,got = %s", stmt.Name)
 	}
 	if token.KeyWord(stmt.Token.Literal) != token.CLASS {

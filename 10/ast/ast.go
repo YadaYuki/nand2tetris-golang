@@ -64,7 +64,7 @@ func (p *Program) Xml() string {
 
 type ClassStatement struct {
 	Token      token.Token // KEYWORD:"class"
-	Name       string
+	Name       token.Token
 	Statements *BlockStatement
 }
 
@@ -75,7 +75,7 @@ func (cs *ClassStatement) TokenLiteral() string { return cs.Token.Literal }
 func (cs *ClassStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(cs.TokenLiteral() + " ")
-	out.WriteString(cs.Name)
+	out.WriteString(cs.Name.Literal)
 	out.WriteString(cs.Statements.String())
 	return out.String()
 }
@@ -84,15 +84,50 @@ func (cs *ClassStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<class> ")
 	out.WriteString(keywordXml(cs.TokenLiteral()))
-	out.WriteString(identifierXml(cs.Name))
+	out.WriteString(identifierXml(cs.Name.Literal))
 	out.WriteString(cs.Statements.Xml())
 	out.WriteString(" </class>")
 	return out.String()
 }
 
+type SubroutineDecStatement struct {
+	Token         token.Token // KEYWORD:"class"
+	ReturnType    token.Token // KEYWORD:"void" or IDENTIFIER
+	Name          token.Token // IDENTIFIER
+	ParameterList *ParameterListStatement
+	Statements    *BlockStatement
+}
+
+func (sds *SubroutineDecStatement) statementNode() {}
+
+func (sds *SubroutineDecStatement) TokenLiteral() string { return sds.Token.Literal }
+
+func (sds *SubroutineDecStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(sds.TokenLiteral() + " ")
+	out.WriteString(sds.ReturnType.Literal + " ")
+	out.WriteString(sds.ParameterList.String())
+	out.WriteString(sds.Statements.String())
+	return out.String()
+}
+
+func (sds *SubroutineDecStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<subroutineDec> ")
+	if sds.ReturnType.Type == token.IDENTIFIER {
+		out.WriteString(identifierXml(sds.ReturnType.Literal))
+	} else if sds.ReturnType.Type == token.KEYWORD {
+		out.WriteString(keywordXml(sds.ReturnType.Literal))
+	}
+	out.WriteString(identifierXml(sds.Name.Literal))
+	out.WriteString(sds.ParameterList.Xml())
+	out.WriteString(sds.Statements.Xml())
+	out.WriteString(" </subroutineDec>")
+	return out.String()
+}
+
 // LetStatement is Ast of "let"
 type LetStatement struct {
-	// TODO:Add array element []
 	Token  token.Token // KEYWORD:"let"
 	Name   *Identifier
 	Symbol token.Token // Symbol:"="
