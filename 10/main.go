@@ -36,7 +36,6 @@ func main() {
         return;
     }
 }
-	
 	`)
 	ce := compilationengine.New(jt)
 	fmt.Println(ce.ParseProgram())

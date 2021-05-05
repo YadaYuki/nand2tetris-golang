@@ -21,8 +21,8 @@ func TestLetStatements(t *testing.T) {
 	if program == nil {
 		t.Fatalf("ParseProgram() returned nil")
 	}
-	if len(program.Statements) != 5 {
-		t.Fatalf("program.Statements does not contain 5 statements. got=%d", len(program.Statements))
+	if len(program.Statements) != 4 {
+		t.Fatalf("program.Statements does not contain 4 statements. got=%d", len(program.Statements))
 	}
 	testCases := []struct {
 		expectedIdentifier string
@@ -364,7 +364,7 @@ func TestParseExpressionListStatement(t *testing.T) {
 	}
 }
 
-func TestParseSubroutineCallExpression(t *testing.T) {
+func TestParseSubroutineCallTermExpression(t *testing.T) {
 	input := `hoge(a,b,c,d,e,f)`
 	jt := tokenizer.New(input)
 	ce := New(jt)
@@ -386,7 +386,7 @@ func TestParseArrayElementExpression(t *testing.T) {
 	input := `hoge[a]`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseArrayElementExpression()
+	expression := ce.parseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -513,7 +513,6 @@ func TestParseSubroutineDecStatement(t *testing.T) {
 		let hoge=111;
 		let foo=838383;
 		let bar="hogehoge";
-		return hoge;
 	}`
 	jt := tokenizer.New(input)
 	ce := New(jt)

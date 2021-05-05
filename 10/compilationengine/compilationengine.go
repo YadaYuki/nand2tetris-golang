@@ -8,65 +8,13 @@ import (
 	"strconv"
 )
 
-type (
-	singleParseFn func() ast.Expression
-	infixParseFn  func(ast.Expression) ast.Expression
-)
-
 // CompilationEngine is struct
 type CompilationEngine struct {
-	jt             *tokenizer.JackTokenizer
-	errors         []string
-	curToken       token.Token
-	nextToken      token.Token
-	singleParseFns map[token.TokenType]singleParseFn
-	infixParseFns  map[token.TokenType]infixParseFn
+	jt *tokenizer.JackTokenizer
+	// errors         []string
+	curToken  token.Token
+	nextToken token.Token
 }
-
-const (
-	_ int = iota
-
-	EQUALS
-	LESSGREATER
-	SUM
-	PRODUCT
-	PREFIX
-	CALL
-)
-
-// var precedences = map[token.Symbol]int{
-// 	token.EQ:       EQUALS,
-// 	token.NOT_EQ:   EQUALS,
-// 	token.LT:       LESSGREATER,
-// 	token.GT:       LESSGREATER,
-// 	token.PLUS:     SUM,
-// 	token.MINUS:    SUM,
-// 	token.SLASH:    PRODUCT,
-// 	token.ASTERISK: PRODUCT,
-// 	token.LPAREN:   CALL,
-// }
-
-// func (ce *CompilationEngine) nextPrecedence() int {
-// 	if p,ok := precedences[ce.nextToken.Type];ok{
-// 		return p
-// 	}
-// 	return
-// }
-
-// func (ce *CompilationEngine) curPrecedence() int {
-// 	if p,ok := precedences[ce.curToken.Type];ok{
-// 		return p
-// 	}
-// 	return
-// }
-
-// func (ce *CompilationEngine) registerSingle(tokenType token.TokenType, fn singleParseFn) {
-// 	ce.singleParseFns[tokenType] = fn
-// }
-
-// func (ce *CompilationEngine) registerInfix(tokenType token.TokenType, fn infixParseFn) {
-// 	ce.infixParseFns[tokenType] = fn
-// }
 
 // New is initializer of compilation engine
 func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
@@ -189,7 +137,6 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 	}
 	stmt.Symbol = ce.curToken
 	ce.advanceToken()
-	// TODO: add parse expression
 	stmt.Value = ce.parseExpression()
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
@@ -204,7 +151,7 @@ func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement {
 	if token.Symbol(ce.curToken.Literal) == token.SEMICOLON {
 		return stmt
 	}
-	// stmt.ReturnValue = ce.parseExpression()
+	stmt.Value = ce.parseExpression()
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		return nil
@@ -289,9 +236,9 @@ func (ce *CompilationEngine) parseWhileStatement() *ast.WhileStatement {
 			return nil
 		}
 	}
-	// TODO:Add parseExpression
-	for token.Symbol(ce.curToken.Literal) != token.RPAREN {
-		ce.advanceToken()
+	stmt.Condition = ce.parseExpression()
+	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
+		return nil
 	}
 
 	ce.advanceToken()
@@ -373,6 +320,12 @@ func (ce *CompilationEngine) parseTerm() ast.Term {
 	case token.INTCONST:
 		return ce.parseIntegerConstTerm()
 	case token.IDENTIFIER:
+		if ce.nextToken.Literal == string(token.LPAREN) {
+			return ce.parseSubroutineCallTerm()
+		}
+		if ce.nextToken.Literal == string(token.LBRACKET) {
+			return ce.parseArrayElementTerm()
+		}
 		return ce.parseIdentifierTerm()
 	case token.STARTINGCONST:
 		return ce.parseStringConstTerm()
@@ -409,20 +362,20 @@ func (ce *CompilationEngine) parseSubroutineCallTerm() ast.Term {
 	return &ast.SubroutineCallTerm{Token: ce.curToken, FunctionName: ce.curToken.Literal, ExpressionListStmt: *expressionListStmt}
 }
 
-func (ce *CompilationEngine) parseArrayElementExpression() ast.Expression {
-	expression := &ast.SingleExpression{Token: ce.curToken}
+func (ce *CompilationEngine) parseArrayElementTerm() ast.Term {
+	arrayElementTerm := &ast.ArrayElementTerm{Token: ce.curToken, ArrayName: ce.curToken.Literal}
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.LBRACKET {
 		return nil
 	}
 	ce.advanceToken()
 	idx := ce.parseExpression()
-	expression.Value = &ast.ArrayElementTerm{Token: ce.curToken, ArrayName: ce.curToken.Literal, Idx: idx}
+	arrayElementTerm.Idx = idx
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.RBRACKET {
 		return nil
 	}
-	return expression
+	return arrayElementTerm
 }
 
 func (ce *CompilationEngine) parsePrefixTerm() ast.Term {
@@ -435,8 +388,8 @@ func (ce *CompilationEngine) parsePrefixTerm() ast.Term {
 func (ce *CompilationEngine) parseBracketTerm() ast.Term {
 	bracketTerm := &ast.BracketTerm{Token: ce.curToken}
 	ce.advanceToken()
-	exp := ce.parseExpression()
-	bracketTerm.Value = exp
+	expression := ce.parseExpression()
+	bracketTerm.Value = expression
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		return nil

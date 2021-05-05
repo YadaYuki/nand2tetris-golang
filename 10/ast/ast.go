@@ -450,9 +450,9 @@ func (pls *ParameterListStatement) Xml() string {
 	out.WriteString("<expressionList> ")
 	parameterListXml := []string{}
 	for _, s := range pls.ParameterList {
-		parameterListXml = append(parameterListXml, s.Xml()+symbolXml(","))
+		parameterListXml = append(parameterListXml, s.Xml())
 	}
-	out.WriteString(strings.Join(parameterListXml, ""))
+	out.WriteString(strings.Join(parameterListXml, symbolXml(",")))
 	out.WriteString(" </expressionList>")
 	out.WriteString(symbolXml(")"))
 	return out.String()
