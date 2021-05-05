@@ -54,7 +54,7 @@ const (
 	ASSIGN    Symbol = "="
 	PLUS      Symbol = "+"
 	MINUS     Symbol = "-"
-	BANG      Symbol = "!"
+	BANG      Symbol = "~"
 	ASTERISK  Symbol = "*"
 	SLASH     Symbol = "/"
 	LT        Symbol = "<"

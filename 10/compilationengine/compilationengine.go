@@ -374,6 +374,15 @@ func (ce *CompilationEngine) parseTerm() ast.Term {
 		return ce.parseIntegerConstTerm()
 	case token.IDENTIFIER:
 		return ce.parseIdentifierTerm()
+	case token.STARTINGCONST:
+		return ce.parseStringConstTerm()
+	case token.SYMBOL:
+		if ce.curToken.Literal == string(token.LPAREN) {
+			return ce.parseBracketTerm()
+		}
+		if ce.curToken.Literal == string(token.MINUS) || ce.curToken.Literal == string(token.BANG) {
+			return ce.parsePrefixTerm()
+		}
 	}
 	return nil
 }
@@ -390,17 +399,14 @@ func (ce *CompilationEngine) parseIdentifierTerm() ast.Term {
 	return &ast.IdentifierTerm{Token: ce.curToken, Value: ce.curToken.Literal}
 }
 
-func (ce *CompilationEngine) parseStringConstExpression() ast.Expression {
-	expression := &ast.SingleExpression{Token: ce.curToken, Value: &ast.StringConstTerm{Token: ce.curToken, Value: ce.curToken.Literal}}
-	return expression
+func (ce *CompilationEngine) parseStringConstTerm() ast.Term {
+	return &ast.StringConstTerm{Token: ce.curToken, Value: ce.curToken.Literal}
 }
 
-func (ce *CompilationEngine) parseSubroutineCallExpression() ast.Expression {
-	expression := &ast.SingleExpression{Token: ce.curToken}
+func (ce *CompilationEngine) parseSubroutineCallTerm() ast.Term {
 	ce.advanceToken()
 	expressionListStmt := ce.parseExpressionListStatement()
-	expression.Value = &ast.SubroutineCallTerm{Token: ce.curToken, FunctionName: ce.curToken.Literal, ExpressionListStmt: *expressionListStmt}
-	return expression
+	return &ast.SubroutineCallTerm{Token: ce.curToken, FunctionName: ce.curToken.Literal, ExpressionListStmt: *expressionListStmt}
 }
 
 func (ce *CompilationEngine) parseArrayElementExpression() ast.Expression {
@@ -419,25 +425,23 @@ func (ce *CompilationEngine) parseArrayElementExpression() ast.Expression {
 	return expression
 }
 
-func (ce *CompilationEngine) parsePrefixExpression() ast.Term {
+func (ce *CompilationEngine) parsePrefixTerm() ast.Term {
 	prefixTerm := &ast.PrefixTerm{Token: ce.curToken, Prefix: token.Symbol(ce.curToken.Literal)}
 	ce.advanceToken()
 	prefixTerm.Value = ce.parseTerm()
 	return prefixTerm
 }
 
-func (ce *CompilationEngine) parseBracketExpression() ast.Expression {
-	expression := &ast.SingleExpression{Token: ce.curToken}
+func (ce *CompilationEngine) parseBracketTerm() ast.Term {
 	bracketTerm := &ast.BracketTerm{Token: ce.curToken}
 	ce.advanceToken()
 	exp := ce.parseExpression()
 	bracketTerm.Value = exp
-	expression.Value = bracketTerm
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		return nil
 	}
-	return expression
+	return bracketTerm
 }
 
 func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
