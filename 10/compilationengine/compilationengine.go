@@ -363,40 +363,25 @@ func (ce *CompilationEngine) parseParameterStatement() *ast.ParameterStatement {
 }
 
 func (ce *CompilationEngine) parseExpression() ast.Expression {
-	// leftExp := single()
-	// TODO:Fix to SEMICOLON
-	// for !p.nextTokenIs(token.SYMBOL) && precedence < ce.nextPrecedence() {
-	// 	infix := ce.infixParseFns(ce.nextToken.Type)
-	// 	if infix == nil {
-	// 		return leftExp
-	// 	}
-	// 	ce.nextToken()
-	// 	leftExp = infix(leftExp)
-	// }
-	return &ast.SingleExpression{}
+	token := ce.curToken
+	prefixTerm := ce.parseTerm()
+	return &ast.SingleExpression{Token: token, Value: prefixTerm}
 }
 
 func (ce *CompilationEngine) parseTerm() ast.Term {
-	// TODO:Fix to SEMICOLON
-	// for !p.nextTokenIs(token.SYMBOL) && precedence < ce.nextPrecedence() {
-	// 	infix := ce.infixParseFns(ce.nextToken.Type)
-	// 	if infix == nil {
-	// 		return leftExp
-	// 	}
-	// 	ce.advanceToken()
-	// 	leftExp = infix(leftExp)
-	// }
-	return &ast.BracketTerm{}
+	switch ce.curToken.Type {
+	case token.INTCONST:
+		return ce.parseIntegerConstTerm()
+	}
+	return nil
 }
 
-func (ce *CompilationEngine) parseIntegerConstExpression() ast.Expression {
-	expression := &ast.SingleExpression{Token: ce.curToken}
+func (ce *CompilationEngine) parseIntegerConstTerm() ast.Term {
 	value, err := strconv.ParseInt(ce.curToken.Literal, 0, 64)
 	if err != nil {
 		panic(fmt.Sprintf("could not parse %q as integer", ce.curToken.Literal))
 	}
-	expression.Value = &ast.IntergerConstTerm{Token: ce.curToken, Value: value}
-	return expression
+	return &ast.IntergerConstTerm{Token: ce.curToken, Value: value}
 }
 
 func (ce *CompilationEngine) parseIdentifierExpression() ast.Expression {
