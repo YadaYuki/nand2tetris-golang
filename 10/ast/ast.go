@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"fmt"
 	"jack_compiler/token"
 	"strconv"
 	"strings"
@@ -105,6 +106,7 @@ func (sds *SubroutineDecStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(sds.TokenLiteral() + " ")
 	out.WriteString(sds.ReturnType.Literal + " ")
+	out.WriteString(sds.Name.Literal)
 	out.WriteString(sds.ParameterList.String())
 	out.WriteString(sds.Statements.String())
 	return out.String()
@@ -235,8 +237,10 @@ func (vds *VarDecStatement) String() string {
 	out.WriteString(vds.ValueType.Literal + " ")
 	identifiersStringLs := []string{}
 	for _, identifier := range vds.Identifiers {
+		fmt.Println(identifier)
 		identifiersStringLs = append(identifiersStringLs, identifier.Literal)
 	}
+	fmt.Println(identifiersStringLs)
 	out.WriteString(strings.Join(identifiersStringLs, ","))
 	out.WriteString(";")
 	return out.String()
@@ -439,13 +443,11 @@ func (pls *ParameterListStatement) String() string {
 	for _, s := range pls.ParameterList {
 		parameterList = append(parameterList, s.String())
 	}
-
-	return "( " + strings.Join(parameterList, ",") + " )"
+	return "(" + strings.Join(parameterList, ",") + ")"
 }
 
 func (pls *ParameterListStatement) Xml() string {
 	var out bytes.Buffer
-	// TODO: Fix from "(" to token.LPAWN. others as well
 	out.WriteString(symbolXml("("))
 	out.WriteString("<expressionList> ")
 	parameterListXml := []string{}
@@ -469,14 +471,11 @@ func (ps *ParameterStatement) statementNode() {}
 func (ps *ParameterStatement) TokenLiteral() string { return ps.Token.Literal }
 
 func (ps *ParameterStatement) String() string {
-	var out bytes.Buffer
-	return out.String()
+	return string(ps.Type) + " " + ps.Name
 }
 
 func (ps *ParameterStatement) Xml() string {
-	var out bytes.Buffer
-	// TODO: Fix from "(" to token.LPAWN. others as well
-	return out.String()
+	return keywordXml(string(ps.Type)) + identifierXml(ps.Name)
 }
 
 type SingleExpression struct {
