@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"jack_compiler/compilationengine"
 	"jack_compiler/tokenizer"
 )
 
 func main() {
 	jt := tokenizer.New(`
-	
 	class Main {
     static boolean test;   
                            
@@ -38,12 +38,6 @@ func main() {
 }
 	
 	`)
-	for jt.HasMoreTokens() {
-		token, err := jt.Advance()
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-		fmt.Println(token)
-	}
+	ce := compilationengine.New(jt)
+	fmt.Println(ce.ParseProgram())
 }

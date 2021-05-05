@@ -9,8 +9,7 @@ import (
 )
 
 func TestLetStatements(t *testing.T) {
-	input := `
-		let x=5;
+	input := `let x=5;
 		let y=10;
 		let hoge=111;
 		let foo=838383;
@@ -35,6 +34,7 @@ func TestLetStatements(t *testing.T) {
 		{"foo"},
 		{"bar"},
 	}
+
 	for i, tt := range testCases {
 		stmt := program.Statements[i]
 		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
@@ -52,17 +52,10 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 		t.Errorf("s not *ast.LetStatement. got %T", s)
 		return false
 	}
-	if letStmt.Name.Value != name {
-		t.Errorf("letStmt.Name.Value not '%s'.got '%s'", name, letStmt.Name.Value)
+	if letStmt.Name.Literal != name {
+		t.Errorf("letStmt.Name.TokenLiteral() not '%s'.got '%s'", name, letStmt.Name.Literal)
 		return false
 	}
-	if letStmt.Name.TokenLiteral() != name {
-		t.Errorf("letStmt.Name.TokenLiteral() not '%s'.got '%s'", name, letStmt.Name.TokenLiteral())
-		return false
-	}
-	// if s.String() == fmt.Sprintf("let %s = %s;", s.TokenLiteral(), letStmt.Value.String()) {
-	// 	return true
-	// }
 	return true
 }
 
@@ -198,7 +191,7 @@ func testVarDecStatement(t *testing.T, s ast.Statement, expectedValueType string
 		return false
 	}
 	for i, ident := range vds.Identifiers {
-		if identifiers[i] != ident.String() {
+		if identifiers[i] != ident.Literal {
 			t.Errorf("identifiers no %s . got %s", identifiers[i], ident)
 			return false
 		}
@@ -252,7 +245,7 @@ func testClassVarDecStatement(t *testing.T, s ast.Statement, expectedValueType s
 		return false
 	}
 	for i, ident := range vds.Identifiers {
-		if identifiers[i] != ident.String() {
+		if identifiers[i] != ident.Literal {
 			t.Errorf("identifiers no %s . got %s", identifiers[i], ident)
 			return false
 		}
@@ -264,7 +257,7 @@ func TestParseIntConstTermExpression(t *testing.T) {
 	input := `33`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseExpression(LOWEST)
+	expression := ce.parseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -282,7 +275,7 @@ func TestParseIdentifierTermExpression(t *testing.T) {
 	input := `hoge`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseExpression(LOWEST)
+	expression := ce.parseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -300,7 +293,7 @@ func TestParseStringConstTermExpression(t *testing.T) {
 	input := `"hoge"`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseExpression(LOWEST)
+	expression := ce.parseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -412,19 +405,14 @@ func TestParsePrefixExpression(t *testing.T) {
 	input := `-4`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parsePrefixExpression()
-	singleExpression, ok := expression.(*ast.SingleExpression)
-	if !ok {
-		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
-	}
-	prefixTerm, ok := singleExpression.Value.(*ast.PrefixTerm)
+	term := ce.parsePrefixExpression()
+	prefixTerm, ok := term.(*ast.PrefixTerm)
 	if !ok {
 		t.Fatalf("prefixTerm is not ast.PrefixTerm,got = %T", prefixTerm)
 	}
 	if prefixTerm.Prefix != token.MINUS {
 		t.Fatalf("prefixTerm.Prefix is not token.MINUS,got = %s", prefixTerm.Prefix)
 	}
-	t.Log(expression.Xml())
 }
 
 func TestParseBracketExpression(t *testing.T) {
@@ -505,7 +493,7 @@ func TestParseClassStatement(t *testing.T) {
 	jt := tokenizer.New(input)
 	ce := New(jt)
 	stmt := ce.parseClassStatement()
-	if stmt.Name != "hoge" {
+	if stmt.Name.Literal != "hoge" {
 		t.Fatalf("stmt.Name  is not hoge ,got = %s", stmt.Name)
 	}
 	if token.KeyWord(stmt.Token.Literal) != token.CLASS {
@@ -513,5 +501,35 @@ func TestParseClassStatement(t *testing.T) {
 	}
 	if len(stmt.Statements.Statements) != 5 {
 		t.Fatalf("len(stmt.Statements.Statements) is not 5 ,got = %d", len(stmt.Statements.Statements))
+	}
+}
+
+func TestParseSubroutineDecStatement(t *testing.T) {
+	input := `method void fuga (int hoge,boolean fuga){
+		let x=5;
+		let y=10;
+		let hoge=111;
+		let foo=838383;
+		let bar="hogehoge";
+		return hoge;
+	}`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	stmt := ce.ParseProgram()
+	if len(stmt.Statements) != 1 {
+		t.Fatalf("len(stmt.Statements)  is not hoge ,got = %d", len(stmt.Statements))
+	}
+	subroutineDecStmt, ok := stmt.Statements[0].(*ast.SubroutineDecStatement)
+	if !ok {
+		t.Fatalf("stmt.Statements[0]  is not SubroutineDecStatement ,got = %T", stmt.Statements[0])
+	}
+	if token.KeyWord(subroutineDecStmt.ReturnType.Literal) != token.VOID {
+		t.Fatalf("subroutineDecStmt.ReturnType.Literal  is not void ,got = %s", subroutineDecStmt.ReturnType.Literal)
+	}
+	if len(subroutineDecStmt.ParameterList.ParameterList) != 2 {
+		t.Fatalf("len(subroutineDecStmt.ParameterList.ParameterList)  is not 2 ,got = %d", len(subroutineDecStmt.ParameterList.ParameterList))
+	}
+	if len(subroutineDecStmt.Statements.Statements) != 5 {
+		t.Fatalf("len(subroutineDecStmt.Statements.Statements)  is not 5 ,got = %d", len(subroutineDecStmt.Statements.Statements))
 	}
 }

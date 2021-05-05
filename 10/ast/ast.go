@@ -54,17 +54,16 @@ func (p *Program) String() string {
 func (p *Program) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<expression>")
-	// TODO: Implement
-	// for _, stmt := range p.Statements {
-	// 	out.WriteString(stmt.Xml())
-	// }
+	for _, stmt := range p.Statements {
+		out.WriteString(stmt.Xml())
+	}
 	out.WriteString("</expression>")
 	return out.String()
 }
 
 type ClassStatement struct {
 	Token      token.Token // KEYWORD:"class"
-	Name       string
+	Name       token.Token
 	Statements *BlockStatement
 }
 
@@ -75,7 +74,7 @@ func (cs *ClassStatement) TokenLiteral() string { return cs.Token.Literal }
 func (cs *ClassStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(cs.TokenLiteral() + " ")
-	out.WriteString(cs.Name)
+	out.WriteString(cs.Name.Literal)
 	out.WriteString(cs.Statements.String())
 	return out.String()
 }
@@ -84,17 +83,52 @@ func (cs *ClassStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<class> ")
 	out.WriteString(keywordXml(cs.TokenLiteral()))
-	out.WriteString(identifierXml(cs.Name))
+	out.WriteString(identifierXml(cs.Name.Literal))
 	out.WriteString(cs.Statements.Xml())
 	out.WriteString(" </class>")
 	return out.String()
 }
 
+type SubroutineDecStatement struct {
+	Token         token.Token // KEYWORD:"class"
+	ReturnType    token.Token // KEYWORD:"void" or IDENTIFIER
+	Name          token.Token // IDENTIFIER
+	ParameterList *ParameterListStatement
+	Statements    *BlockStatement
+}
+
+func (sds *SubroutineDecStatement) statementNode() {}
+
+func (sds *SubroutineDecStatement) TokenLiteral() string { return sds.Token.Literal }
+
+func (sds *SubroutineDecStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(sds.TokenLiteral() + " ")
+	out.WriteString(sds.ReturnType.Literal + " ")
+	out.WriteString(sds.ParameterList.String())
+	out.WriteString(sds.Statements.String())
+	return out.String()
+}
+
+func (sds *SubroutineDecStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<subroutineDec> ")
+	if sds.ReturnType.Type == token.IDENTIFIER {
+		out.WriteString(identifierXml(sds.ReturnType.Literal))
+	} else if sds.ReturnType.Type == token.KEYWORD {
+		out.WriteString(keywordXml(sds.ReturnType.Literal))
+	}
+	out.WriteString(identifierXml(sds.Name.Literal))
+	out.WriteString(sds.ParameterList.Xml())
+	out.WriteString(sds.Statements.Xml())
+	out.WriteString(" </subroutineDec>")
+	return out.String()
+}
+
 // LetStatement is Ast of "let"
 type LetStatement struct {
-	// TODO:Add array element []
 	Token  token.Token // KEYWORD:"let"
-	Name   *Identifier
+	Name   token.Token
 	Symbol token.Token // Symbol:"="
 	Value  Expression
 }
@@ -106,7 +140,7 @@ func (ls *LetStatement) TokenLiteral() string { return ls.Token.Literal }
 func (ls *LetStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(ls.TokenLiteral() + " ")
-	out.WriteString(ls.Name.String())
+	out.WriteString(ls.Name.Literal)
 	if ls.Value != nil {
 		out.WriteString(ls.Symbol.Literal)
 		out.WriteString(ls.Value.String())
@@ -119,49 +153,13 @@ func (ls *LetStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<letStatement>")
 	out.WriteString(keywordXml(ls.TokenLiteral()))
-	out.WriteString(ls.Name.Xml())
+	out.WriteString(identifierXml(ls.Name.Literal))
 	if ls.Value != nil {
 		out.WriteString(symbolXml(ls.Symbol.Literal))
-		// TODO:implement expression Xml
-		// out.WriteString(ls.Value.Xml())
+		out.WriteString(ls.Value.Xml())
 	}
 	out.WriteString("</letStatement>")
 	return out.String()
-}
-
-// Identifier is variable identifier type
-type Identifier struct {
-	Token token.Token
-	Value string
-}
-
-func (i *Identifier) expressionNode() {}
-
-// TokenLiteral returns literal of token
-func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
-
-func (i *Identifier) String() string {
-	return i.Value
-}
-
-func (i *Identifier) Xml() string { return "<identifier> " + i.Value + " </identifier>" }
-
-type IntConst struct {
-	Token token.Token
-	Value int64
-}
-
-func (i *IntConst) expressionNode() {}
-
-// TokenLiteral returns literal of token
-func (i *IntConst) TokenLiteral() string { return i.Token.Literal }
-
-func (i *IntConst) String() string {
-	return i.Token.Literal
-}
-
-func (i *IntConst) Xml() string {
-	return "<integerConstant> " + strconv.FormatInt(i.Value, 10) + " </integerConstant>"
 }
 
 // ReturnStatement is Ast of "return"
@@ -189,9 +187,7 @@ func (rs *ReturnStatement) Xml() string {
 	out.WriteString("<returnStatement>")
 	out.WriteString(keywordXml(rs.TokenLiteral()))
 	if rs.Value != nil {
-		// TODO:implement expression Xml
 		out.WriteString(rs.Value.Xml())
-		// return ""
 	}
 	out.WriteString("</returnStatement>")
 	return out.String()
@@ -199,7 +195,7 @@ func (rs *ReturnStatement) Xml() string {
 
 type DoStatement struct {
 	Token          token.Token // Keyword:"do"
-	SubroutineCall Expression
+	SubroutineCall token.Token
 }
 
 func (ds *DoStatement) statementNode() {}
@@ -209,7 +205,7 @@ func (ds *DoStatement) TokenLiteral() string { return ds.Token.Literal }
 func (ds *DoStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(ds.TokenLiteral() + " ")
-	out.WriteString(ds.SubroutineCall.String())
+	out.WriteString(ds.SubroutineCall.Literal)
 	out.WriteString(";")
 	return out.String()
 }
@@ -218,6 +214,7 @@ func (ds *DoStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<doStatement>")
 	out.WriteString(keywordXml(ds.TokenLiteral()))
+	out.WriteString(identifierXml(ds.SubroutineCall.Literal))
 	out.WriteString("</doStatement>")
 	return out.String()
 }
@@ -225,7 +222,7 @@ func (ds *DoStatement) Xml() string {
 type VarDecStatement struct {
 	Token       token.Token // Keyword:"var"
 	ValueType   token.Token // "int","char","boolean",{class name}
-	Identifiers []*Identifier
+	Identifiers []token.Token
 }
 
 func (vds *VarDecStatement) statementNode() {}
@@ -236,10 +233,11 @@ func (vds *VarDecStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(vds.TokenLiteral() + " ")
 	out.WriteString(vds.ValueType.Literal + " ")
-	out.WriteString(vds.Identifiers[0].String())
-	for _, identifier := range vds.Identifiers[1:] {
-		out.WriteString("," + identifier.String())
+	identifiersStringLs := []string{}
+	for _, identifier := range vds.Identifiers {
+		identifiersStringLs = append(identifiersStringLs, identifier.Literal)
 	}
+	out.WriteString(strings.Join(identifiersStringLs, ","))
 	out.WriteString(";")
 	return out.String()
 }
@@ -248,11 +246,11 @@ func (vds *VarDecStatement) Xml() string {
 	out.WriteString("<varDec>")
 	out.WriteString(keywordXml(vds.TokenLiteral()))
 	out.WriteString(keywordXml(vds.ValueType.Literal))
-	out.WriteString(vds.Identifiers[0].Xml())
-	for _, identifier := range vds.Identifiers[1:] {
-		out.WriteString(keywordXml(","))
-		out.WriteString(identifier.Xml())
+	identifiersXmlLs := []string{}
+	for _, identifier := range vds.Identifiers {
+		identifiersXmlLs = append(identifiersXmlLs, identifierXml(identifier.Literal))
 	}
+	out.WriteString(strings.Join(identifiersXmlLs, symbolXml(",")))
 	out.WriteString(symbolXml(";"))
 	out.WriteString("</varDec>")
 	return out.String()
@@ -261,7 +259,7 @@ func (vds *VarDecStatement) Xml() string {
 type ClassVarDecStatement struct {
 	Token       token.Token // Keyword:"static","field"
 	ValueType   token.Token // "int","char","boolean",{class name}
-	Identifiers []*Identifier
+	Identifiers []token.Token
 }
 
 func (cvds *ClassVarDecStatement) statementNode() {}
@@ -272,10 +270,11 @@ func (cvds *ClassVarDecStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(cvds.TokenLiteral() + " ")
 	out.WriteString(cvds.ValueType.Literal + " ")
-	out.WriteString(cvds.Identifiers[0].String())
-	for _, identifier := range cvds.Identifiers[1:] {
-		out.WriteString("," + identifier.String())
+	identifiersStringLs := []string{}
+	for _, identifier := range cvds.Identifiers {
+		identifiersStringLs = append(identifiersStringLs, identifier.Literal)
 	}
+	out.WriteString(strings.Join(identifiersStringLs, ","))
 	out.WriteString(";")
 	return out.String()
 }
@@ -284,11 +283,11 @@ func (cvds *ClassVarDecStatement) Xml() string {
 	out.WriteString("<classVarDec>")
 	out.WriteString(keywordXml(cvds.TokenLiteral()))
 	out.WriteString(keywordXml(cvds.ValueType.Literal))
-	out.WriteString(cvds.Identifiers[0].Xml())
-	for _, identifier := range cvds.Identifiers[1:] {
-		out.WriteString(keywordXml(","))
-		out.WriteString(identifier.Xml())
+	identifiersStringXml := []string{}
+	for _, identifier := range cvds.Identifiers {
+		identifiersStringXml = append(identifiersStringXml, identifierXml(identifier.Literal))
 	}
+	out.WriteString(strings.Join(identifiersStringXml, symbolXml(",")))
 	out.WriteString(symbolXml(";"))
 	out.WriteString("</classVarDec>")
 	return out.String()
