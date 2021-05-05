@@ -368,7 +368,7 @@ func TestParseSubroutineCallExpression(t *testing.T) {
 	input := `hoge(a,b,c,d,e,f)`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseSubroutineCallExpression()
+	expression := ce.parseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -400,11 +400,15 @@ func TestParseArrayElementExpression(t *testing.T) {
 	}
 }
 func TestParsePrefixExpression(t *testing.T) {
-	input := `-4`
+	input := `-124`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	term := ce.parsePrefixExpression()
-	prefixTerm, ok := term.(*ast.PrefixTerm)
+	expression := ce.parseExpression()
+	singleExpression, ok := expression.(*ast.SingleExpression)
+	if !ok {
+		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
+	}
+	prefixTerm, ok := singleExpression.Value.(*ast.PrefixTerm)
 	if !ok {
 		t.Fatalf("prefixTerm is not ast.PrefixTerm,got = %T", prefixTerm)
 	}
@@ -417,7 +421,7 @@ func TestParseBracketExpression(t *testing.T) {
 	input := `(4)`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseBracketExpression()
+	expression := ce.parseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
