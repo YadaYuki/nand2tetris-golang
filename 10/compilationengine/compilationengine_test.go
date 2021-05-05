@@ -13,7 +13,6 @@ func TestLetStatements(t *testing.T) {
 		let y=10;
 		let hoge=111;
 		let foo=838383;
-		let bar="hogehoge";
 		`
 
 	jt := tokenizer.New(input)
@@ -32,7 +31,6 @@ func TestLetStatements(t *testing.T) {
 		{"y"},
 		{"hoge"},
 		{"foo"},
-		{"bar"},
 	}
 
 	for i, tt := range testCases {
