@@ -312,6 +312,7 @@ func (ce *CompilationEngine) parseParameterStatement() *ast.ParameterStatement {
 func (ce *CompilationEngine) parseExpression() ast.Expression {
 	token := ce.curToken
 	prefixTerm := ce.parseTerm()
+	// TODO: add infix expression parser
 	return &ast.SingleExpression{Token: token, Value: prefixTerm}
 }
 
@@ -360,7 +361,7 @@ func (ce *CompilationEngine) parseStringConstTerm() ast.Term {
 }
 
 func (ce *CompilationEngine) parseKeyWordConstTerm() ast.Term {
-	if ce.curToken.Literal != string(token.NULL) && ce.curToken.Literal != string(token.TRUE) && ce.curToken.Literal != string(token.FALSE) && ce.curToken.Literal != string(token.THIS) {
+	if token.KeyWord(ce.curToken.Literal) != token.NULL && token.KeyWord(ce.curToken.Literal) != (token.TRUE) && token.KeyWord(ce.curToken.Literal) != token.FALSE && token.KeyWord(ce.curToken.Literal) != token.THIS {
 		panic(fmt.Sprintf("could not parse %s as keywordConst", ce.curToken.Literal))
 	}
 	return &ast.KeywordConstTerm{Token: ce.curToken, KeyWord: token.KeyWord(ce.curToken.Literal)}
