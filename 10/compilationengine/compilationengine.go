@@ -372,6 +372,8 @@ func (ce *CompilationEngine) parseTerm() ast.Term {
 	switch ce.curToken.Type {
 	case token.INTCONST:
 		return ce.parseIntegerConstTerm()
+	case token.IDENTIFIER:
+		return ce.parseIdentifierTerm()
 	}
 	return nil
 }
@@ -384,9 +386,8 @@ func (ce *CompilationEngine) parseIntegerConstTerm() ast.Term {
 	return &ast.IntergerConstTerm{Token: ce.curToken, Value: value}
 }
 
-func (ce *CompilationEngine) parseIdentifierExpression() ast.Expression {
-	expression := &ast.SingleExpression{Token: ce.curToken, Value: &ast.IdentifierTerm{Token: ce.curToken, Value: ce.curToken.Literal}}
-	return expression
+func (ce *CompilationEngine) parseIdentifierTerm() ast.Term {
+	return &ast.IdentifierTerm{Token: ce.curToken, Value: ce.curToken.Literal}
 }
 
 func (ce *CompilationEngine) parseStringConstExpression() ast.Expression {
