@@ -336,7 +336,10 @@ func (ce *CompilationEngine) parseTerm() ast.Term {
 		if ce.curToken.Literal == string(token.MINUS) || ce.curToken.Literal == string(token.BANG) {
 			return ce.parsePrefixTerm()
 		}
+	case token.KEYWORD:
+		return ce.parseKeyWordConstTerm()
 	}
+
 	return nil
 }
 
@@ -354,6 +357,13 @@ func (ce *CompilationEngine) parseIdentifierTerm() ast.Term {
 
 func (ce *CompilationEngine) parseStringConstTerm() ast.Term {
 	return &ast.StringConstTerm{Token: ce.curToken, Value: ce.curToken.Literal}
+}
+
+func (ce *CompilationEngine) parseKeyWordConstTerm() ast.Term {
+	if ce.curToken.Literal != string(token.NULL) && ce.curToken.Literal != string(token.TRUE) && ce.curToken.Literal != string(token.FALSE) && ce.curToken.Literal != string(token.THIS) {
+		panic(fmt.Sprintf("could not parse %s as keywordConst", ce.curToken.Literal))
+	}
+	return &ast.KeywordConstTerm{Token: ce.curToken, KeyWord: token.KeyWord(ce.curToken.Literal)}
 }
 
 func (ce *CompilationEngine) parseSubroutineCallTerm() ast.Term {
