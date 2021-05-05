@@ -34,6 +34,7 @@ func TestLetStatements(t *testing.T) {
 		{"foo"},
 		{"bar"},
 	}
+
 	for i, tt := range testCases {
 		stmt := program.Statements[i]
 		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
@@ -51,17 +52,10 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 		t.Errorf("s not *ast.LetStatement. got %T", s)
 		return false
 	}
-	if letStmt.Name.Value != name {
-		t.Errorf("letStmt.Name.Value not '%s'.got '%s'", name, letStmt.Name.Value)
+	if letStmt.Name.Literal != name {
+		t.Errorf("letStmt.Name.TokenLiteral() not '%s'.got '%s'", name, letStmt.Name.Literal)
 		return false
 	}
-	if letStmt.Name.TokenLiteral() != name {
-		t.Errorf("letStmt.Name.TokenLiteral() not '%s'.got '%s'", name, letStmt.Name.TokenLiteral())
-		return false
-	}
-	// if s.String() == fmt.Sprintf("let %s = %s;", s.TokenLiteral(), letStmt.Value.String()) {
-	// 	return true
-	// }
 	return true
 }
 
@@ -197,7 +191,7 @@ func testVarDecStatement(t *testing.T, s ast.Statement, expectedValueType string
 		return false
 	}
 	for i, ident := range vds.Identifiers {
-		if identifiers[i] != ident.String() {
+		if identifiers[i] != ident.Literal {
 			t.Errorf("identifiers no %s . got %s", identifiers[i], ident)
 			return false
 		}
@@ -251,7 +245,7 @@ func testClassVarDecStatement(t *testing.T, s ast.Statement, expectedValueType s
 		return false
 	}
 	for i, ident := range vds.Identifiers {
-		if identifiers[i] != ident.String() {
+		if identifiers[i] != ident.Literal {
 			t.Errorf("identifiers no %s . got %s", identifiers[i], ident)
 			return false
 		}
@@ -263,7 +257,7 @@ func TestParseIntConstTermExpression(t *testing.T) {
 	input := `33`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseExpression(LOWEST)
+	expression := ce.parseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -281,7 +275,7 @@ func TestParseIdentifierTermExpression(t *testing.T) {
 	input := `hoge`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseExpression(LOWEST)
+	expression := ce.parseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -299,7 +293,7 @@ func TestParseStringConstTermExpression(t *testing.T) {
 	input := `"hoge"`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseExpression(LOWEST)
+	expression := ce.parseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -411,19 +405,14 @@ func TestParsePrefixExpression(t *testing.T) {
 	input := `-4`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parsePrefixExpression()
-	singleExpression, ok := expression.(*ast.SingleExpression)
-	if !ok {
-		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
-	}
-	prefixTerm, ok := singleExpression.Value.(*ast.PrefixTerm)
+	term := ce.parsePrefixExpression()
+	prefixTerm, ok := term.(*ast.PrefixTerm)
 	if !ok {
 		t.Fatalf("prefixTerm is not ast.PrefixTerm,got = %T", prefixTerm)
 	}
 	if prefixTerm.Prefix != token.MINUS {
 		t.Fatalf("prefixTerm.Prefix is not token.MINUS,got = %s", prefixTerm.Prefix)
 	}
-	t.Log(expression.Xml())
 }
 
 func TestParseBracketExpression(t *testing.T) {
@@ -522,6 +511,7 @@ func TestParseSubroutineDecStatement(t *testing.T) {
 		let hoge=111;
 		let foo=838383;
 		let bar="hogehoge";
+		return hoge;
 	}`
 	jt := tokenizer.New(input)
 	ce := New(jt)

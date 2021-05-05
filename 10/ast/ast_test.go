@@ -9,19 +9,18 @@ func TestString(t *testing.T) {
 	program := &Program{
 		Statements: []Statement{
 			&LetStatement{
-				Token: token.Token{Type: token.KEYWORD, Literal: "let"},
-				Name: &Identifier{
-					Token: token.Token{Type: token.IDENTIFIER, Literal: "myVar"},
-					Value: "myVar",
-				},
+				Token:  token.Token{Type: token.KEYWORD, Literal: "let"},
+				Name:   token.Token{Type: token.IDENTIFIER, Literal: "myVar"},
 				Symbol: token.Token{Type: token.SYMBOL, Literal: "="},
-				Value: &Identifier{
-					Token: token.Token{Type: token.IDENTIFIER, Literal: "anotherVar"},
-					Value: "anotherVar",
+				Value: &SingleExpression{
+					Token: token.Token{Type: token.INTCONST, Literal: "4"},
+					Value: &IntergerConstTerm{
+						Token: token.Token{Type: token.INTCONST, Literal: "4"},
+						Value: 4,
+					},
 				},
 			},
-		},
-	}
+		}}
 	if program.String() != "let myVar=anotherVar;" {
 		t.Errorf("program.String() wrong. got = %q", program.String())
 	}
@@ -29,15 +28,15 @@ func TestString(t *testing.T) {
 
 func TestLetXml(t *testing.T) {
 	letStatement := &LetStatement{
-		Token: token.Token{Type: token.KEYWORD, Literal: "let"},
-		Name: &Identifier{
-			Token: token.Token{Type: token.IDENTIFIER, Literal: "myVar"},
-			Value: "myVar",
-		},
+		Token:  token.Token{Type: token.KEYWORD, Literal: "let"},
+		Name:   token.Token{Type: token.IDENTIFIER, Literal: "myVar"},
 		Symbol: token.Token{Type: token.SYMBOL, Literal: "="},
-		Value: &Identifier{
-			Token: token.Token{Type: token.IDENTIFIER, Literal: "anotherVar"},
-			Value: "anotherVar",
+		Value: &SingleExpression{
+			Token: token.Token{Type: token.INTCONST, Literal: "4"},
+			Value: &IntergerConstTerm{
+				Token: token.Token{Type: token.INTCONST, Literal: "4"},
+				Value: 4,
+			},
 		},
 	}
 	t.Log(letStatement.String())
@@ -46,16 +45,8 @@ func TestLetXml(t *testing.T) {
 
 func TestDoXml(t *testing.T) {
 	doStatement := &DoStatement{
-		Token: token.Token{Type: token.KEYWORD, Literal: "do"},
-		SubroutineCall: &Identifier{
-			Token: token.Token{Type: token.IDENTIFIER, Literal: "anotherVar"},
-			Value: "anotherVar",
-		},
-		// SubroutineCall: &SubroutineCallExpression{
-		// 	Token: token.Token{Type: token.IDENTIFIER, Literal: "anotherVar"},
-		// 	Value: "anotherVar",
-		// 	Arguments:
-		// },
+		Token:          token.Token{Type: token.KEYWORD, Literal: "do"},
+		SubroutineCall: token.Token{Type: token.IDENTIFIER, Literal: "anotherVar"},
 	}
 	t.Log(doStatement.String())
 	t.Log(doStatement.Xml())
@@ -65,19 +56,10 @@ func TestVarDecString(t *testing.T) {
 	varDecStatement := &VarDecStatement{
 		Token:     token.Token{Type: token.KEYWORD, Literal: "var"},
 		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
-		Identifiers: []*Identifier{
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
+		Identifiers: []token.Token{
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
 		},
 	}
 	t.Log(varDecStatement.String())
@@ -88,19 +70,10 @@ func TestClassVarDecString(t *testing.T) {
 	classVarDecStatement := &ClassVarDecStatement{
 		Token:     token.Token{Type: token.KEYWORD, Literal: "static"},
 		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
-		Identifiers: []*Identifier{
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
+		Identifiers: []token.Token{
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
 		},
 	}
 	t.Log(classVarDecStatement.String())
@@ -135,19 +108,10 @@ func TestIfStatementString(t *testing.T) {
 	varDecStatement := &VarDecStatement{
 		Token:     token.Token{Type: token.KEYWORD, Literal: "var"},
 		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
-		Identifiers: []*Identifier{
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
+		Identifiers: []token.Token{
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
 		},
 	}
 
@@ -272,19 +236,10 @@ func TestClassStatementString(t *testing.T) {
 	varDecStatement := &VarDecStatement{
 		Token:     token.Token{Type: token.KEYWORD, Literal: "var"},
 		ValueType: token.Token{Type: token.KEYWORD, Literal: "int"},
-		Identifiers: []*Identifier{
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
-			{
-				Token: token.Token{Type: token.IDENTIFIER, Literal: "hogehoge"},
-				Value: "hogehgoe",
-			},
+		Identifiers: []token.Token{
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
+			{Type: token.IDENTIFIER, Literal: "hogehoge"},
 		},
 	}
 
