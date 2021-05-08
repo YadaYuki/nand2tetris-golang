@@ -418,7 +418,7 @@ func TestParseExpressionListStatement(t *testing.T) {
 }
 
 func TestParseSubroutineCallTermExpression(t *testing.T) {
-	input := `hoge(a,b,c,d,e,f)`
+	input := `hoge.fuga(a,b,c,d,e,f)`
 	jt := tokenizer.New(input)
 	ce := New(jt)
 	expression := ce.parseExpression()
@@ -429,6 +429,12 @@ func TestParseSubroutineCallTermExpression(t *testing.T) {
 	subroutineCallTerm, ok := singleExpression.Value.(*ast.SubroutineCallTerm)
 	if !ok {
 		t.Fatalf("subroutineCallTerm is not ast.SubroutineCallTerm,got = %T", subroutineCallTerm)
+	}
+	if subroutineCallTerm.ClassName.Literal != "hoge" {
+		t.Fatalf("subroutineCallTerm.ClassName.Literal is not hoge,got = %s", subroutineCallTerm.ClassName.Literal)
+	}
+	if subroutineCallTerm.VarName.Literal != "fuga" {
+		t.Fatalf("subroutineCallTerm.VarName.Literal is not hoge,got = %s", subroutineCallTerm.VarName.Literal)
 	}
 	if len(subroutineCallTerm.ExpressionListStmt.ExpressionList) != 6 {
 		t.Fatalf("len(subroutineCallTerm.ExpressionListStmt.ExpressionList) is not 6,got = %d", len(subroutineCallTerm.ExpressionListStmt.ExpressionList))

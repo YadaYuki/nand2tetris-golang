@@ -201,10 +201,10 @@ func (rs *ReturnStatement) Xml() string {
 }
 
 type DoStatement struct {
-	Token          token.Token // Keyword:"do"
-	ClassName      token.Token
-	VarName        token.Token
-	ExpressionList *ExpressionListStatement
+	Token              token.Token // Keyword:"do"
+	ClassName          token.Token
+	VarName            token.Token
+	ExpressionListStmt *ExpressionListStatement
 }
 
 func (ds *DoStatement) statementNode() {}
@@ -218,7 +218,7 @@ func (ds *DoStatement) String() string {
 		out.WriteString(ds.ClassName.Literal + ".")
 	}
 	out.WriteString(ds.VarName.Literal)
-	out.WriteString(ds.ExpressionList.String())
+	out.WriteString(ds.ExpressionListStmt.String())
 	out.WriteString(";")
 	return out.String()
 }
@@ -231,7 +231,7 @@ func (ds *DoStatement) Xml() string {
 		out.WriteString(identifierXml(ds.ClassName.Literal) + symbolXml("."))
 	}
 	out.WriteString(identifierXml(ds.VarName.Literal))
-	out.WriteString(ds.ExpressionList.Xml())
+	out.WriteString(ds.ExpressionListStmt.Xml())
 	out.WriteString("</doStatement>")
 	return out.String()
 }
@@ -623,8 +623,9 @@ func (ict *KeywordConstTerm) Xml() string {
 
 type SubroutineCallTerm struct {
 	Token              token.Token // FunctionName
-	FunctionName       string
-	ExpressionListStmt ExpressionListStatement
+	ClassName          token.Token
+	VarName            token.Token
+	ExpressionListStmt *ExpressionListStatement
 }
 
 func (sct *SubroutineCallTerm) termNode() {}
@@ -633,17 +634,23 @@ func (sct *SubroutineCallTerm) TokenLiteral() string { return sct.Token.Literal 
 
 func (sct *SubroutineCallTerm) String() string {
 	var out bytes.Buffer
-	out.WriteString(sct.FunctionName)
+	if sct.ClassName.Literal != "" {
+		out.WriteString(sct.ClassName.Literal + ".")
+	}
+	out.WriteString(sct.VarName.Literal)
 	out.WriteString(sct.ExpressionListStmt.String())
 	return out.String()
 }
 
 func (sct *SubroutineCallTerm) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<term>")
-	out.WriteString("<identifier> " + sct.FunctionName + " </identifier>")
+	out.WriteString("<term> ")
+	if sct.ClassName.Literal != "" {
+		out.WriteString(identifierXml(sct.ClassName.Literal) + symbolXml("."))
+	}
+	out.WriteString(identifierXml(sct.VarName.Literal))
 	out.WriteString(sct.ExpressionListStmt.Xml())
-	out.WriteString("</term>")
+	out.WriteString(" </term>")
 	return out.String()
 }
 
