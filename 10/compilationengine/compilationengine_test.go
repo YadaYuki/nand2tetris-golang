@@ -147,11 +147,9 @@ func testReturnStatement(t *testing.T, s ast.Statement, name string) bool {
 	return true
 }
 
-func TestDoStatements(t *testing.T) {
+func TestParseDoStatements(t *testing.T) {
 	input := `
-	do x;
-	do 1;
-	do a;
+	do ClassName.VarName(a,b,c,d,e);
 `
 	jt := tokenizer.New(input)
 	ce := New(jt)
@@ -159,32 +157,39 @@ func TestDoStatements(t *testing.T) {
 	if program == nil {
 		t.Fatalf("ParseProgram() returned nil")
 	}
-	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. got=%d", len(program.Statements))
 	}
 	testCases := []struct {
-		expectedIdentifier string
+		expectedClassName string
+		expectedVarName   string
 	}{
-		{"x"},
-		{"1"},
-		{},
+		{"ClassName", "VarName"},
 	}
 	for i, tt := range testCases {
 		stmt := program.Statements[i]
-		if !testDoStatement(t, stmt, tt.expectedIdentifier) {
+		if !testDoStatement(t, stmt, tt.expectedClassName, tt.expectedVarName) {
 			return
 		}
 	}
 }
 
-func testDoStatement(t *testing.T, s ast.Statement, name string) bool {
+func testDoStatement(t *testing.T, s ast.Statement, className string, varName string) bool {
 	if s.TokenLiteral() != "do" {
 		t.Errorf("s.TokenLiteral not 'do'. got %q", s.TokenLiteral())
 		return false
 	}
-	_, ok := s.(*ast.DoStatement)
+	doStmt, ok := s.(*ast.DoStatement)
 	if !ok {
 		t.Errorf("s not *ast.DoStatement. got %T", s)
+		return false
+	}
+	if doStmt.ClassName.Literal != className {
+		t.Errorf("doStmt.VarName.Literal not %s. got %s", className, doStmt.ClassName.Literal)
+		return false
+	}
+	if doStmt.VarName.Literal != varName {
+		t.Errorf("doStmt.VarName.Literal not %s. got %s", varName, doStmt.VarName.Literal)
 		return false
 	}
 	return true

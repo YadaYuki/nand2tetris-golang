@@ -202,9 +202,9 @@ func (rs *ReturnStatement) Xml() string {
 
 type DoStatement struct {
 	Token          token.Token // Keyword:"do"
-	ClassName      *token.Token
-	VarName        *token.Token
-	ExpressionList ExpressionListStatement
+	ClassName      token.Token
+	VarName        token.Token
+	ExpressionList *ExpressionListStatement
 }
 
 func (ds *DoStatement) statementNode() {}
@@ -214,7 +214,7 @@ func (ds *DoStatement) TokenLiteral() string { return ds.Token.Literal }
 func (ds *DoStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(ds.TokenLiteral() + " ")
-	if ds.ClassName != nil {
+	if ds.ClassName.Literal != "" {
 		out.WriteString(ds.ClassName.Literal + ".")
 	}
 	out.WriteString(ds.VarName.Literal)
@@ -227,7 +227,7 @@ func (ds *DoStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<doStatement>")
 	out.WriteString(keywordXml(ds.TokenLiteral()))
-	if ds.ClassName != nil {
+	if ds.ClassName.Literal != "" {
 		out.WriteString(identifierXml(ds.ClassName.Literal) + symbolXml("."))
 	}
 	out.WriteString(identifierXml(ds.VarName.Literal))
