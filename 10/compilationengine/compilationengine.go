@@ -96,7 +96,6 @@ func (ce *CompilationEngine) parseClassStatement() *ast.ClassStatement {
 	if token.Symbol(ce.curToken.Literal) != token.RBRACE {
 		return nil
 	}
-	ce.advanceToken()
 	return stmt
 }
 
@@ -272,7 +271,6 @@ func (ce *CompilationEngine) parseWhileStatement() *ast.WhileStatement {
 	}
 	ce.advanceToken()
 	stmt.Statements = ce.parseBlockStatement()
-	ce.advanceToken()
 	return stmt
 }
 

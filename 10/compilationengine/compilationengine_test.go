@@ -361,13 +361,8 @@ func TestParseStringConstTermExpression(t *testing.T) {
 func TestParseIfStatement(t *testing.T) {
 	input := `
 	 if(x=1){
-		do x;
-		do 1;
-		do a;
+	
 	 }else{
-		do x;
-		do 1;
-		do a;
 	 }`
 	jt := tokenizer.New(input)
 	ce := New(jt)
