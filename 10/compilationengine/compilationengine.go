@@ -10,8 +10,7 @@ import (
 
 // CompilationEngine is struct
 type CompilationEngine struct {
-	jt *tokenizer.JackTokenizer
-	// errors         []string
+	jt        *tokenizer.JackTokenizer
 	curToken  token.Token
 	nextToken token.Token
 }
@@ -45,6 +44,7 @@ func (ce *CompilationEngine) advanceToken() {
 
 func (ce *CompilationEngine) parseStatement() ast.Statement {
 	if ce.curToken.Type != token.KEYWORD {
+		fmt.Println(ce.curToken)
 		panic(fmt.Sprintf("Initial Token Type should be KEYWORD. got %s ", ce.curToken.Type))
 	}
 	return ce.parseKeyWord()
@@ -177,11 +177,25 @@ func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement {
 func (ce *CompilationEngine) parseDoStatement() *ast.DoStatement {
 	stmt := &ast.DoStatement{Token: ce.curToken}
 	ce.advanceToken()
-	stmt.SubroutineCall = ce.curToken
+
+	if token.Symbol(ce.nextToken.Literal) == token.DOT {
+		stmt.ClassName = ce.curToken
+		ce.advanceToken() // className
+		ce.advanceToken() // token.DOT
+	}
+	stmt.VarName = ce.curToken
+	ce.advanceToken()
+
+	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
+		return nil
+	}
+
+	stmt.ExpressionList = ce.parseExpressionListStatement()
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		return nil
 	}
+
 	return stmt
 }
 
@@ -282,13 +296,19 @@ func (ce *CompilationEngine) parseExpressionListStatement() *ast.ExpressionListS
 	expressionListStmt := &ast.ExpressionListStatement{Token: ce.curToken}
 	ce.advanceToken()
 	expressionListStmt.ExpressionList = []ast.Expression{}
-	for token.Symbol(ce.curToken.Literal) != token.RPAREN && !ce.curTokenIs(token.EOF) {
+	for token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		expression := ce.parseExpression()
 		if expression != nil {
 			expressionListStmt.ExpressionList = append(expressionListStmt.ExpressionList, expression)
 		}
 		ce.advanceToken()
-		ce.advanceToken()
+		if token.Symbol(ce.curToken.Literal) == token.RPAREN {
+			break
+		} else if token.Symbol(ce.curToken.Literal) == token.COMMA {
+			ce.advanceToken()
+		} else {
+			return nil
+		}
 	}
 	return expressionListStmt
 }
@@ -354,6 +374,9 @@ func (ce *CompilationEngine) parseTerm() ast.Term {
 		return ce.parseIntegerConstTerm()
 	case token.IDENTIFIER:
 		if token.Symbol(ce.nextToken.Literal) == token.LPAREN {
+			return ce.parseSubroutineCallTerm()
+		}
+		if token.Symbol(ce.nextToken.Literal) == token.DOT {
 			return ce.parseSubroutineCallTerm()
 		}
 		if token.Symbol(ce.nextToken.Literal) == token.LBRACKET {
