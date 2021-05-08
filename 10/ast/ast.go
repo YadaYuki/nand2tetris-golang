@@ -54,11 +54,9 @@ func (p *Program) String() string {
 }
 func (p *Program) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<expression>")
 	for _, stmt := range p.Statements {
 		out.WriteString(stmt.Xml())
 	}
-	out.WriteString("</expression>")
 	return out.String()
 }
 
@@ -131,6 +129,7 @@ func (sds *SubroutineDecStatement) Xml() string {
 type LetStatement struct {
 	Token  token.Token // KEYWORD:"let"
 	Name   token.Token
+	Idx    Expression
 	Symbol token.Token // Symbol:"="
 	Value  Expression
 }
@@ -143,6 +142,9 @@ func (ls *LetStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(ls.TokenLiteral() + " ")
 	out.WriteString(ls.Name.Literal)
+	if ls.Idx != nil {
+		out.WriteString("[" + ls.Idx.String() + "]")
+	}
 	if ls.Value != nil {
 		out.WriteString(ls.Symbol.Literal)
 		out.WriteString(ls.Value.String())
@@ -156,6 +158,9 @@ func (ls *LetStatement) Xml() string {
 	out.WriteString("<letStatement>")
 	out.WriteString(keywordXml(ls.TokenLiteral()))
 	out.WriteString(identifierXml(ls.Name.Literal))
+	if ls.Idx != nil {
+		out.WriteString(symbolXml("[") + ls.Idx.Xml() + symbolXml("]"))
+	}
 	if ls.Value != nil {
 		out.WriteString(symbolXml(ls.Symbol.Literal))
 		out.WriteString(ls.Value.Xml())
@@ -311,6 +316,7 @@ func (ifs *IfStatement) TokenLiteral() string { return ifs.Token.Literal }
 func (ifs *IfStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString("if")
+
 	out.WriteString(ifs.Condition.String())
 	out.WriteString(" ")
 	out.WriteString(ifs.Consequence.String())
@@ -502,7 +508,7 @@ func (pe *SingleExpression) Xml() string {
 type InfixExpression struct {
 	Token    token.Token // 式の最初のトークン
 	Left     Term
-	Operator string
+	Operator token.Token
 	Right    Term
 }
 
@@ -511,14 +517,14 @@ func (ie *InfixExpression) expressionNode() {}
 func (ie *InfixExpression) TokenLiteral() string { return ie.Token.Literal }
 
 func (ie *InfixExpression) String() string {
-	return ie.Left.String() + ie.Operator + ie.Right.String()
+	return ie.Left.String() + ie.Operator.Literal + ie.Right.String()
 }
 
 func (ie *InfixExpression) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<expression>")
 	out.WriteString(ie.Left.Xml())
-	out.WriteString("<symbol>" + ie.Operator + "</symbol>")
+	out.WriteString("<symbol>" + ie.Operator.Literal + "</symbol>")
 	out.WriteString(ie.Right.Xml())
 	out.WriteString("</expression>")
 	return out.String()

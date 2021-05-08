@@ -51,10 +51,10 @@ type Symbol string
 var SymbolMap = map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
 
 const (
+	BANG      Symbol = "~"
 	ASSIGN    Symbol = "="
 	PLUS      Symbol = "+"
 	MINUS     Symbol = "-"
-	BANG      Symbol = "~"
 	ASTERISK  Symbol = "*"
 	SLASH     Symbol = "/"
 	LT        Symbol = "<"

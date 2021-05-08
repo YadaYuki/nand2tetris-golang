@@ -41,6 +41,28 @@ func TestLetStatements(t *testing.T) {
 	}
 }
 
+func TestLetArrayElementStatements(t *testing.T) {
+	input := `let a[1+1] = 8080;`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	program := ce.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+	testCases := []struct {
+		expectedIdentifier string
+		expectedIdx        string
+		expectedValue      string
+	}{
+		{"a", "1+1", "8080"},
+	}
+	for i, tt := range testCases {
+		stmt := program.Statements[i]
+		if !testLetArrayElementStatement(t, stmt, tt.expectedIdentifier, tt.expectedIdx, tt.expectedValue) {
+			return
+		}
+	}
+}
 func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenLiteral() != "let" {
 		t.Errorf("s.TokenLiteral not 'let'. got %q", s.TokenLiteral())
@@ -52,6 +74,31 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	}
 	if letStmt.Name.Literal != name {
 		t.Errorf("letStmt.Name.TokenLiteral() not '%s'.got '%s'", name, letStmt.Name.Literal)
+		return false
+	}
+	return true
+}
+
+func testLetArrayElementStatement(t *testing.T, s ast.Statement, name string, idx string, value string) bool {
+	if s.TokenLiteral() != "let" {
+		t.Errorf("s.TokenLiteral not 'let'. got %q", s.TokenLiteral())
+	}
+	letStmt, ok := s.(*ast.LetStatement)
+	if !ok {
+		t.Errorf("s not *ast.LetStatement. got %T", s)
+		return false
+	}
+	if letStmt.Name.Literal != name {
+		t.Errorf("letStmt.Name.TokenLiteral() not '%s'.got '%s'", name, letStmt.Name.Literal)
+		return false
+	}
+	if letStmt.Idx.String() != idx {
+		t.Errorf("letStmt.Idx.String() not '%s'.got '%s'", idx, letStmt.Idx.String())
+		return false
+	}
+
+	if letStmt.Value.String() != value {
+		t.Errorf("letStmt.Value.String()  not '%s'.got '%s'", value, letStmt.Value.String())
 		return false
 	}
 	return true
@@ -146,6 +193,7 @@ func testDoStatement(t *testing.T, s ast.Statement, name string) bool {
 func TestVarDecStatements(t *testing.T) {
 	input := `
 	var int a,b,c;
+	var int length;
 	var char casdfasdf;
 	var boolean a1,b2,cx;
 `
@@ -252,7 +300,7 @@ func testClassVarDecStatement(t *testing.T, s ast.Statement, expectedValueType s
 }
 
 func TestParseIntConstTermExpression(t *testing.T) {
-	input := `33`
+	input := `33+33`
 	jt := tokenizer.New(input)
 	ce := New(jt)
 	expression := ce.parseExpression()
