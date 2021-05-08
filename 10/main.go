@@ -8,22 +8,17 @@ import (
 
 func main() {
 	jt := tokenizer.New(`
-    class Main {
-
-   constructor Square new(int Ax, int Ay, int Asize) {
-    let x = Ax;
-    let y = Ay;
-    let size = Asize;
-    do draw;
-    return x;
- }
     function void main() {
+        var Array a;
         var int length;
         var int i, sum;
-        return a;
-      }
-    }`)
+      	let i = 0;
+				while (i < length) {
+           let a = 0;
+					 let sum = sum + a[i];
+					 let i = i + 1;
+      	}
+	}`)
 	ce := compilationengine.New(jt)
 	fmt.Println(ce.ParseProgram().Xml())
-
 }

@@ -146,6 +146,7 @@ func testDoStatement(t *testing.T, s ast.Statement, name string) bool {
 func TestVarDecStatements(t *testing.T) {
 	input := `
 	var int a,b,c;
+	var int length;
 	var char casdfasdf;
 	var boolean a1,b2,cx;
 `
@@ -252,7 +253,7 @@ func testClassVarDecStatement(t *testing.T, s ast.Statement, expectedValueType s
 }
 
 func TestParseIntConstTermExpression(t *testing.T) {
-	input := `33`
+	input := `33+33`
 	jt := tokenizer.New(input)
 	ce := New(jt)
 	expression := ce.parseExpression()

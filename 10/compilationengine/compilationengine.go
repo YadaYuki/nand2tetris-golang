@@ -93,6 +93,7 @@ func (ce *CompilationEngine) parseClassStatement() *ast.ClassStatement {
 		return nil
 	}
 	stmt.Statements = ce.parseBlockStatement()
+
 	if token.Symbol(ce.curToken.Literal) != token.RBRACE {
 		return nil
 	}
@@ -172,11 +173,10 @@ func (ce *CompilationEngine) parseDoStatement() *ast.DoStatement {
 
 func (ce *CompilationEngine) parseVarDecStatement() *ast.VarDecStatement {
 	stmt := &ast.VarDecStatement{Token: ce.curToken, Identifiers: []token.Token{}}
-	if ce.expectNext(token.KEYWORD) {
-		if token.KeyWord(ce.curToken.Literal) != token.INT && token.KeyWord(ce.curToken.Literal) != token.BOOLEAN && token.KeyWord(ce.curToken.Literal) != token.CHAR {
-			return nil
-		}
+	if token.KeyWord(ce.nextToken.Literal) != token.INT && token.KeyWord(ce.nextToken.Literal) != token.BOOLEAN && token.KeyWord(ce.nextToken.Literal) != token.CHAR && !ce.nextTokenIs(token.IDENTIFIER) {
+		return nil
 	}
+	ce.advanceToken()
 	stmt.ValueType = ce.curToken
 	for token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		ce.advanceToken()
@@ -189,17 +189,15 @@ func (ce *CompilationEngine) parseVarDecStatement() *ast.VarDecStatement {
 
 func (ce *CompilationEngine) parseClassVarDecStatement() *ast.ClassVarDecStatement {
 	stmt := &ast.ClassVarDecStatement{Token: ce.curToken, Identifiers: []token.Token{}}
-	if ce.expectNext(token.KEYWORD) {
-		if token.KeyWord(ce.curToken.Literal) != token.INT && token.KeyWord(ce.curToken.Literal) != token.BOOLEAN && token.KeyWord(ce.curToken.Literal) != token.CHAR {
-			return nil
-		}
+	if token.KeyWord(ce.nextToken.Literal) != token.INT && token.KeyWord(ce.nextToken.Literal) != token.BOOLEAN && token.KeyWord(ce.nextToken.Literal) != token.CHAR && !ce.nextTokenIs(token.IDENTIFIER) {
+		return nil
 	}
 	stmt.ValueType = ce.curToken
 	for token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		ce.advanceToken()
 		identifier := ce.curToken
 		stmt.Identifiers = append(stmt.Identifiers, identifier)
-		ce.advanceToken() //
+		ce.advanceToken()
 	}
 	return stmt
 }
@@ -236,11 +234,13 @@ func (ce *CompilationEngine) parseWhileStatement() *ast.WhileStatement {
 			return nil
 		}
 	}
+	ce.advanceToken()
 	stmt.Condition = ce.parseExpression()
+	ce.advanceToken()
+
 	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		return nil
 	}
-
 	ce.advanceToken()
 	stmt.Statements = ce.parseBlockStatement()
 	ce.advanceToken()
@@ -252,6 +252,7 @@ func (ce *CompilationEngine) parseBlockStatement() *ast.BlockStatement {
 	ce.advanceToken()
 	block.Statements = []ast.Statement{}
 	for token.Symbol(ce.curToken.Literal) != token.RBRACE && !ce.curTokenIs(token.EOF) {
+
 		stmt := ce.parseStatement()
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
@@ -310,10 +311,25 @@ func (ce *CompilationEngine) parseParameterStatement() *ast.ParameterStatement {
 }
 
 func (ce *CompilationEngine) parseExpression() ast.Expression {
-	token := ce.curToken
+	expressionToken := ce.curToken
 	prefixTerm := ce.parseTerm()
-	// TODO: add infix expression parser
-	return &ast.SingleExpression{Token: token, Value: prefixTerm}
+	if token.Symbol(ce.nextToken.Literal) != token.ASSIGN &&
+		token.Symbol(ce.nextToken.Literal) != token.PLUS &&
+		token.Symbol(ce.nextToken.Literal) != token.MINUS &&
+		token.Symbol(ce.nextToken.Literal) != token.ASTERISK &&
+		token.Symbol(ce.nextToken.Literal) != token.SLASH &&
+		token.Symbol(ce.nextToken.Literal) != token.LT &&
+		token.Symbol(ce.nextToken.Literal) != token.GT &&
+		token.Symbol(ce.nextToken.Literal) != token.EQ &&
+		token.Symbol(ce.nextToken.Literal) != token.NOT_EQ {
+		return &ast.SingleExpression{Token: expressionToken, Value: prefixTerm}
+	} else {
+		ce.advanceToken()
+		operator := ce.curToken
+		ce.advanceToken()
+		suffixTerm := ce.parseTerm()
+		return &ast.InfixExpression{Left: prefixTerm, Operator: operator, Right: suffixTerm}
+	}
 }
 
 func (ce *CompilationEngine) parseTerm() ast.Term {
@@ -321,20 +337,20 @@ func (ce *CompilationEngine) parseTerm() ast.Term {
 	case token.INTCONST:
 		return ce.parseIntegerConstTerm()
 	case token.IDENTIFIER:
-		if ce.nextToken.Literal == string(token.LPAREN) {
+		if token.Symbol(ce.nextToken.Literal) == token.LPAREN {
 			return ce.parseSubroutineCallTerm()
 		}
-		if ce.nextToken.Literal == string(token.LBRACKET) {
+		if token.Symbol(ce.nextToken.Literal) == token.LBRACKET {
 			return ce.parseArrayElementTerm()
 		}
 		return ce.parseIdentifierTerm()
 	case token.STARTINGCONST:
 		return ce.parseStringConstTerm()
 	case token.SYMBOL:
-		if ce.curToken.Literal == string(token.LPAREN) {
+		if token.Symbol(ce.curToken.Literal) == token.LPAREN {
 			return ce.parseBracketTerm()
 		}
-		if ce.curToken.Literal == string(token.MINUS) || ce.curToken.Literal == string(token.BANG) {
+		if token.Symbol(ce.curToken.Literal) == token.MINUS || token.Symbol(ce.curToken.Literal) == token.BANG {
 			return ce.parsePrefixTerm()
 		}
 	case token.KEYWORD:
