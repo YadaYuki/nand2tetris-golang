@@ -10,8 +10,7 @@ import (
 
 // CompilationEngine is struct
 type CompilationEngine struct {
-	jt *tokenizer.JackTokenizer
-	// errors         []string
+	jt        *tokenizer.JackTokenizer
 	curToken  token.Token
 	nextToken token.Token
 }
@@ -177,8 +176,10 @@ func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement {
 func (ce *CompilationEngine) parseDoStatement() *ast.DoStatement {
 	stmt := &ast.DoStatement{Token: ce.curToken}
 	ce.advanceToken()
+
 	stmt.SubroutineCall = ce.curToken
 	ce.advanceToken()
+
 	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		return nil
 	}

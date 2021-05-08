@@ -66,6 +66,7 @@ const (
 	RBRACE    Symbol = "}"
 	LBRACE    Symbol = "{"
 	COMMA     Symbol = ","
+	DOT       Symbol = "."
 	SEMICOLON Symbol = ";"
 	LBRACKET  Symbol = "["
 	RBRACKET  Symbol = "]"
