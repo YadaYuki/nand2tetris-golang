@@ -44,7 +44,6 @@ func (ce *CompilationEngine) advanceToken() {
 
 func (ce *CompilationEngine) parseStatement() ast.Statement {
 	if ce.curToken.Type != token.KEYWORD {
-		fmt.Println(ce.curToken)
 		panic(fmt.Sprintf("Initial Token Type should be KEYWORD. got %s ", ce.curToken.Type))
 	}
 	return ce.parseKeyWord()
@@ -190,7 +189,7 @@ func (ce *CompilationEngine) parseDoStatement() *ast.DoStatement {
 		return nil
 	}
 
-	stmt.ExpressionList = ce.parseExpressionListStatement()
+	stmt.ExpressionListStmt = ce.parseExpressionListStatement()
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		return nil
@@ -423,9 +422,21 @@ func (ce *CompilationEngine) parseKeyWordConstTerm() ast.Term {
 }
 
 func (ce *CompilationEngine) parseSubroutineCallTerm() ast.Term {
+	subroutineCallTerm := &ast.SubroutineCallTerm{Token: ce.curToken}
+	if token.Symbol(ce.nextToken.Literal) == token.DOT {
+		subroutineCallTerm.ClassName = ce.curToken
+		ce.advanceToken() // className
+		ce.advanceToken() // token.DOT
+	}
+	subroutineCallTerm.VarName = ce.curToken
 	ce.advanceToken()
-	expressionListStmt := ce.parseExpressionListStatement()
-	return &ast.SubroutineCallTerm{Token: ce.curToken, FunctionName: ce.curToken.Literal, ExpressionListStmt: *expressionListStmt}
+
+	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
+		return nil
+	}
+
+	subroutineCallTerm.ExpressionListStmt = ce.parseExpressionListStatement()
+	return subroutineCallTerm
 }
 
 func (ce *CompilationEngine) parseArrayElementTerm() ast.Term {

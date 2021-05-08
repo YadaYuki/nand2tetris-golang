@@ -180,8 +180,8 @@ func TestSubroutineCallTermString(t *testing.T) {
 		},
 	}
 	subroutineCallTerm := &SubroutineCallTerm{
-		Token:              token.Token{Type: token.IDENTIFIER, Literal: "hoge"},
-		FunctionName:       "hoge",
+		Token: token.Token{Type: token.IDENTIFIER, Literal: "hoge"},
+		// FunctionName:       "hoge",
 		ExpressionListStmt: *expressionListStatement,
 	}
 	t.Log(subroutineCallTerm.String())
