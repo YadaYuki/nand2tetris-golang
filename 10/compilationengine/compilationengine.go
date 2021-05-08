@@ -133,9 +133,23 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 	}
 	stmt.Name = ce.curToken
 	ce.advanceToken()
+
+	if token.Symbol(ce.curToken.Literal) == token.LBRACKET {
+		ce.advanceToken()
+
+		stmt.Idx = ce.parseExpression()
+		ce.advanceToken()
+
+		if token.Symbol(ce.curToken.Literal) != token.RBRACKET {
+			return nil
+		}
+		ce.advanceToken()
+	}
+
 	if token.Symbol(ce.curToken.Literal) != token.ASSIGN {
 		return nil
 	}
+
 	stmt.Symbol = ce.curToken
 	ce.advanceToken()
 	stmt.Value = ce.parseExpression()
@@ -209,12 +223,14 @@ func (ce *CompilationEngine) parseIfStatement() *ast.IfStatement {
 			return nil
 		}
 	}
-	// TODO:Add parseExpression
-	for token.Symbol(ce.curToken.Literal) != token.RPAREN {
-		ce.advanceToken()
-	}
-
+	stmt.Condition = ce.parseExpression()
 	ce.advanceToken()
+
+	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
+		return nil
+	}
+	ce.advanceToken()
+
 	stmt.Consequence = ce.parseBlockStatement()
 	ce.advanceToken()
 	if token.KeyWord(ce.curToken.Literal) == token.ELSE {
