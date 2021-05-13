@@ -279,7 +279,6 @@ func (ce *CompilationEngine) parseBlockStatement() *ast.BlockStatement {
 	ce.advanceToken()
 	block.Statements = []ast.Statement{}
 	for token.Symbol(ce.curToken.Literal) != token.RBRACE && !ce.curTokenIs(token.EOF) {
-
 		stmt := ce.parseStatement()
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
@@ -438,7 +437,7 @@ func (ce *CompilationEngine) parseSubroutineCallTerm() ast.Term {
 }
 
 func (ce *CompilationEngine) parseArrayElementTerm() ast.Term {
-	arrayElementTerm := &ast.ArrayElementTerm{Token: ce.curToken, ArrayName: ce.curToken.Literal}
+	arrayElementTerm := &ast.ArrayElementTerm{Token: ce.curToken, ArrayName: ce.curToken}
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.LBRACKET {
 		return nil

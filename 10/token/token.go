@@ -9,6 +9,27 @@ type Token struct {
 	Literal string
 }
 
+func (token *Token) String() string {
+	return token.Literal
+}
+
+func (token *Token) Xml() string {
+	switch token.Type {
+	case KEYWORD:
+		return "<keyword> " + token.Literal + " </keyword>"
+	case SYMBOL:
+		return "<symbol> " + token.Literal + " </symbol>"
+	case IDENTIFIER:
+		return "<identifier> " + token.Literal + " </identifier>"
+	case INTCONST:
+		return "<integerConstant> " + token.Literal + " </integerConstant>"
+	case STARTINGCONST:
+		return "<stringConstant> " + token.Literal + " </stringConstant>"
+	default:
+		return ""
+	}
+}
+
 const (
 	SYMBOL        TokenType = "SYMBOL"
 	KEYWORD       TokenType = "KEYWORD"
@@ -51,6 +72,9 @@ type Symbol string
 var SymbolMap = map[byte]bool{'{': true, '}': true, '(': true, ')': true, '[': true, ']': true, '.': true, ':': true, ',': true, ';': true, '+': true, '-': true, '*': true, '/': true, '&': true, '|': true, '<': true, '>': true, '=': true, '~': true}
 
 const (
+	COLON     Symbol = ":"
+	AMP       Symbol = "&"
+	OR        Symbol = "|"
 	BANG      Symbol = "~"
 	ASSIGN    Symbol = "="
 	PLUS      Symbol = "+"
