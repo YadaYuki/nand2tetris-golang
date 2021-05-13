@@ -8,8 +8,8 @@ import (
 
 func main() {
 	jt := tokenizer.New(`
-	class Main {
-  function void main() {
+class Main {
+function void main() {
   var Array a;
   var int length;
   var int i, sum;
@@ -30,9 +30,8 @@ func main() {
 	do Output.printInt(sum / length);
 	do Output.println();
 	return;
-	}
-}
-`)
+  }
+}`)
 	ce := compilationengine.New(jt)
 	fmt.Println(ce.ParseProgram().Xml())
 }

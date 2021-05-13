@@ -113,14 +113,13 @@ func (sds *SubroutineDecStatement) String() string {
 func (sds *SubroutineDecStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<subroutineDec> ")
-	if sds.ReturnType.Type == token.IDENTIFIER {
-		out.WriteString(identifierXml(sds.ReturnType.Literal))
-	} else if sds.ReturnType.Type == token.KEYWORD {
-		out.WriteString(keywordXml(sds.ReturnType.Literal))
-	}
+	out.WriteString(sds.Token.Xml())
+	out.WriteString(sds.ReturnType.Xml())
 	out.WriteString(identifierXml(sds.Name.Literal))
 	out.WriteString(sds.ParameterList.Xml())
+	out.WriteString("<subroutineBody> ")
 	out.WriteString(sds.Statements.Xml())
+	out.WriteString("</subroutineBody>")
 	out.WriteString(" </subroutineDec>")
 	return out.String()
 }
@@ -232,6 +231,7 @@ func (ds *DoStatement) Xml() string {
 	}
 	out.WriteString(identifierXml(ds.VarName.Literal))
 	out.WriteString(ds.ExpressionListStmt.Xml())
+	out.WriteString(symbolXml(";"))
 	out.WriteString("</doStatement>")
 	return out.String()
 }
@@ -252,7 +252,6 @@ func (vds *VarDecStatement) String() string {
 	out.WriteString(vds.ValueType.Literal + " ")
 	identifiersStringLs := []string{}
 	for _, identifier := range vds.Identifiers {
-		fmt.Println(identifier)
 		identifiersStringLs = append(identifiersStringLs, identifier.Literal)
 	}
 	fmt.Println(identifiersStringLs)
@@ -263,8 +262,8 @@ func (vds *VarDecStatement) String() string {
 func (vds *VarDecStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<varDec>")
-	out.WriteString(keywordXml(vds.TokenLiteral()))
-	out.WriteString(keywordXml(vds.ValueType.Literal))
+	out.WriteString(vds.Token.Xml())
+	out.WriteString(vds.ValueType.Xml())
 	identifiersXmlLs := []string{}
 	for _, identifier := range vds.Identifiers {
 		identifiersXmlLs = append(identifiersXmlLs, identifierXml(identifier.Literal))
@@ -326,7 +325,6 @@ func (ifs *IfStatement) TokenLiteral() string { return ifs.Token.Literal }
 func (ifs *IfStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString("if")
-
 	out.WriteString(ifs.Condition.String())
 	out.WriteString(" ")
 	out.WriteString(ifs.Consequence.String())
@@ -362,7 +360,9 @@ func (ws *WhileStatement) TokenLiteral() string { return ws.Token.Literal }
 func (ws *WhileStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString("while")
+	out.WriteString("(")
 	out.WriteString(ws.Condition.String())
+	out.WriteString(")")
 	out.WriteString(" ")
 	out.WriteString(ws.Statements.String())
 	return out.String()
@@ -371,7 +371,9 @@ func (ws *WhileStatement) String() string {
 func (ws *WhileStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString(keywordXml("while"))
+	out.WriteString(symbolXml("("))
 	out.WriteString(ws.Condition.Xml())
+	out.WriteString(symbolXml(")"))
 	out.WriteString(ws.Statements.Xml())
 	return out.String()
 }
@@ -398,9 +400,11 @@ func (bs *BlockStatement) String() string {
 func (bs *BlockStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString(symbolXml("{"))
+	out.WriteString("<statements>")
 	for _, s := range bs.Statements {
 		out.WriteString(s.Xml())
 	}
+	out.WriteString("</statements>")
 	out.WriteString(symbolXml("}"))
 	return out.String()
 }
@@ -416,14 +420,12 @@ func (els *ExpressionListStatement) TokenLiteral() string { return els.Token.Lit
 
 func (els *ExpressionListStatement) String() string {
 	var out bytes.Buffer
-	if len(els.ExpressionList) == 0 {
-		return "()"
-	}
 	out.WriteString("(")
-	out.WriteString(els.ExpressionList[0].String())
-	for _, s := range els.ExpressionList[1:] {
-		out.WriteString(" ," + s.String())
+	expressionListStrs := []string{}
+	for _, s := range els.ExpressionList {
+		expressionListStrs = append(expressionListStrs, s.String())
 	}
+	out.WriteString(strings.Join(expressionListStrs, ","))
 	out.WriteString(")")
 	return out.String()
 }
@@ -433,10 +435,11 @@ func (els *ExpressionListStatement) Xml() string {
 	// TODO: Fix from "(" to token.LPAWN. others as well
 	out.WriteString(symbolXml("("))
 	out.WriteString("<expressionList> ")
+	expressionListXmls := []string{}
 	for _, s := range els.ExpressionList {
-		out.WriteString(s.Xml())
-		out.WriteString(symbolXml(","))
+		expressionListXmls = append(expressionListXmls, s.Xml())
 	}
+	out.WriteString(strings.Join(expressionListXmls, symbolXml((","))))
 	out.WriteString(" </expressionList>")
 	out.WriteString(symbolXml(")"))
 	return out.String()
@@ -465,13 +468,13 @@ func (pls *ParameterListStatement) String() string {
 func (pls *ParameterListStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString(symbolXml("("))
-	out.WriteString("<expressionList> ")
+	out.WriteString("<parameterList> ")
 	parameterListXml := []string{}
 	for _, s := range pls.ParameterList {
 		parameterListXml = append(parameterListXml, s.Xml())
 	}
 	out.WriteString(strings.Join(parameterListXml, symbolXml(",")))
-	out.WriteString(" </expressionList>")
+	out.WriteString(" </parameterList>")
 	out.WriteString(symbolXml(")"))
 	return out.String()
 }
@@ -534,7 +537,16 @@ func (ie *InfixExpression) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<expression>")
 	out.WriteString(ie.Left.Xml())
-	out.WriteString("<symbol>" + ie.Operator.Literal + "</symbol>")
+	switch token.Symbol(ie.Operator.String()) {
+	case token.LT:
+		out.WriteString("<symbol> &lt; </symbol>")
+	case token.GT:
+		out.WriteString("<symbol> &gt; </symbol>")
+	case token.AMP:
+		out.WriteString("<symbol> &amp; </symbol>")
+	default:
+		out.WriteString("<symbol> " + ie.Operator.Literal + " </symbol>")
+	}
 	out.WriteString(ie.Right.Xml())
 	out.WriteString("</expression>")
 	return out.String()
@@ -555,7 +567,7 @@ func (ict *IntergerConstTerm) String() string {
 func (ict *IntergerConstTerm) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<term>")
-	out.WriteString("<integerConstant>" + strconv.FormatInt(ict.Value, 10) + "</integerConstant>")
+	out.WriteString(ict.Token.Xml())
 	out.WriteString("</term>")
 	return out.String()
 }
@@ -570,12 +582,12 @@ func (sct *StringConstTerm) termNode() {}
 func (sct *StringConstTerm) TokenLiteral() string { return sct.Token.Literal }
 
 func (sct *StringConstTerm) String() string {
-	return sct.Value
+	return `"` + sct.Value + `"`
 }
 func (sct *StringConstTerm) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<term>")
-	out.WriteString("<stringConstant>" + sct.Value + "</stringConstant>")
+	out.WriteString(sct.Token.Xml())
 	out.WriteString("</term>")
 	return out.String()
 }
@@ -646,9 +658,9 @@ func (sct *SubroutineCallTerm) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<term> ")
 	if sct.ClassName.Literal != "" {
-		out.WriteString(identifierXml(sct.ClassName.Literal) + symbolXml("."))
+		out.WriteString(sct.ClassName.Xml() + symbolXml("."))
 	}
-	out.WriteString(identifierXml(sct.VarName.Literal))
+	out.WriteString(sct.VarName.Xml())
 	out.WriteString(sct.ExpressionListStmt.Xml())
 	out.WriteString(" </term>")
 	return out.String()
@@ -656,7 +668,7 @@ func (sct *SubroutineCallTerm) Xml() string {
 
 type ArrayElementTerm struct {
 	Token     token.Token // Identifier
-	ArrayName string
+	ArrayName token.Token
 	Idx       Expression
 }
 
@@ -666,14 +678,14 @@ func (aet *ArrayElementTerm) TokenLiteral() string { return aet.Token.Literal }
 
 func (aet *ArrayElementTerm) String() string {
 	var out bytes.Buffer
-	out.WriteString(aet.ArrayName)
+	out.WriteString(aet.ArrayName.String())
 	out.WriteString("[" + aet.Idx.String() + "]")
 	return out.String()
 }
 
 func (aet *ArrayElementTerm) Xml() string {
 	var out bytes.Buffer
-	out.WriteString(identifierXml(aet.ArrayName))
+	out.WriteString(aet.ArrayName.Xml())
 	out.WriteString(symbolXml("["))
 	out.WriteString(aet.Idx.Xml())
 	out.WriteString(symbolXml("]"))
