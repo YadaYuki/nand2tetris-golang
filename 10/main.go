@@ -30,8 +30,9 @@ function void main() {
 	do Output.printInt(sum / length);
 	do Output.println();
 	return;
+    }
   }
-}`)
+`)
 	ce := compilationengine.New(jt)
 	fmt.Println(ce.ParseProgram().Xml())
 }

@@ -119,8 +119,42 @@ func (sds *SubroutineDecStatement) Xml() string {
 	out.WriteString(sds.ParameterList.Xml())
 	out.WriteString("<subroutineBody> ")
 	out.WriteString(sds.Statements.Xml())
-	out.WriteString("</subroutineBody>")
+	out.WriteString(" </subroutineBody>")
 	out.WriteString(" </subroutineDec>")
+	return out.String()
+}
+
+type SubroutineBodyStatement struct {
+	Token      token.Token // SYMBOL:"{"
+	VarDecList []VarDecStatement
+	Statements *BlockStatement
+}
+
+func (sbs *SubroutineBodyStatement) statementNode() {}
+
+func (sbs *SubroutineBodyStatement) TokenLiteral() string { return sbs.Token.Literal }
+
+func (sbs *SubroutineBodyStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("{")
+	for _, varDec := range sbs.VarDecList {
+		out.WriteString(varDec.String())
+	}
+	out.WriteString(sbs.Statements.String())
+	out.WriteString("}")
+	return out.String()
+}
+
+func (sbs *SubroutineBodyStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<subroutineBody> ")
+	out.WriteString(symbolXml("{"))
+	for _, varDec := range sbs.VarDecList {
+		out.WriteString(varDec.Xml())
+	}
+	out.WriteString(sbs.Statements.Xml())
+	out.WriteString(symbolXml("}"))
+	out.WriteString(" </subroutineBody>")
 	return out.String()
 }
 
@@ -154,7 +188,7 @@ func (ls *LetStatement) String() string {
 
 func (ls *LetStatement) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<letStatement>")
+	out.WriteString("<letStatement> ")
 	out.WriteString(keywordXml(ls.TokenLiteral()))
 	out.WriteString(identifierXml(ls.Name.Literal))
 	if ls.Idx != nil {
@@ -164,7 +198,8 @@ func (ls *LetStatement) Xml() string {
 		out.WriteString(symbolXml(ls.Symbol.Literal))
 		out.WriteString(ls.Value.Xml())
 	}
-	out.WriteString("</letStatement>")
+	out.WriteString(symbolXml(";"))
+	out.WriteString(" </letStatement>")
 	return out.String()
 }
 
@@ -190,12 +225,13 @@ func (rs *ReturnStatement) String() string {
 
 func (rs *ReturnStatement) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<returnStatement>")
+	out.WriteString("<returnStatement> ")
 	out.WriteString(keywordXml(rs.TokenLiteral()))
 	if rs.Value != nil {
 		out.WriteString(rs.Value.Xml())
 	}
-	out.WriteString("</returnStatement>")
+	out.WriteString(symbolXml(";"))
+	out.WriteString(" </returnStatement>")
 	return out.String()
 }
 
@@ -370,11 +406,13 @@ func (ws *WhileStatement) String() string {
 
 func (ws *WhileStatement) Xml() string {
 	var out bytes.Buffer
+	out.WriteString("<whileStatement> ")
 	out.WriteString(keywordXml("while"))
 	out.WriteString(symbolXml("("))
 	out.WriteString(ws.Condition.Xml())
 	out.WriteString(symbolXml(")"))
 	out.WriteString(ws.Statements.Xml())
+	out.WriteString(" </whileStatement>")
 	return out.String()
 }
 
@@ -389,23 +427,19 @@ func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 
 func (bs *BlockStatement) String() string {
 	var out bytes.Buffer
-	out.WriteString("{")
 	for _, s := range bs.Statements {
 		out.WriteString(s.String())
 	}
-	out.WriteString("}")
 	return out.String()
 }
 
 func (bs *BlockStatement) Xml() string {
 	var out bytes.Buffer
-	out.WriteString(symbolXml("{"))
-	out.WriteString("<statements>")
+	out.WriteString("<statements> ")
 	for _, s := range bs.Statements {
 		out.WriteString(s.Xml())
 	}
-	out.WriteString("</statements>")
-	out.WriteString(symbolXml("}"))
+	out.WriteString(" </statements>")
 	return out.String()
 }
 
@@ -535,7 +569,7 @@ func (ie *InfixExpression) String() string {
 
 func (ie *InfixExpression) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<expression>")
+	out.WriteString("<expression> ")
 	out.WriteString(ie.Left.Xml())
 	switch token.Symbol(ie.Operator.String()) {
 	case token.LT:
@@ -548,7 +582,7 @@ func (ie *InfixExpression) Xml() string {
 		out.WriteString("<symbol> " + ie.Operator.Literal + " </symbol>")
 	}
 	out.WriteString(ie.Right.Xml())
-	out.WriteString("</expression>")
+	out.WriteString(" </expression>")
 	return out.String()
 }
 
@@ -566,9 +600,9 @@ func (ict *IntergerConstTerm) String() string {
 }
 func (ict *IntergerConstTerm) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<term>")
+	out.WriteString("<term> ")
 	out.WriteString(ict.Token.Xml())
-	out.WriteString("</term>")
+	out.WriteString(" </term>")
 	return out.String()
 }
 
