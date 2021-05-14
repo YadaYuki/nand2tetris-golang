@@ -148,12 +148,11 @@ func (sbs *SubroutineBodyStatement) String() string {
 func (sbs *SubroutineBodyStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<subroutineBody> ")
-	out.WriteString(symbolXml("{"))
 	for _, varDec := range sbs.VarDecList {
 		out.WriteString(varDec.Xml())
 	}
+
 	out.WriteString(sbs.Statements.Xml())
-	out.WriteString(symbolXml("}"))
 	out.WriteString(" </subroutineBody>")
 	return out.String()
 }

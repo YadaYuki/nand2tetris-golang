@@ -118,8 +118,37 @@ func (ce *CompilationEngine) parseSubroutineDecStatement() *ast.SubroutineDecSta
 	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		return nil
 	}
+	ce.parseSubroutineBodyStatement()
 	ce.advanceToken()
 	stmt.Statements = ce.parseBlockStatement()
+	return stmt
+}
+
+func (ce *CompilationEngine) parseSubroutineBodyStatement() *ast.SubroutineBodyStatement {
+	stmt := &ast.SubroutineBodyStatement{Token: ce.curToken}
+	if token.Symbol(ce.curToken.Literal) != token.LBRACE {
+		fmt.Println(ce.curToken)
+		return nil
+	}
+	ce.advanceToken()
+	stmt.VarDecList = []ast.VarDecStatement{}
+	for token.KeyWord(ce.curToken.Literal) == token.VAR {
+		varDec := ce.parseVarDecStatement()
+		stmt.VarDecList = append(stmt.VarDecList, *varDec)
+		ce.advanceToken()
+	}
+	// NOTE: originally, should call parseBlockStatement.
+	// But, the block statement in subroutine body does not start "{".
+	// so, implement original parser here.
+	stmt.Statements = &ast.BlockStatement{}
+	stmt.Statements.Statements = []ast.Statement{}
+	for token.Symbol(ce.curToken.Literal) != token.RBRACE && !ce.curTokenIs(token.EOF) {
+		statement := ce.parseStatement()
+		if statement != nil {
+			stmt.Statements.Statements = append(stmt.Statements.Statements, statement)
+		}
+		ce.advanceToken()
+	}
 	return stmt
 }
 
