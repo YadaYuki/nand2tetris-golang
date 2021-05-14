@@ -585,6 +585,10 @@ func TestParseSubroutineBodyStatement(t *testing.T) {
 
 func TestParseSubroutineDecStatement(t *testing.T) {
 	input := `method void fuga (int hoge,boolean fuga){
+		var int a,b,c;
+		var int length;
+		var char casdfasdf;
+		var boolean a1,b2,cx;
 		let x=5;
 		let y=10;
 		let hoge=111;
@@ -607,7 +611,10 @@ func TestParseSubroutineDecStatement(t *testing.T) {
 	if len(subroutineDecStmt.ParameterList.ParameterList) != 2 {
 		t.Fatalf("len(subroutineDecStmt.ParameterList.ParameterList)  is not 2 ,got = %d", len(subroutineDecStmt.ParameterList.ParameterList))
 	}
-	if len(subroutineDecStmt.Statements.Statements) != 5 {
-		t.Fatalf("len(subroutineDecStmt.Statements.Statements)  is not 5 ,got = %d", len(subroutineDecStmt.Statements.Statements))
+	if len(subroutineDecStmt.SubroutineBody.VarDecList) != 4 {
+		t.Fatalf("len(subroutineDecStmt.Statements.Statements)  is not 4 ,got = %d", len(subroutineDecStmt.SubroutineBody.VarDecList))
+	}
+	if len(subroutineDecStmt.SubroutineBody.Statements.Statements) != 5 {
+		t.Fatalf("len(subroutineDecStmt.Statements.Statements)  is not 5 ,got = %d", len(subroutineDecStmt.SubroutineBody.Statements.Statements))
 	}
 }

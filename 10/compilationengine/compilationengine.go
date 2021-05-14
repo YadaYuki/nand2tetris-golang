@@ -118,16 +118,14 @@ func (ce *CompilationEngine) parseSubroutineDecStatement() *ast.SubroutineDecSta
 	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		return nil
 	}
-	ce.parseSubroutineBodyStatement()
 	ce.advanceToken()
-	stmt.Statements = ce.parseBlockStatement()
+	stmt.SubroutineBody = ce.parseSubroutineBodyStatement()
 	return stmt
 }
 
 func (ce *CompilationEngine) parseSubroutineBodyStatement() *ast.SubroutineBodyStatement {
 	stmt := &ast.SubroutineBodyStatement{Token: ce.curToken}
 	if token.Symbol(ce.curToken.Literal) != token.LBRACE {
-		fmt.Println(ce.curToken)
 		return nil
 	}
 	ce.advanceToken()
