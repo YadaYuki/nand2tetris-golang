@@ -2,7 +2,6 @@ package ast
 
 import (
 	"bytes"
-	"fmt"
 	"jack_compiler/token"
 	"strconv"
 	"strings"
@@ -161,11 +160,13 @@ func (sbs *SubroutineBodyStatement) String() string {
 func (sbs *SubroutineBodyStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<subroutineBody> ")
+	out.WriteString(symbolXml("{"))
 	for _, varDec := range sbs.VarDecList {
 		out.WriteString(varDec.Xml())
 	}
 
 	out.WriteString(sbs.Statements.Xml())
+	out.WriteString(symbolXml("}"))
 	out.WriteString(" </subroutineBody>")
 	return out.String()
 }
@@ -302,7 +303,6 @@ func (vds *VarDecStatement) String() string {
 	for _, identifier := range vds.Identifiers {
 		identifiersStringLs = append(identifiersStringLs, identifier.Literal)
 	}
-	fmt.Println(identifiersStringLs)
 	out.WriteString(strings.Join(identifiersStringLs, ","))
 	out.WriteString(";")
 	return out.String()
@@ -423,7 +423,9 @@ func (ws *WhileStatement) Xml() string {
 	out.WriteString(symbolXml("("))
 	out.WriteString(ws.Condition.Xml())
 	out.WriteString(symbolXml(")"))
+	out.WriteString(symbolXml("{"))
 	out.WriteString(ws.Statements.Xml())
+	out.WriteString(symbolXml("}"))
 	out.WriteString(" </whileStatement>")
 	return out.String()
 }
