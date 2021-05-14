@@ -540,11 +540,15 @@ func TestParseParameterListStatement(t *testing.T) {
 
 func TestParseClassStatement(t *testing.T) {
 	input := `class hoge {
-		let x=5;
-		let y=10;
-		let hoge=111;
-		let foo=838383;
-		let bar="hogehoge";
+		static boolean test;
+		function void main() {
+			var Array a;
+			let i = 0;
+		}
+		constructor void main() {
+			var Array a;
+			let i = 0;
+		}
 	}`
 	jt := tokenizer.New(input)
 	ce := New(jt)
@@ -555,8 +559,11 @@ func TestParseClassStatement(t *testing.T) {
 	if token.KeyWord(stmt.Token.Literal) != token.CLASS {
 		t.Fatalf("token.KeyWord(stmt.Token.Literal)  is not token.CLASS ,got = %s", token.KeyWord(stmt.Token.Literal))
 	}
-	if len(stmt.Statements.Statements) != 5 {
-		t.Fatalf("len(stmt.Statements.Statements) is not 5 ,got = %d", len(stmt.Statements.Statements))
+	if len(stmt.ClassVarDecList) != 1 {
+		t.Fatalf("len(stmt.ClassVarDecList) is not 1 ,got = %d", len(stmt.ClassVarDecList))
+	}
+	if len(stmt.SubroutineDecList) != 2 {
+		t.Fatalf("len(stmt.SubroutineDecList) is not 2 ,got = %d", len(stmt.SubroutineDecList))
 	}
 }
 

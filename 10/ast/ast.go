@@ -61,9 +61,10 @@ func (p *Program) Xml() string {
 }
 
 type ClassStatement struct {
-	Token      token.Token // KEYWORD:"class"
-	Name       token.Token
-	Statements *BlockStatement
+	Token             token.Token // KEYWORD:"class"
+	Name              token.Token
+	ClassVarDecList   []ClassVarDecStatement
+	SubroutineDecList []SubroutineDecStatement
 }
 
 func (cs *ClassStatement) statementNode() {}
@@ -74,16 +75,30 @@ func (cs *ClassStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(cs.TokenLiteral() + " ")
 	out.WriteString(cs.Name.Literal)
-	out.WriteString(cs.Statements.String())
+	out.WriteString("{")
+	for _, classVarDec := range cs.ClassVarDecList {
+		out.WriteString(classVarDec.String())
+	}
+	for _, subroutineDec := range cs.SubroutineDecList {
+		out.WriteString(subroutineDec.String())
+	}
+	out.WriteString("}")
 	return out.String()
 }
 
 func (cs *ClassStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<class> ")
-	out.WriteString(keywordXml(cs.TokenLiteral()))
-	out.WriteString(identifierXml(cs.Name.Literal))
-	out.WriteString(cs.Statements.Xml())
+	out.WriteString(cs.Token.Xml())
+	out.WriteString(cs.Name.Xml())
+	out.WriteString(symbolXml("{"))
+	for _, classVarDec := range cs.ClassVarDecList {
+		out.WriteString(classVarDec.Xml())
+	}
+	for _, subroutineDec := range cs.SubroutineDecList {
+		out.WriteString(subroutineDec.Xml())
+	}
+	out.WriteString(symbolXml("}"))
 	out.WriteString(" </class>")
 	return out.String()
 }
