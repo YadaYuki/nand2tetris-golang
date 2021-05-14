@@ -89,11 +89,11 @@ func (cs *ClassStatement) Xml() string {
 }
 
 type SubroutineDecStatement struct {
-	Token         token.Token // KEYWORD:"class"
-	ReturnType    token.Token // KEYWORD:"void" or IDENTIFIER
-	Name          token.Token // IDENTIFIER
-	ParameterList *ParameterListStatement
-	Statements    *BlockStatement
+	Token          token.Token // KEYWORD:"class"
+	ReturnType     token.Token // KEYWORD:"void" or IDENTIFIER
+	Name           token.Token // IDENTIFIER
+	ParameterList  *ParameterListStatement
+	SubroutineBody *SubroutineBodyStatement
 }
 
 func (sds *SubroutineDecStatement) statementNode() {}
@@ -106,7 +106,7 @@ func (sds *SubroutineDecStatement) String() string {
 	out.WriteString(sds.ReturnType.Literal + " ")
 	out.WriteString(sds.Name.Literal)
 	out.WriteString(sds.ParameterList.String())
-	out.WriteString(sds.Statements.String())
+	out.WriteString(sds.SubroutineBody.String())
 	return out.String()
 }
 
@@ -117,9 +117,7 @@ func (sds *SubroutineDecStatement) Xml() string {
 	out.WriteString(sds.ReturnType.Xml())
 	out.WriteString(identifierXml(sds.Name.Literal))
 	out.WriteString(sds.ParameterList.Xml())
-	out.WriteString("<subroutineBody> ")
-	out.WriteString(sds.Statements.Xml())
-	out.WriteString(" </subroutineBody>")
+	out.WriteString(sds.SubroutineBody.Xml())
 	out.WriteString(" </subroutineDec>")
 	return out.String()
 }
