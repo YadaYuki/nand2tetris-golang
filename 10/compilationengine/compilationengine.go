@@ -99,7 +99,6 @@ func (ce *CompilationEngine) parseClassStatement() *ast.ClassStatement {
 		stmt.ClassVarDecList = append(stmt.ClassVarDecList, *classVarDec)
 		ce.advanceToken()
 	}
-	fmt.Println(len(stmt.ClassVarDecList))
 	stmt.SubroutineDecList = []ast.SubroutineDecStatement{}
 	for token.KeyWord(ce.curToken.Literal) == token.CONSTRUCTOR || token.KeyWord(ce.curToken.Literal) == token.FUNCTION || token.KeyWord(ce.curToken.Literal) == token.METHOD {
 		subroutineDec := ce.parseSubroutineDecStatement()
