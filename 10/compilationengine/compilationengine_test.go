@@ -560,6 +560,29 @@ func TestParseClassStatement(t *testing.T) {
 	}
 }
 
+func TestParseSubroutineBodyStatement(t *testing.T) {
+	input := `{
+		var int a,b,c;
+		var int length;
+		var char casdfasdf;
+		var boolean a1,b2,cx;
+		let x=5;
+		let y=10;
+		let hoge=111;
+		let foo=838383;
+		let bar="hogehoge";
+	}`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	stmt := ce.parseSubroutineBodyStatement()
+	if len(stmt.VarDecList) != 4 {
+		t.Fatalf("len(stmt.VarDecList)  is not 4 ,got = %d", len(stmt.VarDecList))
+	}
+	if len(stmt.Statements.Statements) != 5 {
+		t.Fatalf("len(stmt.Statements.Statements)  is not 5 ,got = %d", len(stmt.Statements.Statements))
+	}
+}
+
 func TestParseSubroutineDecStatement(t *testing.T) {
 	input := `method void fuga (int hoge,boolean fuga){
 		let x=5;

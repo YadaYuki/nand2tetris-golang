@@ -9,12 +9,8 @@
       "type": "go",
       "request": "launch",
       "program": "${workspaceFolder}",
-      "mode": "test",
-      "args": [
-          "test",
-          "./tokenizer"
-      ],
-
+      "mode": "auto",
+      "args": [],
     }
   ]
 }

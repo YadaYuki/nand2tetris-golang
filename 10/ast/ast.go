@@ -124,6 +124,39 @@ func (sds *SubroutineDecStatement) Xml() string {
 	return out.String()
 }
 
+type SubroutineBodyStatement struct {
+	Token      token.Token // SYMBOL:"{"
+	VarDecList []VarDecStatement
+	Statements *BlockStatement
+}
+
+func (sbs *SubroutineBodyStatement) statementNode() {}
+
+func (sbs *SubroutineBodyStatement) TokenLiteral() string { return sbs.Token.Literal }
+
+func (sbs *SubroutineBodyStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("{")
+	for _, varDec := range sbs.VarDecList {
+		out.WriteString(varDec.String())
+	}
+	out.WriteString(sbs.Statements.String())
+	out.WriteString("}")
+	return out.String()
+}
+
+func (sbs *SubroutineBodyStatement) Xml() string {
+	var out bytes.Buffer
+	out.WriteString("<subroutineBody> ")
+	for _, varDec := range sbs.VarDecList {
+		out.WriteString(varDec.Xml())
+	}
+
+	out.WriteString(sbs.Statements.Xml())
+	out.WriteString(" </subroutineBody>")
+	return out.String()
+}
+
 // LetStatement is Ast of "let"
 type LetStatement struct {
 	Token  token.Token // KEYWORD:"let"
