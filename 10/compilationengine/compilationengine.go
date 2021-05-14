@@ -91,8 +91,21 @@ func (ce *CompilationEngine) parseClassStatement() *ast.ClassStatement {
 	if token.Symbol(ce.curToken.Literal) != token.LBRACE {
 		return nil
 	}
-	stmt.Statements = ce.parseBlockStatement()
+	ce.advanceToken()
+	stmt.ClassVarDecList = []ast.ClassVarDecStatement{}
+	for token.KeyWord(ce.curToken.Literal) == token.STATIC || token.KeyWord(ce.curToken.Literal) == token.FIELD {
 
+		classVarDec := ce.parseClassVarDecStatement()
+		stmt.ClassVarDecList = append(stmt.ClassVarDecList, *classVarDec)
+		ce.advanceToken()
+	}
+	fmt.Println(len(stmt.ClassVarDecList))
+	stmt.SubroutineDecList = []ast.SubroutineDecStatement{}
+	for token.KeyWord(ce.curToken.Literal) == token.CONSTRUCTOR || token.KeyWord(ce.curToken.Literal) == token.FUNCTION || token.KeyWord(ce.curToken.Literal) == token.METHOD {
+		subroutineDec := ce.parseSubroutineDecStatement()
+		stmt.SubroutineDecList = append(stmt.SubroutineDecList, *subroutineDec)
+		ce.advanceToken()
+	}
 	if token.Symbol(ce.curToken.Literal) != token.RBRACE {
 		return nil
 	}
@@ -242,15 +255,30 @@ func (ce *CompilationEngine) parseVarDecStatement() *ast.VarDecStatement {
 
 func (ce *CompilationEngine) parseClassVarDecStatement() *ast.ClassVarDecStatement {
 	stmt := &ast.ClassVarDecStatement{Token: ce.curToken, Identifiers: []token.Token{}}
-	if token.KeyWord(ce.nextToken.Literal) != token.INT && token.KeyWord(ce.nextToken.Literal) != token.BOOLEAN && token.KeyWord(ce.nextToken.Literal) != token.CHAR && !ce.nextTokenIs(token.IDENTIFIER) {
+	ce.advanceToken()
+
+	if token.KeyWord(ce.curToken.Literal) != token.INT && token.KeyWord(ce.curToken.Literal) != token.BOOLEAN && token.KeyWord(ce.curToken.Literal) != token.CHAR && !ce.curTokenIs(token.IDENTIFIER) {
 		return nil
 	}
 	stmt.ValueType = ce.curToken
-	for token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
-		ce.advanceToken()
+	ce.advanceToken()
+
+	for {
 		identifier := ce.curToken
 		stmt.Identifiers = append(stmt.Identifiers, identifier)
 		ce.advanceToken()
+		// TODO:refactoring
+		if token.Symbol(ce.curToken.Literal) == token.COMMA {
+			ce.advanceToken()
+			continue
+		} else if token.Symbol(ce.curToken.Literal) == token.SEMICOLON {
+			break
+		} else {
+			return nil
+		}
+	}
+	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
+		return nil
 	}
 	return stmt
 }
