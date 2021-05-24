@@ -3,6 +3,7 @@ package compilationengine
 import (
 	"fmt"
 	"jack_compiler/ast"
+	"jack_compiler/symboltable"
 	"jack_compiler/token"
 	"jack_compiler/tokenizer"
 	"strconv"
@@ -11,13 +12,14 @@ import (
 // CompilationEngine is struct
 type CompilationEngine struct {
 	jt        *tokenizer.JackTokenizer
+	st        *symboltable.SymbolTable
 	curToken  token.Token
 	nextToken token.Token
 }
 
 // New is initializer of compilation engine
-func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
-	ce := &CompilationEngine{jt: jt}
+func New(jt *tokenizer.JackTokenizer, st *symboltable.SymbolTable) *CompilationEngine {
+	ce := &CompilationEngine{jt: jt, st: st}
 	ce.advanceToken()
 	ce.advanceToken()
 	return ce
