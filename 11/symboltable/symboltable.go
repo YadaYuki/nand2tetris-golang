@@ -12,10 +12,12 @@ type Symbol struct {
 
 type VarKind string
 
-// const (
-// 	STATIC VarKind = "static"
-// 	FIE
-// )
+const (
+	STATIC   VarKind = "static"
+	FIELD    VarKind = "field"
+	ARGUMENT VarKind = "argument"
+	VAR      VarKind = "var"
+)
 
 func New() *SymbolTable {
 	return &SymbolTable{}
