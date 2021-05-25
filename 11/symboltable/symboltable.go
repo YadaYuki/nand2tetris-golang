@@ -1,6 +1,10 @@
 package symboltable
 
 type SymbolTable struct {
+	ClassScopeSymbolTable  map[string]Symbol
+	MethodScopeSymbolTable map[string]Symbol
+	Scope                  int
+	CurrentIdx             int
 }
 
 type Symbol struct {
@@ -28,4 +32,22 @@ const (
 
 func New() *SymbolTable {
 	return &SymbolTable{}
+}
+
+func (SymbolTable *st) StartSubroutine() {
+}
+
+func (SymbolTable *st) Define(name string, varType string, varKind string) {
+}
+
+func (SymbolTable *st) VarCount(varKind string) int {
+}
+
+func (SymbolTable *st) KindOf(name string) VarKind {
+}
+
+func (SymbolTable *st) TypeOf(name string) string {
+}
+
+func (SymbolTable *st) IndexOf(name string) int {
 }
