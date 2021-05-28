@@ -115,7 +115,18 @@ func (st *SymbolTable) KindOf(name string) VarKind {
 }
 
 func (st *SymbolTable) TypeOf(name string) string {
-	return ""
+	table := map[string]Symbol{}
+	switch st.Scope {
+	case SubroutineScope:
+		table = st.MethodScopeSymbolTable
+	case ClassScope:
+		table = st.ClassScopeSymbolTable
+	}
+	symbol, ok := table[name]
+	if !ok {
+		return ""
+	}
+	return symbol.VarType
 }
 
 func (st *SymbolTable) IndexOf(name string) int {

@@ -113,3 +113,37 @@ func TestKindOf(t *testing.T) {
 		}
 	}
 }
+
+func TestTypeOf(t *testing.T) {
+	st := New()
+	symbolList := []struct {
+		name    string
+		varKind VarKind
+		varType string
+		Idx     int
+	}{
+		{"a", STATIC, "int", 0},
+		{"b", FIELD, "float", 0},
+		{"c", ARGUMENT, "string", 0},
+		{"d", VAR, "People", 0},
+		{"e", VAR, "int", 1},
+	}
+	for _, tt := range symbolList {
+		st.Define(tt.name, tt.varType, tt.varKind)
+	}
+	testCases := []struct {
+		name    string
+		varType string
+	}{
+		{"a", "int"},
+		{"b", "float"},
+		{"c", "string"},
+		{"d", "People"},
+		{"e", "int"},
+	}
+	for _, tt := range testCases {
+		if st.TypeOf(tt.name) != tt.varType {
+			t.Errorf("st.TypeOf(tt.name) not %s. got %s", tt.varType, st.TypeOf(tt.name))
+		}
+	}
+}
