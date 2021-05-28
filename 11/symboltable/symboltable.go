@@ -100,7 +100,14 @@ func (st *SymbolTable) VarCount(varKind VarKind) int {
 }
 
 func (st *SymbolTable) KindOf(name string) VarKind {
-	return STATIC
+	table := map[string]Symbol{}
+	switch st.Scope {
+	case SubroutineScope:
+		table = st.MethodScopeSymbolTable
+	case ClassScope:
+		table = st.ClassScopeSymbolTable
+	}
+	return table[name].VarKind
 }
 
 func (st *SymbolTable) TypeOf(name string) string {

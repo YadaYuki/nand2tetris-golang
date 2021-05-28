@@ -78,3 +78,27 @@ func TestVarCount(t *testing.T) {
 		}
 	}
 }
+
+func TestKindOf(t *testing.T) {
+	st := New()
+	testCases := []struct {
+		name    string
+		varKind VarKind
+		varType string
+		Idx     int
+	}{
+		{"a", STATIC, "int", 0},
+		{"b", FIELD, "int", 0},
+		{"c", ARGUMENT, "int", 0},
+		{"d", VAR, "int", 0},
+		{"e", VAR, "int", 1},
+	}
+	for _, tt := range testCases {
+		st.Define(tt.name, tt.varType, tt.varKind)
+	}
+	for _, tt := range testCases {
+		if st.KindOf(tt.name) != tt.varKind {
+			t.Errorf("st.KindOf(tt.name) not %s. got %s", tt.varKind, st.KindOf(tt.name))
+		}
+	}
+}
