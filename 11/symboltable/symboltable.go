@@ -3,7 +3,7 @@ package symboltable
 type SymbolTable struct {
 	ClassScopeSymbolTable  map[string]Symbol
 	MethodScopeSymbolTable map[string]Symbol
-	Scope                  int
+	Scope                  Scope
 	CurrentIdx             int
 }
 
@@ -34,20 +34,28 @@ func New() *SymbolTable {
 	return &SymbolTable{}
 }
 
-func (SymbolTable *st) StartSubroutine() {
+// TODO: TDD!
+func (st *SymbolTable) StartSubroutine() {
+	st.MethodScopeSymbolTable = map[string]Symbol{}
+	st.Scope = SubroutineScope
 }
 
-func (SymbolTable *st) Define(name string, varType string, varKind string) {
+func (st *SymbolTable) Define(name string, varType string, varKind string) {
+
 }
 
-func (SymbolTable *st) VarCount(varKind string) int {
+func (st *SymbolTable) VarCount(varKind string) int {
+	return -1
 }
 
-func (SymbolTable *st) KindOf(name string) VarKind {
+func (st *SymbolTable) KindOf(name string) VarKind {
+	return STATIC
 }
 
-func (SymbolTable *st) TypeOf(name string) string {
+func (st *SymbolTable) TypeOf(name string) string {
+	return ""
 }
 
-func (SymbolTable *st) IndexOf(name string) int {
+func (st *SymbolTable) IndexOf(name string) int {
+	return -1
 }
