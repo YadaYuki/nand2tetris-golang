@@ -1,6 +1,8 @@
 package symboltable
 
-import "errors"
+import (
+	"errors"
+)
 
 type SymbolTable struct {
 	ClassScopeSymbolTable  map[string]Symbol
@@ -80,8 +82,21 @@ func (st *SymbolTable) Define(name string, varType string, varKind VarKind) erro
 	return nil
 }
 
-func (st *SymbolTable) VarCount(varKind string) int {
-	return -1
+func (st *SymbolTable) VarCount(varKind VarKind) int {
+	table := map[string]Symbol{}
+	switch st.Scope {
+	case SubroutineScope:
+		table = st.MethodScopeSymbolTable
+	case ClassScope:
+		table = st.ClassScopeSymbolTable
+	}
+	varCount := 0
+	for _, symbol := range table {
+		if symbol.VarKind == varKind {
+			varCount++
+		}
+	}
+	return varCount
 }
 
 func (st *SymbolTable) KindOf(name string) VarKind {

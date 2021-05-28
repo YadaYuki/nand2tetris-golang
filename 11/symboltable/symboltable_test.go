@@ -46,4 +46,35 @@ func TestDefine(t *testing.T) {
 	}
 }
 
-// symbolTable := map[string]Symbol{"a": {"a", "static", "int", 0}}
+func TestVarCount(t *testing.T) {
+	st := New()
+	symbolList := []struct {
+		name    string
+		varKind VarKind
+		varType string
+		Idx     int
+	}{
+		{"a", STATIC, "int", 0},
+		{"b", FIELD, "int", 0},
+		{"c", ARGUMENT, "int", 0},
+		{"d", VAR, "int", 0},
+		{"e", VAR, "int", 1},
+	}
+	for _, tt := range symbolList {
+		st.Define(tt.name, tt.varType, tt.varKind)
+	}
+	testCases := []struct {
+		varKind  VarKind
+		varCount int
+	}{
+		{STATIC, 1},
+		{FIELD, 1},
+		{ARGUMENT, 1},
+		{VAR, 2},
+	}
+	for _, tt := range testCases {
+		if st.VarCount(tt.varKind) != tt.varCount {
+			t.Errorf("st.VarCount(tt.varKind) not %d. got %d", tt.varCount, st.VarCount(tt.varKind))
+		}
+	}
+}
