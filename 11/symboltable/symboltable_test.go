@@ -81,7 +81,7 @@ func TestVarCount(t *testing.T) {
 
 func TestKindOf(t *testing.T) {
 	st := New()
-	testCases := []struct {
+	symbolList := []struct {
 		name    string
 		varKind VarKind
 		varType string
@@ -93,8 +93,19 @@ func TestKindOf(t *testing.T) {
 		{"d", VAR, "int", 0},
 		{"e", VAR, "int", 1},
 	}
-	for _, tt := range testCases {
+	for _, tt := range symbolList {
 		st.Define(tt.name, tt.varType, tt.varKind)
+	}
+	testCases := []struct {
+		name    string
+		varKind VarKind
+	}{
+		{"a", STATIC},
+		{"b", FIELD},
+		{"c", ARGUMENT},
+		{"d", VAR},
+		{"e", VAR},
+		{"f", ""},
 	}
 	for _, tt := range testCases {
 		if st.KindOf(tt.name) != tt.varKind {

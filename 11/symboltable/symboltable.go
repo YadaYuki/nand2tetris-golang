@@ -107,7 +107,11 @@ func (st *SymbolTable) KindOf(name string) VarKind {
 	case ClassScope:
 		table = st.ClassScopeSymbolTable
 	}
-	return table[name].VarKind
+	symbol, ok := table[name]
+	if !ok {
+		return ""
+	}
+	return symbol.VarKind
 }
 
 func (st *SymbolTable) TypeOf(name string) string {
