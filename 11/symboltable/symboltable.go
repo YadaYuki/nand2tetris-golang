@@ -1,10 +1,15 @@
 package symboltable
 
+import "errors"
+
 type SymbolTable struct {
 	ClassScopeSymbolTable  map[string]Symbol
 	MethodScopeSymbolTable map[string]Symbol
 	Scope                  Scope
-	CurrentIdx             int
+	CurrentStaticIdx       int
+	CurrentFieldIdx        int
+	CurrentArgumentIdx     int
+	CurrentVarIdx          int
 }
 
 type Symbol struct {
@@ -31,7 +36,7 @@ const (
 )
 
 func New() *SymbolTable {
-	return &SymbolTable{}
+	return &SymbolTable{Scope: ClassScope, MethodScopeSymbolTable: map[string]Symbol{}, ClassScopeSymbolTable: map[string]Symbol{}}
 }
 
 // TODO: TDD!
@@ -40,8 +45,39 @@ func (st *SymbolTable) StartSubroutine() {
 	st.Scope = SubroutineScope
 }
 
-func (st *SymbolTable) Define(name string, varType string, varKind string) {
+func (st *SymbolTable) Define(name string, varType string, varKind VarKind) error {
 
+	symbol := Symbol{}
+	symbol.Name = name
+	symbol.VarKind = varKind
+	symbol.VarType = varType
+
+	switch varKind {
+	case STATIC:
+		symbol.Idx = st.CurrentStaticIdx
+		st.CurrentStaticIdx++
+	case FIELD:
+		symbol.Idx = st.CurrentFieldIdx
+		st.CurrentFieldIdx++
+	case ARGUMENT:
+		symbol.Idx = st.CurrentArgumentIdx
+		st.CurrentArgumentIdx++
+	case VAR:
+		symbol.Idx = st.CurrentVarIdx
+		st.CurrentVarIdx++
+	default:
+		return errors.New("") // TODO: Add Error
+	}
+
+	switch st.Scope {
+	case SubroutineScope:
+		st.MethodScopeSymbolTable[name] = symbol
+	case ClassScope:
+		st.ClassScopeSymbolTable[name] = symbol
+	default:
+		return errors.New("") // TODO: Add Error
+	}
+	return nil
 }
 
 func (st *SymbolTable) VarCount(varKind string) int {
