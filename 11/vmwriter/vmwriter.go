@@ -1,10 +1,7 @@
 package vmwriter
 
-import (
-	"jack_compiler/value"
-)
-
 type VMWriter struct {
+	// file writer
 }
 
 type Command string
@@ -38,6 +35,33 @@ func New() *VMWriter {
 	return &VMWriter{}
 }
 
-func (vm *VMWriter) WritePush() string {
-	return "" + value.NEW_LINE
+func (vm *VMWriter) WritePush(segment Segment, idx int) {
+}
+
+func (vm *VMWriter) WritePop(segment Segment, idx int) {
+
+}
+
+func (vm *VMWriter) WriteArithmetic(command Command) {
+}
+
+func (vm *VMWriter) WriteLabel(label string) {
+}
+
+func (vm *VMWriter) WriteGoto(label string) {
+}
+
+func (vm *VMWriter) WriteIf(label string) {
+}
+
+func (vm *VMWriter) WriteCall(name string, nArgs int) {
+}
+
+func (vm *VMWriter) WriteFunction(name string, nArgs int) {
+}
+
+func (vm *VMWriter) WriteReturn() {
+}
+
+func (vm *VMWriter) Close() {
 }
