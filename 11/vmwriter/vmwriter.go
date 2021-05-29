@@ -1,5 +1,9 @@
 package vmwriter
 
+import (
+	"jack_compiler/value"
+)
+
 type VMWriter struct {
 }
 
@@ -35,5 +39,5 @@ func New() *VMWriter {
 }
 
 func (vm *VMWriter) WritePush() string {
-	return ""
+	return "" + value.NEW_LINE
 }
