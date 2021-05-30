@@ -69,6 +69,10 @@ func (vm *VMWriter) WriteFunction(name string, nArgs int) {
 func (vm *VMWriter) WriteReturn() {
 }
 
+func (vm *VMWriter) writeData(vmCode string) {
+	vm.VMCode = append(vm.VMCode, []byte(vmCode)...)
+}
+
 func (vm *VMWriter) Close() {
 	err := ioutil.WriteFile(vm.Filename, vm.VMCode, vm.perm)
 	if err != nil {

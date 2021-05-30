@@ -18,3 +18,15 @@ func TestClose(t *testing.T) {
 		t.Fatalf("vmCode should be %s. got %s", vmCode, content)
 	}
 }
+func TestWriteData(t *testing.T) {
+	filename := "test.vm"
+	vmCode := "Hello,World."
+	vmWriter := &VMWriter{
+		VMCode: []byte(vmCode), Filename: filename, perm: 0644,
+	}
+	addVmCode := "Good bye, World"
+	vmWriter.writeData(addVmCode)
+	if !bytes.Equal(vmWriter.VMCode, []byte(vmCode+addVmCode)) {
+		t.Fatalf("vmCode should be %s. got %s", vmCode+addVmCode, vmWriter.VMCode)
+	}
+}
