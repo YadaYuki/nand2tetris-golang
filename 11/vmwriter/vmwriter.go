@@ -1,7 +1,14 @@
 package vmwriter
 
+import (
+	"io/fs"
+	"io/ioutil"
+)
+
 type VMWriter struct {
-	// file writer
+	VMCode   []byte
+	Filename string
+	perm     fs.FileMode
 }
 
 type Command string
@@ -31,15 +38,14 @@ const (
 	TEMP    Segment = "temp"
 )
 
-func New() *VMWriter {
-	return &VMWriter{}
+func New(filename string, permission fs.FileMode) *VMWriter {
+	return &VMWriter{Filename: filename, VMCode: []byte{}, perm: permission}
 }
 
 func (vm *VMWriter) WritePush(segment Segment, idx int) {
 }
 
 func (vm *VMWriter) WritePop(segment Segment, idx int) {
-
 }
 
 func (vm *VMWriter) WriteArithmetic(command Command) {
@@ -64,4 +70,8 @@ func (vm *VMWriter) WriteReturn() {
 }
 
 func (vm *VMWriter) Close() {
+	err := ioutil.WriteFile(vm.Filename, vm.VMCode, vm.perm)
+	if err != nil {
+		panic(err)
+	}
 }
