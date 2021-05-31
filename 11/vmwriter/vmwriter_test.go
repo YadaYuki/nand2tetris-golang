@@ -56,3 +56,11 @@ func TestWriteArithmetic(t *testing.T) {
 		t.Fatalf("vmCode should be %s. got %s", "add", vmWriter.VMCode)
 	}
 }
+
+func TestWriteLabel(t *testing.T) {
+	vmWriter := New("test.vm", 0644)
+	vmWriter.WriteLabel("LOOP")
+	if !bytes.Equal(vmWriter.VMCode, []byte("label LOOP"+value.NEW_LINE)) {
+		t.Fatalf("vmCode should be %s. got %s", "label LOOP", vmWriter.VMCode)
+	}
+}

@@ -59,6 +59,8 @@ func (vm *VMWriter) WriteArithmetic(command Command) {
 }
 
 func (vm *VMWriter) WriteLabel(label string) {
+	labelVmCode := fmt.Sprintf("label %s", label) + value.NEW_LINE
+	vm.writeData(labelVmCode)
 }
 
 func (vm *VMWriter) WriteGoto(label string) {
