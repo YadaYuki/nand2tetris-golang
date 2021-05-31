@@ -64,3 +64,11 @@ func TestWriteLabel(t *testing.T) {
 		t.Fatalf("vmCode should be %s. got %s", "label LOOP", vmWriter.VMCode)
 	}
 }
+
+func TestWriteGoto(t *testing.T) {
+	vmWriter := New("test.vm", 0644)
+	vmWriter.WriteGoto("LOOP")
+	if !bytes.Equal(vmWriter.VMCode, []byte("goto LOOP"+value.NEW_LINE)) {
+		t.Fatalf("vmCode should be %s. got %s", "goto LOOP", vmWriter.VMCode)
+	}
+}

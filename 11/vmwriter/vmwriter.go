@@ -64,6 +64,8 @@ func (vm *VMWriter) WriteLabel(label string) {
 }
 
 func (vm *VMWriter) WriteGoto(label string) {
+	gotoVmCode := fmt.Sprintf("goto %s", label) + value.NEW_LINE
+	vm.writeData(gotoVmCode)
 }
 
 func (vm *VMWriter) WriteIf(label string) {
