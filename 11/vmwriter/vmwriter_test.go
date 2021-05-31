@@ -80,3 +80,11 @@ func TestWriteIf(t *testing.T) {
 		t.Fatalf("vmCode should be %s. got %s", "if-goto LOOP", vmWriter.VMCode)
 	}
 }
+
+func TestWriteCall(t *testing.T) {
+	vmWriter := New("test.vm", 0644)
+	vmWriter.WriteCall("hogeFunc", 3)
+	if !bytes.Equal(vmWriter.VMCode, []byte("call hogeFunc 3"+value.NEW_LINE)) {
+		t.Fatalf("vmCode should be %s. got %s", "call hogeFunc 3", vmWriter.VMCode)
+	}
+}

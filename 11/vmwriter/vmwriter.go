@@ -74,6 +74,8 @@ func (vm *VMWriter) WriteIf(label string) {
 }
 
 func (vm *VMWriter) WriteCall(name string, nArgs int) {
+	callVmCode := fmt.Sprintf("call %s %d", name, nArgs) + value.NEW_LINE
+	vm.writeData(callVmCode)
 }
 
 func (vm *VMWriter) WriteFunction(name string, nArgs int) {
