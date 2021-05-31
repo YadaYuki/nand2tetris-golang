@@ -96,3 +96,11 @@ func TestWriteFunction(t *testing.T) {
 		t.Fatalf("vmCode should be %s. got %s", "function hogeFunc 3", vmWriter.VMCode)
 	}
 }
+
+func TestWriteReturn(t *testing.T) {
+	vmWriter := New("test.vm", 0644)
+	vmWriter.WriteReturn()
+	if !bytes.Equal(vmWriter.VMCode, []byte("return"+value.NEW_LINE)) {
+		t.Fatalf("vmCode should be %s. got %s", "return", vmWriter.VMCode)
+	}
+}

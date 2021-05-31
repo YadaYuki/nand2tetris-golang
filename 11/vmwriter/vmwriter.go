@@ -84,6 +84,7 @@ func (vm *VMWriter) WriteFunction(name string, nLocals int) {
 }
 
 func (vm *VMWriter) WriteReturn() {
+	vm.writeData("return" + value.NEW_LINE)
 }
 
 func (vm *VMWriter) writeData(vmCode string) {
