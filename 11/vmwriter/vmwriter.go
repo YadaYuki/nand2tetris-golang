@@ -78,7 +78,9 @@ func (vm *VMWriter) WriteCall(name string, nArgs int) {
 	vm.writeData(callVmCode)
 }
 
-func (vm *VMWriter) WriteFunction(name string, nArgs int) {
+func (vm *VMWriter) WriteFunction(name string, nLocals int) {
+	functionVmCode := fmt.Sprintf("function %s %d", name, nLocals) + value.NEW_LINE
+	vm.writeData(functionVmCode)
 }
 
 func (vm *VMWriter) WriteReturn() {
