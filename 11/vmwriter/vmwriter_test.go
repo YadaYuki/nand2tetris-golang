@@ -49,3 +49,10 @@ func TestWritePop(t *testing.T) {
 		t.Fatalf("vmCode should be %s. got %s", "pop const 0", vmWriter.VMCode)
 	}
 }
+func TestWriteArithmetic(t *testing.T) {
+	vmWriter := New("test.vm", 0644)
+	vmWriter.WriteArithmetic(ADD)
+	if !bytes.Equal(vmWriter.VMCode, []byte("add"+value.NEW_LINE)) {
+		t.Fatalf("vmCode should be %s. got %s", "add", vmWriter.VMCode)
+	}
+}

@@ -55,6 +55,7 @@ func (vm *VMWriter) WritePop(segment Segment, idx int) {
 }
 
 func (vm *VMWriter) WriteArithmetic(command Command) {
+	vm.writeData(string(command) + value.NEW_LINE)
 }
 
 func (vm *VMWriter) WriteLabel(label string) {
