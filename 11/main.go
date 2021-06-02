@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-	"jack_compiler/compilationengine"
-	"jack_compiler/symboltable"
+	"jack_compiler/parser"
 	"jack_compiler/tokenizer"
 )
 
@@ -16,7 +15,7 @@ func main() {
 		}
  }
 `)
-	st := symboltable.New()
-	ce := compilationengine.New(jt, st)
+	// st := symboltable.New()
+	ce := parser.New(jt)
 	fmt.Println(ce.ParseProgram().Xml())
 }
