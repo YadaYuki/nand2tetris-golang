@@ -15,7 +15,6 @@ func main() {
 		}
  }
 `)
-	// st := symboltable.New()
-	ce := parser.New(jt)
-	fmt.Println(ce.ParseProgram().Xml())
+	parser := parser.New(jt)
+	fmt.Println(parser.ParseProgram().Xml())
 }
