@@ -1,0 +1,14 @@
+
+
+CHIP AReg {
+
+    IN  instruction[16],outM[16]; 
+    OUT out[16];       
+    PARTS:
+    Not(in=instruction[15], out=isA);
+    Not(in=isA, out=isC);
+    And(a=isC, b=instruction[5], out=ALUtoA);
+    Mux16(a=outM,b=instruction,sel=isA,out=outMu);
+    Or(a=ALUtoA,b=isA,out=loadA);
+    ARegister(in=outMu,load=loadA,out=A,out=out);
+}
