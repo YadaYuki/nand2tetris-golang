@@ -39,18 +39,18 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // TODO: implement
+
+    // flag for ARegister
     Not(in=instruction[15], out=isA);
     Not(in=isA, out=isC);
+    And(a=isC, b=instruction[5], out=ALUtoA);
     
-    And(a=isC, b=instruction[5], out=ALUtoA);   
-
-    // Define Aregister
-    Mux16(a=instruction,b=aluFb,sel=ALUtoA,out=outMu);
-
+    // Mux previous ARegister
+    Mux16(a=outM,b=instruction,sel=isA,out=outMu);
+    
     // ARegister
-    Or(a=ALUtoA,b=isA,out=loadA)
-    ARegister(in=outMu,load=loadA,out=A,out=addressM);
+    Or(a=ALUtoA,b=isA,out=loadA);
+    ARegister(in=outMu,load=loadA,out=A,out=out);
 
     // Define mnemonic(A or M)
     Mux16(a=A,b=inM,sel=instruction[12],out=AM);
@@ -60,6 +60,7 @@ CHIP CPU {
 
     // ALU
     ALU(x=D,y=AM,zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6],out=outM1);
+    // ALU(x=D,y=AM,zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6],out=outMu);
     DFF16(in=outM1,out=outM,out=aluFb);
 
     // PC
