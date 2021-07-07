@@ -49,7 +49,7 @@ CHIP CPU {
     Mux16(a=instruction,b=aluFb,sel=ALUtoA,out=outMu);
 
     // ARegister
-    Or(a=ALUtoA,b=isA,out=loadA)
+    Or(a=ALUtoA,b=isA,out=loadA);
     ARegister(in=outMu,load=loadA,out=A,out=addressM);
 
     // Define mnemonic(A or M)
