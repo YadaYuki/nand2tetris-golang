@@ -53,18 +53,30 @@ CHIP CPU {
     ARegister(in=outMu,load=loadA,out=A,out=out);
 
     // Define mnemonic(A or M)
-    Mux16(a=A,b=inM,sel=instruction[12],out=AM);
+    Mux16(a=A,b=inM,sel=instruction[12],out=out);
 
     // DRegister
     DRegister(in=aluFb,load=instruction[4],out=D);
 
     // ALU
-    ALU(x=D,y=AM,zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6],out=outM1);
-    // ALU(x=D,y=AM,zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6],out=outMu);
-    DFF16(in=outM1,out=outM,out=aluFb);
-
+    ALU(x=D,y=AM,zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6],
+    out=outMu,zr=zr,ng=ng);
+    
+    
     // PC
-    Or(a=instruction[0],a=instruction[1],out=o1);
-    Or(a=instruction[2],a=o2,out=isJump);
-    PC(in=A,load=isJump,inc=true,reset=reset,out=PC[0..14]);
+    // Calc isPositive
+    Not(in=zr,out=nZr);
+    Not(in=ng,out=nNg);
+    And(a=nZr,b=nNg,out=isPositive);
+    // JGT
+    And(a=isPositive,b=instruction[0],out=JGT);
+    // JEQ
+    And(a=zr,b=instruction[1],out=JEQ);
+    // JLT
+    And(a=ng,b=instruction[2],out=JLT);
+    // loadPc = JGT || JLT || JEQ
+    Or(a=JGT,b=JLT,out=JNE);
+    Or(a=JNE,b=JEQ,out=loadPc);
+
+    PC(in=A,load=loadPc,inc=true,reset=reset,out[0..14]=pc);
 }
