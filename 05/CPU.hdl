@@ -26,7 +26,6 @@
  */
 
 CHIP CPU {
-
     IN  inM[16],         // M value input  (M = contents of RAM[A])
         instruction[16], // Instruction for execution
         reset;           // Signals whether to re-start the current
@@ -46,23 +45,31 @@ CHIP CPU {
     And(a=isC, b=instruction[5], out=ALUtoA);
     
     // Mux previous ARegister
-    Mux16(a=outM,b=instruction,sel=isA,out=outMu);
-    
+    Mux16(a=ALUout,b=instruction,sel=isA,out=outMu);
+
     // ARegister
     Or(a=ALUtoA,b=isA,out=loadA);
     ARegister(in=outMu,load=loadA,out=A,out=out);
 
     // Define mnemonic(A or M)
-    Mux16(a=A,b=inM,sel=instruction[12],out=out);
+    Mux16(a=A,b=inM,sel=instruction[12],out=AM);
 
     // DRegister
-    DRegister(in=aluFb,load=instruction[4],out=D);
+    And(a=isC, b=instruction[4], out=loadD);
+    DRegister(in=outMu,load=loadD,out=D);
 
     // ALU
-    ALU(x=D,y=AM,zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6],
-    out=outMu,zr=zr,ng=ng);
+    ALU(x=D,y=AM,zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6],out=ALUout,zr=zr,ng=ng);
+
+    // outM. not output directly from ALU,because of internal pin
+    Or16(a=false,b=ALUout,out=outM);
     
-    
+    // writeM
+    And(a=isC,b=instruction[3],out=writeM);
+
+    // addressM
+    Or16(a=false,b=A,out[0..14]=addressM);
+
     // PC
     // Calc isPositive
     Not(in=zr,out=nZr);
@@ -76,7 +83,8 @@ CHIP CPU {
     And(a=ng,b=instruction[2],out=JLT);
     // loadPc = JGT || JLT || JEQ
     Or(a=JGT,b=JLT,out=JNE);
-    Or(a=JNE,b=JEQ,out=loadPc);
-
+    Or(a=JNE,b=JEQ,out=isJump);
+    And(a=isC,b=isJump,out=loadPc);
     PC(in=A,load=loadPc,inc=true,reset=reset,out[0..14]=pc);
+
 }
