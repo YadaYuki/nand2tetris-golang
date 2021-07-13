@@ -1,31 +1,42 @@
 package code
 
 import (
-	"errors"
+	"assembly/ast"
+	"fmt"
 )
 
-// GetDestBinary return Binary Code Correspond to dest label
-func GetDestBinary(destMemonic string) (binary string, err error) {
-	destBinaryMap := map[string]string{"null": "000", "M": "001", "D": "010", "MD": "011", "A": "100", "AM": "101", "AD": "110", "AMD": "111"}
-	destBinary := destBinaryMap[destMemonic]
-	if destBinary == "" {
-		return "", errors.New("invalid memonic")
+func Binary(command ast.Command) string {
+	switch c := command.(type) {
+	case *ast.ACommand:
+		return fmt.Sprintf("%016b", c.Value)
+	case *ast.CCommand:
+		cCommandBinaryPrefix := "111"
+		return cCommandBinaryPrefix + Comp(c.Comp) + Dest(c.Dest) + Jump(c.Jump)
 	}
-	return destBinary, nil
+	return ""
+}
+
+// GetDestBinary return Binary Code Correspond to dest label
+func Dest(dest string) string {
+	if dest == "" {
+		return "000"
+	}
+	destBinaryMap := map[string]string{"M": "001", "D": "010", "MD": "011", "A": "100", "AM": "101", "AD": "110", "AMD": "111"}
+	destBinary := destBinaryMap[dest]
+	return destBinary
 }
 
 // GetJumpBinary return Binary Code Correspond to dest label
-func GetJumpBinary(jumpMemonic string) (binary string, err error) {
-	jumpBinaryMap := map[string]string{"null": "000", "JGT": "001", "JEQ": "010", "JGE": "011", "JLT": "100", "JNE": "101", "JLE": "110", "JMP": "111"}
-	jumpBinary := jumpBinaryMap[jumpMemonic]
-	if jumpBinary == "" {
-		return "", errors.New("invalid memonic")
+func Jump(jump string) string {
+	if jump == "" {
+		return "000"
 	}
-	return jumpBinary, nil
+	jumpBinaryMap := map[string]string{"JGT": "001", "JEQ": "010", "JGE": "011", "JLT": "100", "JNE": "101", "JLE": "110", "JMP": "111"}
+	jumpBinary := jumpBinaryMap[jump]
+	return jumpBinary
 }
 
-// GetCompBinary return Binary Code Correspond to dest label
-func GetCompBinary(compMemonic string) (binary string, err error) {
+func Comp(comp string) string {
 	compBinaryMap := map[string]string{
 		// a = 0
 		"0":   "0101010",
@@ -58,9 +69,5 @@ func GetCompBinary(compMemonic string) (binary string, err error) {
 		"D&M": "1000000",
 		"D|M": "1010101",
 	}
-	compBinary := compBinaryMap[compMemonic]
-	if compBinary == "" {
-		return "", errors.New("invalid memonic")
-	}
-	return compBinary, nil
+	return compBinaryMap[comp]
 }

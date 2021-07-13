@@ -7,7 +7,7 @@ import (
 
 func TestACommand(t *testing.T) {
 	val := 10000
-	aCommand := ACommand{value: val}
+	aCommand := ACommand{Value: val}
 	if aCommand.String() != "@10000"+value.NEW_LINE {
 		t.Fatalf("aCommand.String() should be %s, got %s ", "@10000"+value.NEW_LINE, aCommand.String())
 	}
@@ -18,9 +18,9 @@ func TestCCommand(t *testing.T) {
 		command    CCommand
 		commandStr string
 	}{
-		{CCommand{comp: "-1", dest: "M"}, "M=-1" + value.NEW_LINE},
-		{CCommand{comp: "D", jump: "JMP"}, "D;JMP" + value.NEW_LINE},
-		{CCommand{comp: "D|A", dest: "AM", jump: "JMP"}, "AM=D|A;JMP" + value.NEW_LINE},
+		{CCommand{Comp: "-1", Dest: "M"}, "M=-1" + value.NEW_LINE},
+		{CCommand{Comp: "D", Jump: "JMP"}, "D;JMP" + value.NEW_LINE},
+		{CCommand{Comp: "D|A", Dest: "AM", Jump: "JMP"}, "AM=D|A;JMP" + value.NEW_LINE},
 	}
 	for _, tt := range testCases {
 		if tt.commandStr != tt.command.String() {
