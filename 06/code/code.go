@@ -1,8 +1,18 @@
 package code
 
 import (
+	"assembly/ast"
 	"errors"
+	"fmt"
 )
+
+func Binary(command ast.Command) string {
+	switch c := command.(type) {
+	case *ast.ACommand:
+		return fmt.Sprintf("%016b", c.Value)
+	}
+	return ""
+}
 
 // GetDestBinary return Binary Code Correspond to dest label
 func GetDestBinary(destMemonic string) (binary string, err error) {
