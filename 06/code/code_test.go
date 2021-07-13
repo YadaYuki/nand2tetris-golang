@@ -12,6 +12,8 @@ func TestBinary(t *testing.T) {
 		binaryStr string
 	}{
 		{&ast.ACommand{Value: 100}, "0000000001100100"},
+		{&ast.CCommand{Comp: "A", Dest: "D"}, "1110110000010000"},
+		{&ast.CCommand{Comp: "D|A", Dest: "AM", Jump: "JMP"}, "1110010101101111"},
 	}
 	for _, tt := range testCases {
 		binaryStr := Binary(tt.command)
