@@ -10,15 +10,15 @@ func TestAdvance(t *testing.T) {
 	}
 }
 
-func TestHasMoreToken(t *testing.T) {
+func TestHasMoreCommand(t *testing.T) {
 	p := New(`sample
 	hoge`)
 	p.Advance()
-	if !p.HasMoreToken() {
-		t.Fatal("p.HasMoreToken should be true , but got false")
+	if !p.HasMoreCommand() {
+		t.Fatal("p.HasMoreCommand should be true , but got false")
 	}
 	p.Advance()
-	if p.HasMoreToken() {
-		t.Fatalf("p.HasMoreToken should be false , but got true")
+	if p.HasMoreCommand() {
+		t.Fatalf("p.HasMoreCommand should be false , but got true")
 	}
 }

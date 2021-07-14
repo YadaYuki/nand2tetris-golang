@@ -21,6 +21,6 @@ func (p *Parser) Advance() {
 	p.currentCommandIdx++
 }
 
-func (p *Parser) HasMoreToken() bool {
+func (p *Parser) HasMoreCommand() bool {
 	return len(p.commandStrList) > p.currentCommandIdx
 }
