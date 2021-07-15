@@ -3,6 +3,7 @@ package parser
 import (
 	"assembly/ast"
 	"assembly/value"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -38,6 +39,36 @@ func (p *Parser) CommandType() ast.CommandType {
 		return ast.C_COMMAND
 	default:
 		return ""
+	}
+}
+
+func (p *Parser) ParseAssembly() ([]ast.Command, error) {
+	commands := []ast.Command{}
+	for p.HasMoreCommand() {
+		command, _ := p.ParseCommand()
+		p.resetReadPosition()
+		commands = append(commands, command)
+		p.Advance()
+	}
+	return commands, nil
+}
+
+func (p *Parser) ParseCommand() (ast.Command, error) {
+	switch p.CommandType() {
+	case ast.A_COMMAND:
+		aCommand, err := p.parseACommand()
+		if err != nil {
+			return nil, err
+		}
+		return aCommand, nil
+	case ast.C_COMMAND:
+		cCommand, err := p.parseCCommand()
+		if err != nil {
+			return nil, err
+		}
+		return cCommand, nil
+	default:
+		return nil, fmt.Errorf("%s is invalid Command Type ", p.commandStrList[p.currentCommandIdx])
 	}
 }
 
@@ -120,4 +151,7 @@ func (p *Parser) readChar() {
 
 func (p *Parser) hasMoreChar() bool {
 	return len(p.commandStrList[p.currentCommandIdx]) > p.readPosition
+}
+func (p *Parser) resetReadPosition() {
+	p.readPosition = 0
 }
