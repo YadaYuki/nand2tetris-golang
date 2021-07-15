@@ -1,6 +1,9 @@
 package parser
 
-import "testing"
+import (
+	"assembly/ast"
+	"testing"
+)
 
 func TestAdvance(t *testing.T) {
 	p := New("sample")
@@ -40,6 +43,22 @@ func TestSkipWhiteSpace(t *testing.T) {
 		}
 		if tt.parser.commandStrList[tt.parser.currentCommandIdx][tt.parser.readPosition] != byte('i') {
 			t.Fatalf("readChar should be `i`,got %c", tt.parser.commandStrList[tt.parser.currentCommandIdx][tt.parser.readPosition])
+		}
+	}
+}
+
+func TestCommandType(t *testing.T) {
+	testCases := []struct {
+		parser      *Parser
+		commandType ast.CommandType
+	}{
+		{&Parser{commandStrList: []string{"@10"}, currentCommandIdx: 0}, ast.A_COMMAND},
+		{&Parser{commandStrList: []string{"D=M"}, currentCommandIdx: 0}, ast.C_COMMAND},
+	}
+	for _, tt := range testCases {
+		commandType := tt.parser.CommandType()
+		if commandType != tt.commandType {
+			t.Fatalf("commandType() Should be %s, got %s", tt.commandType, commandType)
 		}
 	}
 }

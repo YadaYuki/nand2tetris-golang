@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"assembly/ast"
 	"assembly/value"
 	"strings"
 )
@@ -24,8 +25,27 @@ func (p *Parser) Advance() {
 func (p *Parser) HasMoreCommand() bool {
 	return len(p.commandStrList) > p.currentCommandIdx
 }
+
+func (p *Parser) CommandType() ast.CommandType {
+	commansStr := p.commandStrList[p.currentCommandIdx]
+	// switch by prefix char
+	commandStrPrefix := commansStr[0]
+	switch commandStrPrefix {
+	case '@':
+		return ast.A_COMMAND
+	case '0', '1', 'D', 'A', '!', '-', 'M':
+		return ast.C_COMMAND
+	default:
+		return ""
+	}
+}
+
 func (p *Parser) skipWhiteSpace() {
-	for p.commandStrList[p.currentCommandIdx][p.readPosition] == value.SPACE || p.commandStrList[p.currentCommandIdx][p.readPosition] == value.TAB {
+	for p.hasMoreChar() && (p.commandStrList[p.currentCommandIdx][p.readPosition] == value.SPACE || p.commandStrList[p.currentCommandIdx][p.readPosition] == value.TAB) {
 		p.readPosition++
 	}
+}
+
+func (p *Parser) hasMoreChar() bool {
+	return len(p.commandStrList[p.currentCommandIdx]) > p.readPosition
 }

@@ -6,6 +6,13 @@ import (
 	"strings"
 )
 
+type CommandType string
+
+const (
+	A_COMMAND CommandType = "A_COMMAND"
+	C_COMMAND CommandType = "C_COMMAND"
+)
+
 type Command interface {
 	String() string
 }
