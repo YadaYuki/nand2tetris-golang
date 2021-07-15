@@ -24,3 +24,8 @@ func (p *Parser) Advance() {
 func (p *Parser) HasMoreCommand() bool {
 	return len(p.commandStrList) > p.currentCommandIdx
 }
+func (p *Parser) skipWhiteSpace() {
+	for p.commandStrList[p.currentCommandIdx][p.readPosition] == value.SPACE || p.commandStrList[p.currentCommandIdx][p.readPosition] == value.TAB {
+		p.readPosition++
+	}
+}
