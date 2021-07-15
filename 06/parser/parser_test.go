@@ -62,3 +62,19 @@ func TestCommandType(t *testing.T) {
 		}
 	}
 }
+
+func TestParseACommand(t *testing.T) {
+	testCases := []struct {
+		parser *Parser
+		value  int
+	}{
+		{&Parser{commandStrList: []string{"@10"}, currentCommandIdx: 0}, 10},
+		{&Parser{commandStrList: []string{"@100"}, currentCommandIdx: 0}, 100},
+	}
+	for _, tt := range testCases {
+		command, _ := tt.parser.parseACommand()
+		if command.Value != tt.value {
+			t.Fatalf("command.Value Should be %d, got %d", command.Value, tt.value)
+		}
+	}
+}

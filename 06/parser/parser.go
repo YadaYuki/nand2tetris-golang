@@ -3,6 +3,7 @@ package parser
 import (
 	"assembly/ast"
 	"assembly/value"
+	"strconv"
 	"strings"
 )
 
@@ -40,10 +41,28 @@ func (p *Parser) CommandType() ast.CommandType {
 	}
 }
 
+func (p *Parser) parseACommand() (*ast.ACommand, error) {
+	p.readChar() // read "@"
+	valueStr := ""
+	for p.hasMoreChar() {
+		valueStr += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
+		p.readChar()
+	}
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		return nil, err
+	}
+	return &ast.ACommand{Value: value}, nil
+}
+
 func (p *Parser) skipWhiteSpace() {
 	for p.hasMoreChar() && (p.commandStrList[p.currentCommandIdx][p.readPosition] == value.SPACE || p.commandStrList[p.currentCommandIdx][p.readPosition] == value.TAB) {
-		p.readPosition++
+		p.readChar()
 	}
+}
+
+func (p *Parser) readChar() {
+	p.readPosition++
 }
 
 func (p *Parser) hasMoreChar() bool {
