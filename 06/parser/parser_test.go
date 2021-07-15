@@ -78,3 +78,38 @@ func TestParseACommand(t *testing.T) {
 		}
 	}
 }
+func TestParseCCommand(t *testing.T) {
+	testCases := []struct {
+		parser  *Parser
+		command *ast.CCommand
+	}{
+		{&Parser{commandStrList: []string{"D=M"}, currentCommandIdx: 0}, &ast.CCommand{
+			Comp: "M",
+			Dest: "D",
+			Jump: "",
+		}},
+		{&Parser{commandStrList: []string{"D=D-M"}, currentCommandIdx: 0}, &ast.CCommand{
+			Comp: "D-M",
+			Dest: "D",
+			Jump: "",
+		}},
+		{&Parser{commandStrList: []string{"0;JMP"}, currentCommandIdx: 0}, &ast.CCommand{
+			Comp: "0",
+			Dest: "",
+			Jump: "JMP",
+		}},
+		{&Parser{commandStrList: []string{"AM=D|A;JMP"}, currentCommandIdx: 0}, &ast.CCommand{Comp: "D|A", Dest: "AM", Jump: "JMP"}},
+	}
+	for _, tt := range testCases {
+		command, _ := tt.parser.parseCCommand()
+		if command.Comp != tt.command.Comp {
+			t.Fatalf("command.Comp Should be %s, got %s", command.Comp, tt.command.Comp)
+		}
+		if command.Dest != tt.command.Dest {
+			t.Fatalf("command.Dest Should be %s, got %s", command.Dest, tt.command.Dest)
+		}
+		if command.Jump != tt.command.Jump {
+			t.Fatalf("command.Jump Should be %s, got %s", command.Jump, tt.command.Jump)
+		}
+	}
+}
