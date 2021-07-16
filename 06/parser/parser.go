@@ -1,126 +1,157 @@
 package parser
 
 import (
-	"errors"
+	"assembly/ast"
+	"assembly/value"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
-// CommandType is type of command
-type CommandType int
+type Parser struct {
+	input             string
+	commandStrList    []string
+	currentCommandIdx int
+	readPosition      int
+}
 
-const (
-	ACommand CommandType = iota
-	CCommand
-	LCommand
-)
+func New(input string) *Parser {
+	parser := &Parser{input: input, commandStrList: strings.Split(input, value.NEW_LINE), currentCommandIdx: 0, readPosition: 0}
+	return parser
+}
 
-func (command CommandType) String() string {
-	switch command {
-	case ACommand:
-		return "A_COMMAND"
-	case CCommand:
-		return "C_COMMAND"
-	case LCommand:
-		return "L_COMMAND"
+func (p *Parser) Advance() {
+	p.currentCommandIdx++
+}
+
+func (p *Parser) HasMoreCommand() bool {
+	return len(p.commandStrList) > p.currentCommandIdx
+}
+
+func (p *Parser) CommandType() ast.CommandType {
+	commansStr := p.commandStrList[p.currentCommandIdx]
+	// switch by prefix char
+	commandStrPrefix := commansStr[0]
+	switch commandStrPrefix {
+	case '@':
+		return ast.A_COMMAND
+	case '0', '1', 'D', 'A', '!', '-', 'M':
+		return ast.C_COMMAND
 	default:
-		return "Unknown"
+		return ""
 	}
 }
 
-// GetCommandType is function get command type from command
-func GetCommandType(commandStr string) (c CommandType, err error) {
-	s := strings.TrimSpace(commandStr)
-
-	if s[0:1] == "@" {
-		return ACommand, nil
+func (p *Parser) ParseAssembly() ([]ast.Command, error) {
+	commands := []ast.Command{}
+	for p.HasMoreCommand() {
+		command, _ := p.ParseCommand()
+		p.resetReadPosition()
+		commands = append(commands, command)
+		p.Advance()
 	}
-	if strings.LastIndexAny(s, "(") == 0 && strings.LastIndexAny(s, ")") == len(s)-1 {
-		return LCommand, nil
-	}
-
-	// TODO: clarify syntax of C_COMMAND
-	if strings.Contains(s, ";") || strings.Contains(s, "=") {
-		return CCommand, nil
-	}
-
-	return LCommand, errors.New("Invalid CommandType")
+	return commands, nil
 }
 
-// GetSymbol returns Symbol name
-func GetSymbol(commandStr string) (symbol string, err error) {
-	s := strings.TrimSpace(commandStr)
-	commandType, err := GetCommandType(s)
+func (p *Parser) ParseCommand() (ast.Command, error) {
+	switch p.CommandType() {
+	case ast.A_COMMAND:
+		aCommand, err := p.parseACommand()
+		if err != nil {
+			return nil, err
+		}
+		return aCommand, nil
+	case ast.C_COMMAND:
+		cCommand, err := p.parseCCommand()
+		if err != nil {
+			return nil, err
+		}
+		return cCommand, nil
+	default:
+		return nil, fmt.Errorf("%s is invalid Command Type ", p.commandStrList[p.currentCommandIdx])
+	}
+}
+
+func (p *Parser) parseACommand() (*ast.ACommand, error) {
+	p.readChar() // read "@"
+	valueStr := ""
+	for p.hasMoreChar() {
+		valueStr += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
+		p.readChar()
+	}
+	value, err := strconv.Atoi(valueStr)
 	if err != nil {
-		fmt.Println(err)
-		return "", err
+		return nil, err
 	}
-	if commandType == ACommand {
-		return s[1:], nil
-	}
-	if commandType == LCommand {
-		return s[1 : len(s)-1], nil
-	}
-	return "", err
+	return &ast.ACommand{Value: value}, nil
 }
 
-// GetDest returns machine language　Correspond to dest label
-func GetDest(commandStr string) (symbol string, err error) {
-	s := strings.TrimSpace(commandStr)
-	commandType, err := GetCommandType(s)
-	if err != nil {
-		fmt.Println(err)
-		return "", err
+func (p *Parser) parseCCommand() (*ast.CCommand, error) {
+	dest, comp, jump := "", "", ""
+	hasEqual := strings.Contains(p.commandStrList[p.currentCommandIdx], "=")
+	hasSemicolon := strings.Contains(p.commandStrList[p.currentCommandIdx], ";")
+	if hasEqual && hasSemicolon { // parseDest
+		dest = p.parseDest()
+		p.readChar() // read "="
+		comp = p.parseComp()
+		p.readChar() // read ";"
+		jump = p.parseJump()
+	} else if hasEqual {
+		dest = p.parseDest() // read "="
+		p.readChar()
+		comp = p.parseComp()
+	} else if hasSemicolon {
+		comp = p.parseComp()
+		p.readChar() // read ";"
+		jump = p.parseJump()
 	}
-	if commandType != CCommand {
-		return "", errors.New("only C_COMMAND has dest label")
-	}
-	if strings.Contains(s, "=") == false {
-		return "null", nil
-	}
-	dest := strings.Split(s, "=")[0]
-	return dest, nil
+	return &ast.CCommand{Dest: dest, Comp: comp, Jump: jump}, nil
 }
 
-// GetJump returns machine language　Correspond to dest label
-func GetJump(commandStr string) (symbol string, err error) {
-	s := strings.TrimSpace(commandStr)
-	commandType, err := GetCommandType(s)
-	if err != nil {
-		fmt.Println(err)
-		return "", err
+func (p *Parser) parseDest() string {
+	dest := ""
+	for p.commandStrList[p.currentCommandIdx][p.readPosition] != '=' {
+		dest += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
+		p.readChar()
 	}
-	if commandType != CCommand {
-		return "", errors.New("only C_COMMAND has jump label")
-	}
-	if strings.Contains(s, ";") == false {
-		return "null", nil
-	}
-	jump := strings.Split(s, ";")[1]
-	return jump, nil
+
+	return dest
 }
 
-// GetComp returns machine language　Correspond to dest label
-func GetComp(commandStr string) (symbol string, err error) {
-	s := strings.TrimSpace(commandStr)
-	commandType, err := GetCommandType(s)
-	if err != nil {
-		fmt.Println(err)
-		return "", err
+func (p *Parser) parseComp() string {
+	comp := ""
+	for p.hasMoreChar() {
+		if p.commandStrList[p.currentCommandIdx][p.readPosition] == ';' {
+			break
+		}
+		comp += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
+		p.readChar()
 	}
-	if commandType != CCommand {
-		return "", errors.New("only C_COMMAND has jump label")
+	return comp
+}
+
+func (p *Parser) parseJump() string {
+	jump := ""
+	for p.hasMoreChar() {
+		jump += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
+		p.readChar()
 	}
-	jump, err := GetJump(s)
-	if jump == "null" {
-		comp := strings.Split(s, "=")[1]
-		return comp, nil
+	return jump
+}
+
+func (p *Parser) skipWhiteSpace() {
+	for p.hasMoreChar() && (p.commandStrList[p.currentCommandIdx][p.readPosition] == value.SPACE || p.commandStrList[p.currentCommandIdx][p.readPosition] == value.TAB) {
+		p.readChar()
 	}
-	dest, err := GetDest(s)
-	if dest == "null" {
-		comp := strings.Split(s, ";")[0]
-		return comp, nil
-	}
-	comp := strings.Split((strings.Split(s, "=")[1]), ";")[0]
-	return comp, nil
+}
+
+func (p *Parser) readChar() {
+	p.readPosition++
+}
+
+func (p *Parser) hasMoreChar() bool {
+	return len(p.commandStrList[p.currentCommandIdx]) > p.readPosition
+}
+func (p *Parser) resetReadPosition() {
+	p.readPosition = 0
 }
