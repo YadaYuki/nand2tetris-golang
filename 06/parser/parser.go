@@ -37,6 +37,8 @@ func (p *Parser) CommandType() ast.CommandType {
 		return ast.A_COMMAND
 	case '0', '1', 'D', 'A', '!', '-', 'M':
 		return ast.C_COMMAND
+	case '(':
+		return ast.L_COMMAND
 	default:
 		return ""
 	}
@@ -67,6 +69,12 @@ func (p *Parser) ParseCommand() (ast.Command, error) {
 			return nil, err
 		}
 		return cCommand, nil
+	case ast.L_COMMAND:
+		lCommand, err := p.parseLCommand()
+		if err != nil {
+			return nil, err
+		}
+		return lCommand, nil
 	default:
 		return nil, fmt.Errorf("%s is invalid Command Type ", p.commandStrList[p.currentCommandIdx])
 	}
@@ -137,6 +145,16 @@ func (p *Parser) parseJump() string {
 		p.readChar()
 	}
 	return jump
+}
+
+func (p *Parser) parseLCommand() (*ast.LCommand, error) {
+	p.readChar() // read '('
+	valueStr := ""
+	for p.commandStrList[p.currentCommandIdx][p.readPosition] != ')' {
+		valueStr += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
+		p.readChar()
+	}
+	return &ast.LCommand{Symbol: valueStr}, nil
 }
 
 func (p *Parser) skipWhiteSpace() {

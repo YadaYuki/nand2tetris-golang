@@ -54,6 +54,7 @@ func TestCommandType(t *testing.T) {
 	}{
 		{&Parser{commandStrList: []string{"@10"}, currentCommandIdx: 0}, ast.A_COMMAND},
 		{&Parser{commandStrList: []string{"D=M"}, currentCommandIdx: 0}, ast.C_COMMAND},
+		{&Parser{commandStrList: []string{"(SAMPLE)"}, currentCommandIdx: 0}, ast.L_COMMAND},
 	}
 	for _, tt := range testCases {
 		commandType := tt.parser.CommandType()
@@ -110,6 +111,22 @@ func TestParseCCommand(t *testing.T) {
 		}
 		if command.Jump != tt.command.Jump {
 			t.Fatalf("command.Jump Should be %s, got %s", command.Jump, tt.command.Jump)
+		}
+	}
+}
+
+func TestParseLCommand(t *testing.T) {
+	testCases := []struct {
+		parser *Parser
+		symbol string
+	}{
+		{&Parser{commandStrList: []string{"(HOGE)"}, currentCommandIdx: 0}, "HOGE"},
+		{&Parser{commandStrList: []string{"(FUGA)"}, currentCommandIdx: 0}, "FUGA"},
+	}
+	for _, tt := range testCases {
+		command, _ := tt.parser.parseLCommand()
+		if command.Symbol != tt.symbol {
+			t.Fatalf("command.Symbol Should be %s, got %s", command.Symbol, tt.symbol)
 		}
 	}
 }
