@@ -69,6 +69,12 @@ func (p *Parser) ParseCommand() (ast.Command, error) {
 			return nil, err
 		}
 		return cCommand, nil
+	case ast.L_COMMAND:
+		lCommand, err := p.parseLCommand()
+		if err != nil {
+			return nil, err
+		}
+		return lCommand, nil
 	default:
 		return nil, fmt.Errorf("%s is invalid Command Type ", p.commandStrList[p.currentCommandIdx])
 	}
