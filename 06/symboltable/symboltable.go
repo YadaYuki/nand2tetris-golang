@@ -15,3 +15,8 @@ func New() *SymbolTable {
 	}
 	return &SymbolTable{SymbolTableDict: initialSymbolTable, CurrentVariableCount: 0}
 }
+
+func (st *SymbolTable) Contains(symbol string) bool {
+	_, ok := st.SymbolTableDict[symbol]
+	return ok
+}
