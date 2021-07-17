@@ -37,6 +37,8 @@ func (p *Parser) CommandType() ast.CommandType {
 		return ast.A_COMMAND
 	case '0', '1', 'D', 'A', '!', '-', 'M':
 		return ast.C_COMMAND
+	case '(':
+		return ast.L_COMMAND
 	default:
 		return ""
 	}

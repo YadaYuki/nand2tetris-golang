@@ -54,6 +54,7 @@ func TestCommandType(t *testing.T) {
 	}{
 		{&Parser{commandStrList: []string{"@10"}, currentCommandIdx: 0}, ast.A_COMMAND},
 		{&Parser{commandStrList: []string{"D=M"}, currentCommandIdx: 0}, ast.C_COMMAND},
+		{&Parser{commandStrList: []string{"(SAMPLE)"}, currentCommandIdx: 0}, ast.L_COMMAND},
 	}
 	for _, tt := range testCases {
 		commandType := tt.parser.CommandType()
