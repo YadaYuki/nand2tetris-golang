@@ -1,6 +1,8 @@
 package symboltable
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type SymbolTable struct {
 	SymbolTableDict      map[string]int
@@ -19,4 +21,12 @@ func New() *SymbolTable {
 func (st *SymbolTable) Contains(symbol string) bool {
 	_, ok := st.SymbolTableDict[symbol]
 	return ok
+}
+
+func (st *SymbolTable) GetAddress(symbol string) (int, error) {
+	contains := st.Contains(symbol)
+	if !contains {
+		return -1, fmt.Errorf("%s is not Contained in symbolTable", symbol)
+	}
+	return st.SymbolTableDict[symbol], nil
 }
