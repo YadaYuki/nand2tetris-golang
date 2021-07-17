@@ -11,6 +11,7 @@ type CommandType string
 const (
 	A_COMMAND CommandType = "A_COMMAND"
 	C_COMMAND CommandType = "C_COMMAND"
+	L_COMMAND CommandType = "L_COMMAND"
 )
 
 type Command interface {
@@ -39,4 +40,12 @@ func (cCommand *CCommand) String() string {
 		commandStr = strings.Replace(commandStr, "=", "", 1)
 	}
 	return commandStr
+}
+
+type LCommand struct {
+	Symbol string
+}
+
+func (lCommand *LCommand) String() string {
+	return fmt.Sprintf("(%s)", lCommand.Symbol)
 }
