@@ -33,3 +33,19 @@ func TestGetAddress(t *testing.T) {
 		}
 	}
 }
+func TestAddEntry(t *testing.T) {
+	symbolTable := New()
+	testCases := []struct {
+		symbol  string
+		address int
+	}{
+		{"SMAP", 16}, {"KINGNOO", 17}, {"ARASHI", 18},
+	}
+	for _, tt := range testCases {
+		symbolTable.AddEntry(tt.symbol, tt.address)
+		address, _ := symbolTable.GetAddress(tt.symbol)
+		if address != tt.address {
+			t.Fatalf("%s's address should be %d, got %d", tt.symbol, tt.address, address)
+		}
+	}
+}
