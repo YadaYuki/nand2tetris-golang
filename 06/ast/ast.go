@@ -19,11 +19,12 @@ type Command interface {
 }
 
 type ACommand struct {
-	Value int
+	Value    int
+	ValueStr string
 }
 
 func (aCommand *ACommand) String() string {
-	return fmt.Sprintf("@%d", aCommand.Value) + value.NEW_LINE
+	return fmt.Sprintf("@%s", aCommand.ValueStr) + value.NEW_LINE
 }
 
 type CCommand struct {

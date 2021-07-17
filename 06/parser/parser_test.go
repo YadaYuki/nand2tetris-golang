@@ -66,16 +66,16 @@ func TestCommandType(t *testing.T) {
 
 func TestParseACommand(t *testing.T) {
 	testCases := []struct {
-		parser *Parser
-		value  int
+		parser   *Parser
+		valueStr string
 	}{
-		{&Parser{commandStrList: []string{"@10"}, currentCommandIdx: 0}, 10},
-		{&Parser{commandStrList: []string{"@100"}, currentCommandIdx: 0}, 100},
+		{&Parser{commandStrList: []string{"@10"}, currentCommandIdx: 0}, "10"},
+		{&Parser{commandStrList: []string{"@100"}, currentCommandIdx: 0}, "100"},
 	}
 	for _, tt := range testCases {
 		command, _ := tt.parser.parseACommand()
-		if command.Value != tt.value {
-			t.Fatalf("command.Value Should be %d, got %d", command.Value, tt.value)
+		if command.ValueStr != tt.valueStr {
+			t.Fatalf("command.Value Should be %s, got %s", command.ValueStr, tt.valueStr)
 		}
 	}
 }
@@ -127,6 +127,22 @@ func TestParseLCommand(t *testing.T) {
 		command, _ := tt.parser.parseLCommand()
 		if command.Symbol != tt.symbol {
 			t.Fatalf("command.Symbol Should be %s, got %s", command.Symbol, tt.symbol)
+		}
+	}
+}
+
+func TestParseSymbol(t *testing.T) {
+	testCases := []struct {
+		parser *Parser
+		symbol string
+	}{
+		{&Parser{commandStrList: []string{"(HOGE)"}, currentCommandIdx: 0}, "HOGE"},
+		{&Parser{commandStrList: []string{"@FUGA"}, currentCommandIdx: 0}, "FUGA"},
+	}
+	for _, tt := range testCases {
+		symbol, _ := tt.parser.Symbol()
+		if symbol != tt.symbol {
+			t.Fatalf("symbol Should be %s, got %s", symbol, tt.symbol)
 		}
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"assembly/ast"
 	"assembly/value"
 	"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -87,11 +86,11 @@ func (p *Parser) parseACommand() (*ast.ACommand, error) {
 		valueStr += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
 		p.readChar()
 	}
-	value, err := strconv.Atoi(valueStr)
-	if err != nil {
-		return nil, err
-	}
-	return &ast.ACommand{Value: value}, nil
+	// value, err := strconv.Atoi(valueStr)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	return &ast.ACommand{ValueStr: valueStr}, nil
 }
 
 func (p *Parser) parseCCommand() (*ast.CCommand, error) {
@@ -122,7 +121,6 @@ func (p *Parser) parseDest() string {
 		dest += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
 		p.readChar()
 	}
-
 	return dest
 }
 
@@ -155,6 +153,19 @@ func (p *Parser) parseLCommand() (*ast.LCommand, error) {
 		p.readChar()
 	}
 	return &ast.LCommand{Symbol: valueStr}, nil
+}
+
+func (p *Parser) Symbol() (string, error) {
+	switch p.CommandType() {
+	case ast.A_COMMAND:
+		aCommand, _ := p.parseACommand()
+		return aCommand.ValueStr, nil
+	case ast.L_COMMAND:
+		lCommand, _ := p.parseLCommand()
+		return lCommand.Symbol, nil
+	default:
+		return "", fmt.Errorf("%s does not have Symbol ", p.CommandType())
+	}
 }
 
 func (p *Parser) skipWhiteSpace() {
