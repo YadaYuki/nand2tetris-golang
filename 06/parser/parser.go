@@ -141,6 +141,16 @@ func (p *Parser) parseJump() string {
 	return jump
 }
 
+func (p *Parser) parseLCommand() (*ast.LCommand, error) {
+	p.readChar() // read '('
+	valueStr := ""
+	for p.commandStrList[p.currentCommandIdx][p.readPosition] != ')' {
+		valueStr += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
+		p.readChar()
+	}
+	return &ast.LCommand{Symbol: valueStr}, nil
+}
+
 func (p *Parser) skipWhiteSpace() {
 	for p.hasMoreChar() && (p.commandStrList[p.currentCommandIdx][p.readPosition] == value.SPACE || p.commandStrList[p.currentCommandIdx][p.readPosition] == value.TAB) {
 		p.readChar()
