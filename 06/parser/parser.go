@@ -57,6 +57,7 @@ func (p *Parser) ParseAssembly() ([]ast.Command, error) {
 }
 
 func (p *Parser) ParseCommand() (ast.Command, error) {
+	p.removeWhiteSpace()
 	switch p.CommandType() {
 	case ast.A_COMMAND:
 		aCommand, err := p.parseACommand()
@@ -88,7 +89,11 @@ func (p *Parser) parseACommand() (*ast.ACommand, error) {
 	p.readChar() // read "@"
 	valueStr := ""
 	for p.hasMoreChar() {
-		valueStr += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
+		c := p.commandStrList[p.currentCommandIdx][p.readPosition]
+		// if !isLetter(c) && !isNumber(c) && !isUnderline(c) {
+		// 	break
+		// }
+		valueStr += string(c)
 		p.readChar()
 	}
 	value, err := strconv.Atoi(valueStr)
@@ -118,14 +123,16 @@ func (p *Parser) parseCCommand() (*ast.CCommand, error) {
 		comp = p.parseComp()
 		p.readChar() // read ";"
 		jump = p.parseJump()
+
 	}
 	return &ast.CCommand{Dest: dest, Comp: comp, Jump: jump}, nil
 }
 
 func (p *Parser) parseDest() string {
 	dest := ""
-	for p.commandStrList[p.currentCommandIdx][p.readPosition] != '=' {
-		dest += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
+
+	for c := p.commandStrList[p.currentCommandIdx][p.readPosition]; c != '='; c = p.commandStrList[p.currentCommandIdx][p.readPosition] {
+		dest += string(c)
 		p.readChar()
 	}
 	return dest
@@ -134,10 +141,14 @@ func (p *Parser) parseDest() string {
 func (p *Parser) parseComp() string {
 	comp := ""
 	for p.hasMoreChar() {
-		if p.commandStrList[p.currentCommandIdx][p.readPosition] == ';' {
+		c := p.commandStrList[p.currentCommandIdx][p.readPosition]
+		if c == ';' {
 			break
 		}
-		comp += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
+		if c == '/' {
+			break
+		}
+		comp += string(c)
 		p.readChar()
 	}
 	return comp
@@ -146,7 +157,11 @@ func (p *Parser) parseComp() string {
 func (p *Parser) parseJump() string {
 	jump := ""
 	for p.hasMoreChar() {
-		jump += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
+		c := p.commandStrList[p.currentCommandIdx][p.readPosition]
+		if !isLetter(c) && !isNumber(c) && !isUnderline(c) {
+			break
+		}
+		jump += string(c)
 		p.readChar()
 	}
 	return jump
@@ -177,10 +192,9 @@ func (p *Parser) Symbol() (string, error) {
 	}
 }
 
-func (p *Parser) skipWhiteSpace() {
-	for p.hasMoreChar() && (p.commandStrList[p.currentCommandIdx][p.readPosition] == value.SPACE || p.commandStrList[p.currentCommandIdx][p.readPosition] == value.TAB) {
-		p.readChar()
-	}
+func (p *Parser) removeWhiteSpace() {
+	p.commandStrList[p.currentCommandIdx] = strings.Replace(p.commandStrList[p.currentCommandIdx], string(value.SPACE), "", -1)
+	p.commandStrList[p.currentCommandIdx] = strings.Replace(p.commandStrList[p.currentCommandIdx], string(value.TAB), "", -1)
 }
 
 func (p *Parser) readChar() {
@@ -192,4 +206,21 @@ func (p *Parser) hasMoreChar() bool {
 }
 func (p *Parser) resetReadPosition() {
 	p.readPosition = 0
+}
+
+func (p *Parser) ResetParseIdx() {
+	p.resetReadPosition()
+	p.currentCommandIdx = 0
+}
+
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z'
+}
+
+func isNumber(ch byte) bool {
+	return '0' <= ch && ch <= '9'
+}
+
+func isUnderline(ch byte) bool {
+	return ch == '_'
 }

@@ -2,25 +2,22 @@ package main
 
 import (
 	"assembly/ast"
+	"assembly/code"
 	"assembly/parser"
 	"assembly/symboltable"
 	"fmt"
+	"io/ioutil"
 	"strconv"
 )
 
 //TODO: test
 
 func main() {
-	input := `(LOOP)
-@FUGA
-D=A
-@HOGE
-D=D+A
-@0
-M=D
-AM=D|A;JMP`
+	asm, _ := ioutil.ReadFile("add/Add.asm")
+	input := string(asm)
 	st := symboltable.New()
 	p := parser.New(input, st)
+	// first path
 	customVariableCount := 0
 	INTIAL_VARIABLE_COUNT := 16
 	for i := 0; p.HasMoreCommand(); i++ {
@@ -42,5 +39,15 @@ AM=D|A;JMP`
 		}
 		p.Advance()
 	}
-	fmt.Println(p.SymbolTableDict)
+	p.ResetParseIdx()
+	// second path
+	// binary := ""
+	for p.HasMoreCommand() {
+		command, _ := p.ParseCommand()
+		if p.CommandType() == ast.A_COMMAND || p.CommandType() == ast.C_COMMAND {
+			// c, ok := command.(*ast.CCommand)
+			fmt.Println(code.Binary(command))
+		}
+		p.Advance()
+	}
 }
