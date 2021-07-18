@@ -36,10 +36,6 @@ func (st *SymbolTable) GetAddress(symbol string) (int, error) {
 }
 
 func (st *SymbolTable) AddEntry(symbol string, address int) error {
-	contains := st.Contains(symbol)
-	if contains {
-		return fmt.Errorf("%s is already Contained in symbolTable", symbol)
-	}
 	st.SymbolTableDict[symbol] = address
 	return nil
 }

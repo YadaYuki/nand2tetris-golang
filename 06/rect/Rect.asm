@@ -1,15 +1,7 @@
-//Thisfileispartofwww.nand2tetris.org
-//andthebook"TheElementsofComputingSystems"
-//byNisanandSchocken,MITPress.
-//Filename:projects/06/rect/Rect.asm
-
-//Drawsarectangleatthetop-leftcornerofthescreen.
-//Therectangleis16pixelswideandR0pixelshigh.
-
 @0
 D=M
 @INFINITE_LOOP
-D;JLE
+D;JLE 
 @counter
 M=D
 @SCREEN

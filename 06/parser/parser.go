@@ -32,6 +32,9 @@ func (p *Parser) HasMoreCommand() bool {
 
 func (p *Parser) CommandType() ast.CommandType {
 	commansStr := p.commandStrList[p.currentCommandIdx]
+	if commansStr == "" {
+		return ""
+	}
 	// switch by prefix char
 	commandStrPrefix := commansStr[0]
 	switch commandStrPrefix {
