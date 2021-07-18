@@ -2,20 +2,23 @@ package parser
 
 import (
 	"assembly/ast"
+	"assembly/symboltable"
 	"assembly/value"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
 type Parser struct {
+	*symboltable.SymbolTable
 	input             string
 	commandStrList    []string
 	currentCommandIdx int
 	readPosition      int
 }
 
-func New(input string) *Parser {
-	parser := &Parser{input: input, commandStrList: strings.Split(input, value.NEW_LINE), currentCommandIdx: 0, readPosition: 0}
+func New(input string, symbolTable *symboltable.SymbolTable) *Parser {
+	parser := &Parser{input: input, commandStrList: strings.Split(input, value.NEW_LINE), currentCommandIdx: 0, readPosition: 0, SymbolTable: symbolTable}
 	return parser
 }
 
@@ -47,7 +50,6 @@ func (p *Parser) ParseAssembly() ([]ast.Command, error) {
 	commands := []ast.Command{}
 	for p.HasMoreCommand() {
 		command, _ := p.ParseCommand()
-		p.resetReadPosition()
 		commands = append(commands, command)
 		p.Advance()
 	}
@@ -58,18 +60,21 @@ func (p *Parser) ParseCommand() (ast.Command, error) {
 	switch p.CommandType() {
 	case ast.A_COMMAND:
 		aCommand, err := p.parseACommand()
+		p.resetReadPosition()
 		if err != nil {
 			return nil, err
 		}
 		return aCommand, nil
 	case ast.C_COMMAND:
 		cCommand, err := p.parseCCommand()
+		p.resetReadPosition()
 		if err != nil {
 			return nil, err
 		}
 		return cCommand, nil
 	case ast.L_COMMAND:
 		lCommand, err := p.parseLCommand()
+		p.resetReadPosition()
 		if err != nil {
 			return nil, err
 		}
@@ -86,11 +91,13 @@ func (p *Parser) parseACommand() (*ast.ACommand, error) {
 		valueStr += string(p.commandStrList[p.currentCommandIdx][p.readPosition])
 		p.readChar()
 	}
-	// value, err := strconv.Atoi(valueStr)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	return &ast.ACommand{ValueStr: valueStr}, nil
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		if p.Contains(valueStr) {
+			value, _ = p.GetAddress(valueStr)
+		}
+	}
+	return &ast.ACommand{ValueStr: valueStr, Value: value}, nil
 }
 
 func (p *Parser) parseCCommand() (*ast.CCommand, error) {
@@ -159,9 +166,11 @@ func (p *Parser) Symbol() (string, error) {
 	switch p.CommandType() {
 	case ast.A_COMMAND:
 		aCommand, _ := p.parseACommand()
+		p.resetReadPosition()
 		return aCommand.ValueStr, nil
 	case ast.L_COMMAND:
 		lCommand, _ := p.parseLCommand()
+		p.resetReadPosition()
 		return lCommand.Symbol, nil
 	default:
 		return "", fmt.Errorf("%s does not have Symbol ", p.CommandType())
