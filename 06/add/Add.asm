@@ -3,5 +3,5 @@ D=A
 @3
 D=D+A
 @0
-M=D
+D=M
 AM=D|A;JMP
