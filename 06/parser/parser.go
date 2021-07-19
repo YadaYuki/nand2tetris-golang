@@ -93,9 +93,6 @@ func (p *Parser) parseACommand() (*ast.ACommand, error) {
 	valueStr := ""
 	for p.hasMoreChar() {
 		c := p.commandStrList[p.currentCommandIdx][p.readPosition]
-		// if !isLetter(c) && !isNumber(c) && !isUnderline(c) {
-		// 	break
-		// }
 		valueStr += string(c)
 		p.readChar()
 	}
