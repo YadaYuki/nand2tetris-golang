@@ -2,12 +2,13 @@ package ast
 
 import (
 	"assembly/value"
+	"fmt"
 	"testing"
 )
 
 func TestACommand(t *testing.T) {
 	val := 10000
-	aCommand := ACommand{Value: val}
+	aCommand := ACommand{Value: val, ValueStr: fmt.Sprintf("%d", val)}
 	if aCommand.String() != "@10000"+value.NEW_LINE {
 		t.Fatalf("aCommand.String() should be %s, got %s ", "@10000"+value.NEW_LINE, aCommand.String())
 	}

@@ -13,6 +13,7 @@ func TestBinary(t *testing.T) {
 	}{
 		{&ast.ACommand{Value: 100}, "0000000001100100"},
 		{&ast.CCommand{Comp: "A", Dest: "D"}, "1110110000010000"},
+		{&ast.CCommand{Comp: "M", Dest: "D"}, "1110001100001000"},
 		{&ast.CCommand{Comp: "D|A", Dest: "AM", Jump: "JMP"}, "1110010101101111"},
 	}
 	for _, tt := range testCases {
