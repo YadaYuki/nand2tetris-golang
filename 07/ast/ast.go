@@ -21,3 +21,7 @@ type VMCommand interface {
 type ArithmeticCommand struct {
 	ArthmeticCommand AritimeticCommandType
 }
+
+func (arithmeticCommand *ArithmeticCommand) String() string {
+	return string(arithmeticCommand.ArthmeticCommand)
+}
