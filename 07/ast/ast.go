@@ -1,6 +1,13 @@
 package ast
 
-type AritimeticCommandType string
+type CommandType string
+
+const (
+	PUSH CommandType = "push"
+	POP  CommandType = "pop"
+)
+
+type AritimeticCommandType CommandType
 
 const (
 	ADD AritimeticCommandType = "add"
@@ -19,11 +26,11 @@ type VMCommand interface {
 }
 
 type ArithmeticCommand struct {
-	ArthmeticCommand AritimeticCommandType
+	Command AritimeticCommandType
 }
 
 func (arithmeticCommand *ArithmeticCommand) String() string {
-	return string(arithmeticCommand.ArthmeticCommand)
+	return string(arithmeticCommand.Command)
 }
 
 type SegmentType string
@@ -41,4 +48,10 @@ const (
 
 type MemoryAccessCommand interface {
 	VMCommand
+}
+
+type PushCommand struct {
+	Comamnd CommandType // push
+	Segment SegmentType
+	Index   int
 }
