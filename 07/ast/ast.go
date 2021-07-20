@@ -1,6 +1,15 @@
 package ast
 
-type AritimeticCommandType string
+import "fmt"
+
+type CommandType string
+
+const (
+	PUSH CommandType = "push"
+	POP  CommandType = "pop"
+)
+
+type AritimeticCommandType CommandType
 
 const (
 	ADD AritimeticCommandType = "add"
@@ -19,9 +28,46 @@ type VMCommand interface {
 }
 
 type ArithmeticCommand struct {
-	ArthmeticCommand AritimeticCommandType
+	Command AritimeticCommandType
 }
 
 func (arithmeticCommand *ArithmeticCommand) String() string {
-	return string(arithmeticCommand.ArthmeticCommand)
+	return string(arithmeticCommand.Command)
+}
+
+type SegmentType string
+
+const (
+	ARGUMENT SegmentType = "argument"
+	LOCAL    SegmentType = "local"
+	STATIC   SegmentType = "static"
+	CONSTANT SegmentType = "constant"
+	THIS     SegmentType = "this"
+	THAT     SegmentType = "that"
+	POINTER  SegmentType = "pointer"
+	TEMP     SegmentType = "temp"
+)
+
+type MemoryAccessCommand interface {
+	VMCommand
+}
+
+type PushCommand struct {
+	Comamnd CommandType // push
+	Segment SegmentType
+	Index   int
+}
+
+func (pushCommand *PushCommand) String() string {
+	return fmt.Sprintf("%s %s %d", pushCommand.Comamnd, pushCommand.Segment, pushCommand.Index)
+}
+
+type PopCommand struct {
+	Comamnd CommandType // push
+	Segment SegmentType
+	Index   int
+}
+
+func (popCommand *PopCommand) String() string {
+	return fmt.Sprintf("%s %s %d", popCommand.Comamnd, popCommand.Segment, popCommand.Index)
 }
