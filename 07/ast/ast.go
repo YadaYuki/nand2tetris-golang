@@ -25,3 +25,16 @@ type ArithmeticCommand struct {
 func (arithmeticCommand *ArithmeticCommand) String() string {
 	return string(arithmeticCommand.ArthmeticCommand)
 }
+
+type SegmentType string
+
+const (
+	ARGUMENT SegmentType = "argument"
+	LOCAL    SegmentType = "local"
+	STATIC   SegmentType = "static"
+	CONSTANT SegmentType = "constant"
+	THIS     SegmentType = "this"
+	THAT     SegmentType = "that"
+	POINTER  SegmentType = "pointer"
+	TEMP     SegmentType = "temp"
+)
