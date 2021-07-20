@@ -38,3 +38,7 @@ const (
 	POINTER  SegmentType = "pointer"
 	TEMP     SegmentType = "temp"
 )
+
+type MemoryAccessCommand interface {
+	VMCommand
+}
