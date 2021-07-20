@@ -1,5 +1,7 @@
 package ast
 
+import "fmt"
+
 type CommandType string
 
 const (
@@ -54,4 +56,8 @@ type PushCommand struct {
 	Comamnd CommandType // push
 	Segment SegmentType
 	Index   int
+}
+
+func (pushCommand *PushCommand) String() string {
+	return fmt.Sprintf("%s %s %d", pushCommand.Comamnd, pushCommand.Segment, pushCommand.Index)
 }
