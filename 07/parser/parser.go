@@ -18,3 +18,7 @@ func New(input string) *Parser {
 	InitialCurrentCommandTokenArr := strings.Split(CommandStrArr[0], value.SPACE)
 	return &Parser{input: input, CurrentCommandIdx: 0, CurrentTokenIdx: 0, CommandStrArr: CommandStrArr, CurrentCommandTokenArr: InitialCurrentCommandTokenArr}
 }
+
+func (p *Parser) HasMoreCommand() bool {
+	return len(p.CommandStrArr) > p.CurrentCommandIdx
+}
