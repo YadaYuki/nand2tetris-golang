@@ -12,14 +12,12 @@ import (
 	"strings"
 )
 
-//TODO: test
-
 func Assemble(input string) (binaryArr []string, err error) {
 	st := symboltable.New()
 	p := parser.New(input, st)
 	// first path
 	currentBinaryCount := 0
-	for i := 0; p.HasMoreCommand(); i++ {
+	for p.HasMoreCommand() {
 		switch p.CommandType() {
 		case ast.A_COMMAND, ast.C_COMMAND:
 			currentBinaryCount++

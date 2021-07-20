@@ -29,27 +29,6 @@ func TestHasMoreCommand(t *testing.T) {
 	}
 }
 
-// func TestSkipWhiteSpace(t *testing.T) {
-// 	testCases := []struct {
-// 		parser                          *Parser
-// 		readPositionAfterSkipWhiteSpace int
-// 	}{
-// 		{&Parser{commandStrList: []string{"input"}, currentCommandIdx: 0}, 0},
-// 		{&Parser{commandStrList: []string{" input"}, currentCommandIdx: 0}, 1},
-// 		{&Parser{commandStrList: []string{"   input"}, currentCommandIdx: 0}, 3},
-// 		{&Parser{commandStrList: []string{"   \tinput"}, currentCommandIdx: 0}, 4},
-// 	}
-// 	for _, tt := range testCases {
-// 		tt.parser.removeWhiteSpace()
-// 		if tt.parser.readPosition != tt.readPositionAfterSkipWhiteSpace {
-// 			t.Fatalf("parser.readPosition should be %d,got %d", tt.readPositionAfterSkipWhiteSpace, tt.parser.readPosition)
-// 		}
-// 		if tt.parser.commandStrList[tt.parser.currentCommandIdx][tt.parser.readPosition] != byte('i') {
-// 			t.Fatalf("readChar should be `i`,got %c", tt.parser.commandStrList[tt.parser.currentCommandIdx][tt.parser.readPosition])
-// 		}
-// 	}
-// }
-
 func TestCommandType(t *testing.T) {
 	testCases := []struct {
 		parser      *Parser
