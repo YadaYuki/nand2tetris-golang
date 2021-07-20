@@ -13,3 +13,7 @@ const (
 	OR  AritimeticCommandType = "or"
 	NOT AritimeticCommandType = "not"
 )
+
+type VMCommand interface {
+	String()
+}
