@@ -61,3 +61,13 @@ type PushCommand struct {
 func (pushCommand *PushCommand) String() string {
 	return fmt.Sprintf("%s %s %d", pushCommand.Comamnd, pushCommand.Segment, pushCommand.Index)
 }
+
+type PopCommand struct {
+	Comamnd CommandType // push
+	Segment SegmentType
+	Index   int
+}
+
+func (popCommand *PopCommand) String() string {
+	return fmt.Sprintf("%s %s %d", popCommand.Comamnd, popCommand.Segment, popCommand.Index)
+}
