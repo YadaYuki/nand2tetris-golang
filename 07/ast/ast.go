@@ -5,8 +5,9 @@ import "fmt"
 type CommandType string
 
 const (
-	PUSH CommandType = "push"
-	POP  CommandType = "pop"
+	PUSH          CommandType = "push"
+	POP           CommandType = "pop"
+	EMPTY_COMMAND CommandType = ""
 )
 
 type AritimeticCommandType CommandType
@@ -63,7 +64,7 @@ func (pushCommand *PushCommand) String() string {
 }
 
 type PopCommand struct {
-	Comamnd CommandType // push
+	Comamnd CommandType // pop
 	Segment SegmentType
 	Index   int
 }
