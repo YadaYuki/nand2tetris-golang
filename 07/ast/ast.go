@@ -17,3 +17,7 @@ const (
 type VMCommand interface {
 	String()
 }
+
+type ArithmeticCommand struct {
+	ArthmeticCommand AritimeticCommandType
+}
