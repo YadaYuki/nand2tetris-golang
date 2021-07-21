@@ -1,85 +1,79 @@
 package parser
 
 import (
-	"errors"
+	"VMtranslator/ast"
+	"VMtranslator/value"
+	"fmt"
+	"strconv"
 	"strings"
 )
 
-// CommandType is CommandType
-type CommandType int
+type Parser struct {
+	CurrentCommandIdx      int
+	CurrentTokenIdx        int
+	CommandStrArr          []string // ["push local 1",....]
+	CurrentCommandTokenArr []string // ["push","local","1"]
+	input                  string
+}
 
-const (
-	CArithmetic CommandType = iota
-	CPush
-	CPop
-	CLabel
-	CGoto
-	CIf
-	CFunction
-	CReturn
-	CCall
-)
+func New(input string) *Parser {
+	CommandStrArr := strings.Split(input, value.NEW_LINE)
+	InitialCurrentCommandTokenArr := strings.Split(CommandStrArr[0], value.SPACE)
+	return &Parser{input: input, CurrentCommandIdx: 0, CurrentTokenIdx: 0, CommandStrArr: CommandStrArr, CurrentCommandTokenArr: InitialCurrentCommandTokenArr}
+}
 
-func (command CommandType) String() string {
-	switch command {
-	case CArithmetic:
-		return "C_ARITHMETIC"
-	case CPush:
-		return "C_PUSH"
-	case CPop:
-		return "C_POP"
-	case CLabel:
-		return "C_LABEL"
-	case CGoto:
-		return "C_GOTO"
-	case CIf:
-		return "C_IF"
-	case CFunction:
-		return "C_FUNCTION"
-	case CReturn:
-		return "C_RETURN"
-	case CCall:
-		return "C_CALL"
+func (p *Parser) HasMoreCommand() bool {
+	return len(p.CommandStrArr) > p.CurrentCommandIdx
+}
+
+func (p *Parser) CommandType() ast.CommandType {
+	if p.CommandStrArr[p.CurrentCommandIdx] == "" {
+		return ast.C_EMPTY
+	}
+	curretnCommandPrefix := ast.CommandSymbol(p.CurrentCommandTokenArr[0])
+	switch curretnCommandPrefix {
+	case ast.PUSH:
+		return ast.C_PUSH
+	case ast.POP:
+		return ast.C_POP
+	case ast.ADD, ast.SUB, ast.NEG, ast.EQ, ast.GT, ast.LT, ast.AND, ast.OR, ast.NOT:
+		return ast.C_ARITHMETIC
 	default:
-		return "Unknown"
+		return ast.C_EMPTY
 	}
 }
 
-// GetCommandType GetCommandType
-func GetCommandType(commandStr string) (c CommandType, err error) {
-	s := strings.TrimSpace(commandStr)
-	arithmeticCommand := map[string]int{"add": 1, "sub": 1, "neg": 1, "eq": 1, "gt": 1, "lt": 1, "and": 1, "or": 1, "not": 1}
-	if _, ok := arithmeticCommand[s]; ok {
-		return CArithmetic, nil
+func (p *Parser) Advance() {
+	for {
+		p.CurrentCommandIdx++
+		p.CurrentTokenIdx = 0
+		p.CurrentCommandTokenArr = strings.Split(p.CommandStrArr[p.CurrentCommandIdx], value.SPACE)
+		if p.CommandType() != ast.C_EMPTY || !p.HasMoreCommand() {
+			break
+		}
 	}
-	if strings.HasPrefix(s, "push") {
-		return CPush, nil
-	}
-	if strings.HasPrefix(s, "pop") {
-		return CPop, nil
-	}
-	return 100, errors.New("Invalid CommandType")
 }
 
-// GetArg1 GetArg1
-func GetArg1(commandStr string) (arg1 string, err error) {
-	s := strings.TrimSpace(commandStr)
-	commandType, _ := GetCommandType(s)
-	if commandType == CArithmetic {
-		return s, nil
+func (p *Parser) Arg1() (string, error) {
+	switch p.CommandType() {
+	case ast.C_ARITHMETIC:
+		return p.CurrentCommandTokenArr[0], nil // return arithmetic symbol. "add","eq"...
+	case ast.C_PUSH, ast.C_POP, ast.C_LABEL, ast.C_GOTO, ast.C_IF, ast.C_FUNCTION, ast.C_CALL:
+		return p.CurrentCommandTokenArr[1], nil
+	default:
+		return "", fmt.Errorf("%s cannnot call Arg1()", p.CommandType())
 	}
-	if commandType == CPush {
-		return strings.Split(s, " ")[1], nil
-	}
-	return "", errors.New("Command has no symbol")
 }
 
-// GetArg2 a
-func GetArg2(commandStr string) (arg2 string, err error) {
-	s := strings.TrimSpace(commandStr)
-	commandType, _ := GetCommandType(s)
-	if commandType == CPush {
-		return strings.Split(s, " ")[2], nil
+func (p *Parser) Arg2() (int, error) {
+	switch p.CommandType() {
+	case ast.C_PUSH, ast.C_POP, ast.C_FUNCTION, ast.C_CALL:
+		arg2, err := strconv.Atoi(p.CurrentCommandTokenArr[2])
+		if err != nil {
+			return -1, err
+		}
+		return arg2, nil
+	default:
+		return -1, fmt.Errorf("%s cannnot call Arg2()", p.CommandType())
 	}
-	return "", errors.New("Command has no symbol")
 }
