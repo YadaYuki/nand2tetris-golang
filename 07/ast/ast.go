@@ -5,23 +5,26 @@ import "fmt"
 type CommandType string
 
 const (
-	PUSH          CommandType = "push"
-	POP           CommandType = "pop"
-	EMPTY_COMMAND CommandType = ""
+	C_PUSH       CommandType = "C_PUSH"
+	C_POP        CommandType = "C_POP"
+	C_ARITHMETIC CommandType = "C_ARITHMETIC"
+	C_EMPTY      CommandType = "C_EMPTY"
 )
 
-type AritimeticCommandType CommandType
+type CommandSymbol string
 
 const (
-	ADD AritimeticCommandType = "add"
-	SUB AritimeticCommandType = "sub"
-	NEG AritimeticCommandType = "neg"
-	EQ  AritimeticCommandType = "eq"
-	GT  AritimeticCommandType = "gt"
-	LT  AritimeticCommandType = "lt"
-	AND AritimeticCommandType = "and"
-	OR  AritimeticCommandType = "or"
-	NOT AritimeticCommandType = "not"
+	PUSH CommandSymbol = "push"
+	POP  CommandSymbol = "pop"
+	ADD  CommandSymbol = "add"
+	SUB  CommandSymbol = "sub"
+	NEG  CommandSymbol = "neg"
+	EQ   CommandSymbol = "eq"
+	GT   CommandSymbol = "gt"
+	LT   CommandSymbol = "lt"
+	AND  CommandSymbol = "and"
+	OR   CommandSymbol = "or"
+	NOT  CommandSymbol = "not"
 )
 
 type VMCommand interface {
@@ -29,11 +32,12 @@ type VMCommand interface {
 }
 
 type ArithmeticCommand struct {
-	Command AritimeticCommandType
+	Command CommandType   // C_ARITHMETIC
+	Symbol  CommandSymbol // "add","lt"...
 }
 
 func (arithmeticCommand *ArithmeticCommand) String() string {
-	return string(arithmeticCommand.Command)
+	return string(arithmeticCommand.Symbol)
 }
 
 type SegmentType string
@@ -54,21 +58,23 @@ type MemoryAccessCommand interface {
 }
 
 type PushCommand struct {
-	Comamnd CommandType // push
+	Comamnd CommandType // C_PUSH
+	Symbol  CommandSymbol
 	Segment SegmentType
 	Index   int
 }
 
 func (pushCommand *PushCommand) String() string {
-	return fmt.Sprintf("%s %s %d", pushCommand.Comamnd, pushCommand.Segment, pushCommand.Index)
+	return fmt.Sprintf("%s %s %d", pushCommand.Symbol, pushCommand.Segment, pushCommand.Index)
 }
 
 type PopCommand struct {
-	Comamnd CommandType // pop
+	Comamnd CommandType // C_POP
+	Symbol  CommandSymbol
 	Segment SegmentType
 	Index   int
 }
 
 func (popCommand *PopCommand) String() string {
-	return fmt.Sprintf("%s %s %d", popCommand.Comamnd, popCommand.Segment, popCommand.Index)
+	return fmt.Sprintf("%s %s %d", popCommand.Symbol, popCommand.Segment, popCommand.Index)
 }

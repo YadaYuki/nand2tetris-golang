@@ -7,9 +7,9 @@ func TestArithmeticCommandString(t *testing.T) {
 		command    *ArithmeticCommand
 		commandStr string
 	}{
-		{&ArithmeticCommand{ADD}, "add"},
-		{&ArithmeticCommand{NEG}, "neg"},
-		{&ArithmeticCommand{AND}, "and"},
+		{&ArithmeticCommand{C_ARITHMETIC, ADD}, "add"},
+		{&ArithmeticCommand{C_ARITHMETIC, NEG}, "neg"},
+		{&ArithmeticCommand{C_ARITHMETIC, AND}, "and"},
 	}
 	for _, tt := range testCases {
 		if tt.commandStr != tt.command.String() {
@@ -23,9 +23,9 @@ func TestPushCommandString(t *testing.T) {
 		command    *PushCommand
 		commandStr string
 	}{
-		{&PushCommand{PUSH, ARGUMENT, 4}, "push argument 4"},
-		{&PushCommand{PUSH, LOCAL, 111}, "push local 111"},
-		{&PushCommand{PUSH, THIS, 12}, "push this 12"},
+		{&PushCommand{C_PUSH, PUSH, ARGUMENT, 4}, "push argument 4"},
+		{&PushCommand{C_PUSH, PUSH, LOCAL, 111}, "push local 111"},
+		{&PushCommand{C_PUSH, PUSH, THIS, 12}, "push this 12"},
 	}
 	for _, tt := range testCases {
 		if tt.commandStr != tt.command.String() {
@@ -39,9 +39,9 @@ func TestPopCommandString(t *testing.T) {
 		command    *PopCommand
 		commandStr string
 	}{
-		{&PopCommand{POP, ARGUMENT, 4}, "pop argument 4"},
-		{&PopCommand{POP, LOCAL, 111}, "pop local 111"},
-		{&PopCommand{POP, THIS, 12}, "pop this 12"},
+		{&PopCommand{C_POP, POP, ARGUMENT, 4}, "pop argument 4"},
+		{&PopCommand{C_POP, POP, LOCAL, 111}, "pop local 111"},
+		{&PopCommand{C_POP, POP, THIS, 12}, "pop this 12"},
 	}
 	for _, tt := range testCases {
 		if tt.commandStr != tt.command.String() {

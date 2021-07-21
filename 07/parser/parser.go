@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"VMtranslator/ast"
 	"VMtranslator/value"
 	"strings"
 )
@@ -21,4 +22,21 @@ func New(input string) *Parser {
 
 func (p *Parser) HasMoreCommand() bool {
 	return len(p.CommandStrArr) > p.CurrentCommandIdx
+}
+
+func (p *Parser) CommandType() ast.CommandType {
+	if p.CommandStrArr[p.CurrentCommandIdx] == "" {
+		return ast.C_EMPTY
+	}
+	curretnCommandPrefix := ast.CommandSymbol(p.CurrentCommandTokenArr[0])
+	switch curretnCommandPrefix {
+	case ast.PUSH:
+		return ast.C_PUSH
+	case ast.POP:
+		return ast.C_POP
+	case ast.ADD, ast.SUB, ast.NEG, ast.EQ, ast.GT, ast.LT, ast.AND, ast.OR, ast.NOT:
+		return ast.C_ARITHMETIC
+	default:
+		return ast.C_EMPTY
+	}
 }
