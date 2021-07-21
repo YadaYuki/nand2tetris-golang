@@ -3,6 +3,7 @@ package parser
 import (
 	"VMtranslator/ast"
 	"VMtranslator/value"
+	"fmt"
 	"strings"
 )
 
@@ -52,5 +53,13 @@ func (p *Parser) Advance() {
 	}
 }
 
-func 
-
+func (p *Parser) Arg1() (string, error) {
+	switch p.CommandType() {
+	case ast.C_ARITHMETIC:
+		return p.CurrentCommandTokenArr[0], nil // return arithmetic symbol. "add","eq"...
+	case ast.C_PUSH, ast.C_POP, ast.C_LABEL, ast.C_GOTO, ast.C_IF, ast.C_FUNCTION, ast.C_CALL:
+		return p.CurrentCommandTokenArr[1], nil
+	default:
+		return "", fmt.Errorf("%s cannnot call Arg1()", p.CommandType())
+	}
+}
