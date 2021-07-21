@@ -40,3 +40,14 @@ func (p *Parser) CommandType() ast.CommandType {
 		return ast.C_EMPTY
 	}
 }
+
+func (p *Parser) Advance() {
+	for {
+		p.CurrentCommandIdx++
+		p.CurrentTokenIdx = 0
+		p.CurrentCommandTokenArr = strings.Split(p.CommandStrArr[p.CurrentCommandIdx], value.SPACE)
+		if p.CommandType() != ast.C_EMPTY || !p.HasMoreCommand() {
+			break
+		}
+	}
+}

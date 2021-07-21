@@ -35,3 +35,19 @@ func TestCommandType(t *testing.T) {
 		}
 	}
 }
+
+func TestAdvance(t *testing.T) {
+	testCases := []struct {
+		p                       *Parser
+		commandTypeAfterAdvance ast.CommandType
+	}{
+		{&Parser{CurrentCommandIdx: 0, CurrentCommandTokenArr: []string{"push", "local", "1"}, CommandStrArr: []string{"push local 1", "", "add"}}, ast.C_ARITHMETIC},
+		{&Parser{CurrentCommandIdx: 2, CurrentCommandTokenArr: []string{"push", "local", "1"}, CommandStrArr: []string{"push local 1", "", "add", "pop local 2"}}, ast.C_POP},
+	}
+	for _, tt := range testCases {
+		tt.p.Advance()
+		if tt.p.CommandType() != tt.commandTypeAfterAdvance {
+			t.Fatalf("p.CommandType after Advance should be %s , but got %s", tt.commandTypeAfterAdvance, tt.p.CommandType())
+		}
+	}
+}
