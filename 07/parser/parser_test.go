@@ -68,3 +68,20 @@ func TestArg1(t *testing.T) {
 		}
 	}
 }
+func TestArg2(t *testing.T) {
+	testCases := []struct {
+		p    *Parser
+		arg2 int
+	}{
+		{&Parser{CurrentCommandIdx: 0, CommandStrArr: []string{"push local 1"}, CurrentCommandTokenArr: []string{"push", "local", "1"}}, 1},
+		{&Parser{CurrentCommandIdx: 0, CommandStrArr: []string{"pop local 111"}, CurrentCommandTokenArr: []string{"pop", "local", "111"}}, 111},
+		{&Parser{CurrentCommandIdx: 0, CommandStrArr: []string{""}, CurrentCommandTokenArr: []string{""}}, -1},
+		{&Parser{CurrentCommandIdx: 0, CommandStrArr: []string{"add"}, CurrentCommandTokenArr: []string{"add"}}, -1},
+	}
+
+	for _, tt := range testCases {
+		if arg2, _ := tt.p.Arg2(); arg2 != tt.arg2 {
+			t.Fatalf("p.Arg2 should be %d , but got %d", tt.arg2, arg2)
+		}
+	}
+}

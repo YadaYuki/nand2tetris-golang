@@ -4,6 +4,7 @@ import (
 	"VMtranslator/ast"
 	"VMtranslator/value"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -61,5 +62,18 @@ func (p *Parser) Arg1() (string, error) {
 		return p.CurrentCommandTokenArr[1], nil
 	default:
 		return "", fmt.Errorf("%s cannnot call Arg1()", p.CommandType())
+	}
+}
+
+func (p *Parser) Arg2() (int, error) {
+	switch p.CommandType() {
+	case ast.C_PUSH, ast.C_POP, ast.C_FUNCTION, ast.C_CALL:
+		arg2, err := strconv.Atoi(p.CurrentCommandTokenArr[2])
+		if err != nil {
+			return -1, err
+		}
+		return arg2, nil
+	default:
+		return -1, fmt.Errorf("%s cannnot call Arg2()", p.CommandType())
 	}
 }
