@@ -1,10 +1,21 @@
 package codewriter
 
+import (
+	"io/ioutil"
+)
+
 type CodeWirter struct {
-	filename string
-	assembly []byte
+	Filename string
+	Assembly []byte
 }
 
 func New(filename string) *CodeWirter {
-	return &CodeWirter{filename: filename, assembly: []byte{}}
+	return &CodeWirter{Filename: filename, Assembly: []byte{}}
+}
+
+func (codeWriter *CodeWirter) Close() {
+	err := ioutil.WriteFile(codeWriter.Filename, codeWriter.Assembly, 0644)
+	if err != nil {
+		panic(err)
+	}
 }
