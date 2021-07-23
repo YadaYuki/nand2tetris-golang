@@ -1,6 +1,7 @@
 package codewriter
 
 import (
+	"VMtranslator/ast"
 	"bytes"
 	"io/ioutil"
 	"testing"
@@ -27,5 +28,20 @@ func TestWriteAssembly(t *testing.T) {
 	codeWriter.writeAssembly(string(assembly))
 	if !bytes.Equal(codeWriter.Assembly, []byte(assembly)) {
 		t.Fatalf("assembly should be %s. got %s", assembly, codeWriter.Assembly)
+	}
+}
+
+func TestGetPushAssembly(t *testing.T) {
+	testCases := []struct {
+		pushCommand *ast.PushCommand
+		assembly    string
+	}{
+		{&ast.PushCommand{Comamnd: ast.C_PUSH, Symbol: ast.PUSH, Segment: ast.CONSTANT, Index: 1111}, "@1111\r\nD=A\r\n@SP\r\nA=M\r\nM=D\r\n@SP\r\nM=M+1\r\n"},
+	}
+	for _, tt := range testCases {
+		assembly, _ := getPushAssembly(tt.pushCommand)
+		if !bytes.Equal([]byte(assembly), []byte(tt.assembly)) {
+			t.Fatalf("assembly should be %s. got %s", tt.assembly, assembly)
+		}
 	}
 }
