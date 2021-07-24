@@ -9,12 +9,13 @@ import (
 )
 
 type CodeWriter struct {
-	Filename string
-	Assembly []byte
+	Filename            string
+	Assembly            []byte
+	compareAssemblyFlag int
 }
 
 func New(filename string) *CodeWriter {
-	return &CodeWriter{Filename: filename, Assembly: []byte{}}
+	return &CodeWriter{Filename: filename, Assembly: []byte{}, compareAssemblyFlag: 0}
 }
 
 func (codeWriter *CodeWriter) Close() {
@@ -48,9 +49,20 @@ func (codeWriter *CodeWriter) WriteArithmetic(command *ast.ArithmeticCommand) er
 }
 
 func getArithmeticAssembly(arithmeticCommand *ast.ArithmeticCommand) (string, error) {
+
 	switch arithmeticCommand.Symbol {
 	case ast.ADD:
 		return getAddCommandAssembly(), nil
+	case ast.SUB:
+		return getSubCommandAssembly(), nil
+	case ast.NEG:
+		return getNegCommandAssembly(), nil
+	case ast.NOT:
+		return getNotCommandAssembly(), nil
+	case ast.AND:
+		return getAndCommandAssembly(), nil
+	case ast.OR:
+		return getOrCommandAssembly(), nil
 	}
 	return "", fmt.Errorf("%T couldn't convert to arithmeticAssembly", arithmeticCommand)
 }
@@ -63,6 +75,55 @@ func getAddCommandAssembly() string {
 	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-2 points to into M
 	assembly += "M=M+D" + value.NEW_LINE                          // set RAM[SP-2] = RAM[SP-2] + RAM[SP-1]
 	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE // decrement SP
+	return assembly
+}
+
+func getSubCommandAssembly() string {
+	assembly := ""
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE   // read value which SP points to into M
+	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-1 points to into M
+	assembly += "D=M" + value.NEW_LINE                            // set M to D
+	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-2 points to into M
+	assembly += "M=M-D" + value.NEW_LINE                          // set RAM[SP-2] = RAM[SP-2] - RAM[SP-1]
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE // decrement SP
+	return assembly
+}
+
+func getAndCommandAssembly() string {
+	assembly := ""
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE   // read value which SP points to into M
+	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-1 points to into M
+	assembly += "D=M" + value.NEW_LINE                            // set M to D
+	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-2 points to into M
+	assembly += "M=M&D" + value.NEW_LINE                          // set RAM[SP-2] = RAM[SP-2] and RAM[SP-1]
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE // decrement SP
+	return assembly
+}
+
+func getOrCommandAssembly() string {
+	assembly := ""
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE   // read value which SP points to into M
+	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-1 points to into M
+	assembly += "D=M" + value.NEW_LINE                            // set M to D
+	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-2 points to into M
+	assembly += "M=M|D" + value.NEW_LINE                          // set RAM[SP-2] = RAM[SP-2] or RAM[SP-1]
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE // decrement SP
+	return assembly
+}
+
+func getNegCommandAssembly() string {
+	assembly := ""
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE // read value which SP points to into M
+	assembly += "A=A-1" + value.NEW_LINE                        // set value which SP-1 points to into M
+	assembly += "M=-M" + value.NEW_LINE                         // set RAM[SP-1] = -RAM[SP-1]
+	return assembly
+}
+
+func getNotCommandAssembly() string {
+	assembly := ""
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE // read value which SP points to into M
+	assembly += "A=A-1" + value.NEW_LINE                        // set value which SP-1 points to into M
+	assembly += "M=!M" + value.NEW_LINE                         // set RAM[SP-1] = -RAM[SP-1]
 	return assembly
 }
 
