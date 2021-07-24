@@ -45,3 +45,18 @@ func TestGetPushAssembly(t *testing.T) {
 		}
 	}
 }
+
+func TestGetArithmeticAssembly(t *testing.T) {
+	testCases := []struct {
+		arithmeticCommand *ast.ArithmeticCommand
+		assembly          string
+	}{
+		{arithmeticCommand: &ast.ArithmeticCommand{Command: ast.C_ARITHMETIC, Symbol: ast.ADD}, assembly: ""},
+	}
+	for _, tt := range testCases {
+		assembly, _ := getArithmeticAssembly(tt.arithmeticCommand)
+		if !bytes.Equal([]byte(assembly), []byte(tt.assembly)) {
+			t.Fatalf("assembly should be %s. got %s", tt.assembly, assembly)
+		}
+	}
+}

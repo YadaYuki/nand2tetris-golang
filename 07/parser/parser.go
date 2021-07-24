@@ -46,9 +46,13 @@ func (p *Parser) CommandType() ast.CommandType {
 func (p *Parser) Advance() {
 	for {
 		p.CurrentCommandIdx++
+		if !p.HasMoreCommand() {
+			break
+		}
 		p.CurrentTokenIdx = 0
 		p.CurrentCommandTokenArr = strings.Split(p.CommandStrArr[p.CurrentCommandIdx], value.SPACE)
-		if p.CommandType() != ast.C_EMPTY || !p.HasMoreCommand() {
+		if p.CommandType() != ast.C_EMPTY {
+
 			break
 		}
 	}

@@ -33,10 +33,37 @@ func (codeWriter *CodeWriter) WritePushPop(command ast.MemoryAccessCommand) erro
 			return err
 		}
 		assembly = pushAssembly
-		return nil
 	}
 	codeWriter.writeAssembly(assembly)
 	return nil
+}
+
+func (codeWriter *CodeWriter) WriteArithmetic(command *ast.ArithmeticCommand) error {
+	arithmeticAssembly, err := getArithmeticAssembly(command)
+	if err != nil {
+		return nil
+	}
+	codeWriter.writeAssembly(arithmeticAssembly)
+	return nil
+}
+
+func getArithmeticAssembly(arithmeticCommand *ast.ArithmeticCommand) (string, error) {
+	switch arithmeticCommand.Symbol {
+	case ast.ADD:
+		return getAddCommandAssembly(), nil
+	}
+	return "", fmt.Errorf("%T couldn't convert to arithmeticAssembly", arithmeticCommand)
+}
+
+func getAddCommandAssembly() string {
+	assembly := ""
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE   // read value which SP points to into M
+	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-1 points to into M
+	assembly += "D=M" + value.NEW_LINE                            // set M to D
+	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-2 points to into M
+	assembly += "M=M+D" + value.NEW_LINE                          // set RAM[SP-2] = RAM[SP-2] + RAM[SP-1]
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE // decrement SP
+	return assembly
 }
 
 func getPushAssembly(pushCommand *ast.PushCommand) (string, error) {
@@ -44,7 +71,7 @@ func getPushAssembly(pushCommand *ast.PushCommand) (string, error) {
 	case ast.CONSTANT:
 		return getPushConstantAssembly(pushCommand), nil
 	}
-	return "", fmt.Errorf("%T couldn't convert to assembly", pushCommand)
+	return "", fmt.Errorf("%T couldn't convert to pushAssembly", pushCommand)
 }
 
 func getPushConstantAssembly(pushCommand *ast.PushCommand) string {
