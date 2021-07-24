@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	vm, _ := ioutil.ReadFile("StackArithmetic/SimpleAdd/SimpleAdd.vm")
+	vm, _ := ioutil.ReadFile("StackArithmetic/StackTest/StackTest.vm")
 	parser := parser.New(string(vm))
-	codeWriter := codewriter.New("SimpleAdd.asm")
+	codeWriter := codewriter.New("StackTest.asm")
 	for parser.HasMoreCommand() {
 		switch parser.CommandType() {
 		case ast.C_PUSH:

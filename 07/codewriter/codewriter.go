@@ -5,17 +5,17 @@ import (
 	"VMtranslator/value"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"strconv"
 )
 
 type CodeWriter struct {
-	Filename            string
-	Assembly            []byte
-	compareAssemblyFlag int
+	Filename string
+	Assembly []byte
 }
 
 func New(filename string) *CodeWriter {
-	return &CodeWriter{Filename: filename, Assembly: []byte{}, compareAssemblyFlag: 0}
+	return &CodeWriter{Filename: filename, Assembly: []byte{}}
 }
 
 func (codeWriter *CodeWriter) Close() {
@@ -42,14 +42,13 @@ func (codeWriter *CodeWriter) WritePushPop(command ast.MemoryAccessCommand) erro
 func (codeWriter *CodeWriter) WriteArithmetic(command *ast.ArithmeticCommand) error {
 	arithmeticAssembly, err := getArithmeticAssembly(command)
 	if err != nil {
-		return nil
+		return err
 	}
 	codeWriter.writeAssembly(arithmeticAssembly)
 	return nil
 }
 
 func getArithmeticAssembly(arithmeticCommand *ast.ArithmeticCommand) (string, error) {
-
 	switch arithmeticCommand.Symbol {
 	case ast.ADD:
 		return getAddCommandAssembly(), nil
@@ -63,6 +62,8 @@ func getArithmeticAssembly(arithmeticCommand *ast.ArithmeticCommand) (string, er
 		return getAndCommandAssembly(), nil
 	case ast.OR:
 		return getOrCommandAssembly(), nil
+	case ast.GT, ast.LT, ast.EQ:
+		return getCompareAssembly(arithmeticCommand.Symbol), nil
 	}
 	return "", fmt.Errorf("%T couldn't convert to arithmeticAssembly", arithmeticCommand)
 }
@@ -123,7 +124,30 @@ func getNotCommandAssembly() string {
 	assembly := ""
 	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE // read value which SP points to into M
 	assembly += "A=A-1" + value.NEW_LINE                        // set value which SP-1 points to into M
-	assembly += "M=!M" + value.NEW_LINE                         // set RAM[SP-1] = -RAM[SP-1]
+	assembly += "M=!M" + value.NEW_LINE                         // set RAM[SP-1] = !RAM[SP-1]
+	return assembly
+}
+
+func getCompareAssembly(compareCommandSymbol ast.CommandSymbol) string {
+	assembly := ""
+	// set x(RAM[SP-2]) - y(RAM[SP-1]) to D(==x-y)
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE // set RAM[SP-1]=y to D
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE + "A=M" + value.NEW_LINE                          // set RAM[SP-2]=x to M
+	assembly += "D=M-D" + value.NEW_LINE                                                                            // set x - y to D
+	compareAddressFlag := strconv.Itoa(rand.Intn(1000000))
+	// jump based on D
+	switch compareCommandSymbol {
+	case ast.EQ:
+		assembly += "@TRUE" + compareAddressFlag + value.NEW_LINE + "D;JEQ" + value.NEW_LINE
+	case ast.GT:
+		assembly += "@TRUE" + compareAddressFlag + value.NEW_LINE + "D;JGT" + value.NEW_LINE
+	case ast.LT:
+		assembly += "@TRUE" + compareAddressFlag + value.NEW_LINE + "D;JLT" + value.NEW_LINE
+	}
+	assembly += "M=0" + value.NEW_LINE + "@NEXT" + compareAddressFlag + value.NEW_LINE + "0;JMP" + value.NEW_LINE // if false set 0 to RAM[SP-2] & jump to NEXT(to prevent TRUE process)
+	assembly += "(TRUE" + compareAddressFlag + ")" + value.NEW_LINE + "M=-1" + value.NEW_LINE                     // if true set -1 to RAM[SP-2]
+	assembly += "(NEXT" + compareAddressFlag + ")" + value.NEW_LINE                                               // NEXT Addr
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                                                 // increment SP
 	return assembly
 }
 

@@ -52,7 +52,6 @@ func (p *Parser) Advance() {
 		p.CurrentTokenIdx = 0
 		p.CurrentCommandTokenArr = strings.Split(p.CommandStrArr[p.CurrentCommandIdx], value.SPACE)
 		if p.CommandType() != ast.C_EMPTY {
-
 			break
 		}
 	}
