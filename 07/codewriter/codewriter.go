@@ -144,10 +144,10 @@ func getCompareAssembly(compareCommandSymbol ast.CommandSymbol) string {
 	case ast.LT:
 		assembly += "@TRUE" + compareAddressFlag + value.NEW_LINE + "D;JLT" + value.NEW_LINE
 	}
-	assembly += "M=0" + value.NEW_LINE + "@NEXT" + compareAddressFlag + value.NEW_LINE + "0;JMP" + value.NEW_LINE // if false set 0 to RAM[SP-2] & jump to NEXT(to prevent TRUE process)
-	assembly += "(TRUE" + compareAddressFlag + ")" + value.NEW_LINE + "M=-1" + value.NEW_LINE                     // if true set -1 to RAM[SP-2]
-	assembly += "(NEXT" + compareAddressFlag + ")" + value.NEW_LINE                                               // NEXT Addr
-	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                                                 // increment SP
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=0" + value.NEW_LINE + "@NEXT" + compareAddressFlag + value.NEW_LINE + "0;JMP" + value.NEW_LINE      // if false set 0 to RAM[SP-2] & jump to NEXT(to prevent TRUE process)
+	assembly += "(TRUE" + compareAddressFlag + ")" + value.NEW_LINE + "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=0" + value.NEW_LINE + "M=-1" + value.NEW_LINE // if true set -1 to RAM[SP-2]
+	assembly += "(NEXT" + compareAddressFlag + ")" + value.NEW_LINE                                                                                                      // NEXT Addr
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                                                                                                        // increment SP
 	return assembly
 }
 
