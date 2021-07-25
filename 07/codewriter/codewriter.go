@@ -155,6 +155,8 @@ func getPushAssembly(pushCommand *ast.PushCommand) (string, error) {
 	switch pushCommand.Segment {
 	case ast.CONSTANT:
 		return getPushConstantAssembly(pushCommand), nil
+	case ast.ARGUMENT, ast.LOCAL, ast.THAT, ast.THIS:
+		return getPushCommandBaseAddressInRamAssembly(pushCommand), nil
 	}
 	return "", fmt.Errorf("%T couldn't convert to pushAssembly", pushCommand)
 }
@@ -165,6 +167,27 @@ func getPushConstantAssembly(pushCommand *ast.PushCommand) string {
 	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE                                 // read value which SP points to into M
 	assembly += "M=D" + value.NEW_LINE                                                          // set D to M
 	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                               // increment SP
+	return assembly
+}
+
+func getPushCommandBaseAddressInRamAssembly(pushCommand *ast.PushCommand) string {
+	assembly := ""
+	assembly += strconv.Itoa(pushCommand.Index) + value.NEW_LINE + "D=A" + value.NEW_LINE // set constant value to D
+	// read Segment Base Address to A (A == {segment},M=R[{segment}])
+	switch pushCommand.Segment {
+	case ast.LOCAL:
+		assembly += "@LCL" + value.NEW_LINE + "A=M" + value.NEW_LINE
+	case ast.ARGUMENT:
+		assembly += "@ARG" + value.NEW_LINE + "A=M" + value.NEW_LINE
+	case ast.THAT:
+		assembly += "@THAT" + value.NEW_LINE + "A=M" + value.NEW_LINE
+	case ast.THIS:
+		assembly += "@THIS" + value.NEW_LINE + "A=M" + value.NEW_LINE
+	}
+	assembly += "A=A+D" + value.NEW_LINE                                                 // set A =  A + D (A == LCL + idx , M == RAM[LCL + idx])
+	assembly += "D=M" + value.NEW_LINE                                                   // set D=M (D == RAM[LCL + idx])
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE // set D to RAM[sp]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                        // increment SP
 	return assembly
 }
 
