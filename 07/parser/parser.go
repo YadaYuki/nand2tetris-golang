@@ -93,6 +93,19 @@ func (p *Parser) ParsePush() (*ast.PushCommand, error) {
 	command := &ast.PushCommand{Comamnd: ast.C_PUSH, Symbol: ast.PUSH, Segment: ast.SegmentType(arg1), Index: arg2}
 	return command, nil
 }
+
+func (p *Parser) ParsePop() (*ast.PopCommand, error) {
+	arg1, err := p.Arg1()
+	if err != nil {
+		return nil, err
+	}
+	arg2, err := p.Arg2()
+	if err != nil {
+		return nil, err
+	}
+	command := &ast.PopCommand{Comamnd: ast.C_POP, Symbol: ast.PUSH, Segment: ast.SegmentType(arg1), Index: arg2}
+	return command, nil
+}
 func (p *Parser) ParseArithmetic() (*ast.ArithmeticCommand, error) {
 	arg1, err := p.Arg1()
 	if err != nil {

@@ -38,8 +38,9 @@ func TestGetPushAssembly(t *testing.T) {
 	}{
 		{&ast.PushCommand{Comamnd: ast.C_PUSH, Symbol: ast.PUSH, Segment: ast.CONSTANT, Index: 1111}, "@1111\r\nD=A\r\n@SP\r\nA=M\r\nM=D\r\n@SP\r\nM=M+1\r\n"},
 	}
+	codeWriter := New("test.asm", "Test")
 	for _, tt := range testCases {
-		assembly, _ := getPushAssembly(tt.pushCommand)
+		assembly, _ := codeWriter.getPushAssembly(tt.pushCommand)
 		if !bytes.Equal([]byte(assembly), []byte(tt.assembly)) {
 			t.Fatalf("assembly should be %s. got %s", tt.assembly, assembly)
 		}
@@ -53,8 +54,9 @@ func TestGetArithmeticAssembly(t *testing.T) {
 	}{
 		{arithmeticCommand: &ast.ArithmeticCommand{Command: ast.C_ARITHMETIC, Symbol: ast.ADD}, assembly: ""},
 	}
+	codeWriter := New("test.asm", "Test")
 	for _, tt := range testCases {
-		assembly, _ := getArithmeticAssembly(tt.arithmeticCommand)
+		assembly, _ := codeWriter.getArithmeticAssembly(tt.arithmeticCommand)
 		if !bytes.Equal([]byte(assembly), []byte(tt.assembly)) {
 			t.Fatalf("assembly should be %s. got %s", tt.assembly, assembly)
 		}

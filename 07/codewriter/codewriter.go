@@ -10,12 +10,13 @@ import (
 )
 
 type CodeWriter struct {
-	Filename string
-	Assembly []byte
+	Filename    string
+	Assembly    []byte
+	VmClassName string
 }
 
-func New(filename string) *CodeWriter {
-	return &CodeWriter{Filename: filename, Assembly: []byte{}}
+func New(filename string, vmClassName string) *CodeWriter {
+	return &CodeWriter{Filename: filename, Assembly: []byte{}, VmClassName: vmClassName}
 }
 
 func (codeWriter *CodeWriter) Close() {
@@ -29,18 +30,24 @@ func (codeWriter *CodeWriter) WritePushPop(command ast.MemoryAccessCommand) erro
 	var assembly string
 	switch c := command.(type) {
 	case *ast.PushCommand:
-		pushAssembly, err := getPushAssembly(c)
+		pushAssembly, err := codeWriter.getPushAssembly(c)
 		if err != nil {
 			return err
 		}
 		assembly = pushAssembly
+	case *ast.PopCommand:
+		popAssembly, err := codeWriter.getPopAssembly(c)
+		if err != nil {
+			return err
+		}
+		assembly = popAssembly
 	}
 	codeWriter.writeAssembly(assembly)
 	return nil
 }
 
 func (codeWriter *CodeWriter) WriteArithmetic(command *ast.ArithmeticCommand) error {
-	arithmeticAssembly, err := getArithmeticAssembly(command)
+	arithmeticAssembly, err := codeWriter.getArithmeticAssembly(command)
 	if err != nil {
 		return err
 	}
@@ -48,27 +55,27 @@ func (codeWriter *CodeWriter) WriteArithmetic(command *ast.ArithmeticCommand) er
 	return nil
 }
 
-func getArithmeticAssembly(arithmeticCommand *ast.ArithmeticCommand) (string, error) {
+func (codeWriter *CodeWriter) getArithmeticAssembly(arithmeticCommand *ast.ArithmeticCommand) (string, error) {
 	switch arithmeticCommand.Symbol {
 	case ast.ADD:
-		return getAddCommandAssembly(), nil
+		return codeWriter.getAddCommandAssembly(), nil
 	case ast.SUB:
-		return getSubCommandAssembly(), nil
+		return codeWriter.getSubCommandAssembly(), nil
 	case ast.NEG:
-		return getNegCommandAssembly(), nil
+		return codeWriter.getNegCommandAssembly(), nil
 	case ast.NOT:
-		return getNotCommandAssembly(), nil
+		return codeWriter.getNotCommandAssembly(), nil
 	case ast.AND:
-		return getAndCommandAssembly(), nil
+		return codeWriter.getAndCommandAssembly(), nil
 	case ast.OR:
-		return getOrCommandAssembly(), nil
+		return codeWriter.getOrCommandAssembly(), nil
 	case ast.GT, ast.LT, ast.EQ:
-		return getCompareAssembly(arithmeticCommand.Symbol), nil
+		return codeWriter.getCompareAssembly(arithmeticCommand.Symbol), nil
 	}
 	return "", fmt.Errorf("%T couldn't convert to arithmeticAssembly", arithmeticCommand)
 }
 
-func getAddCommandAssembly() string {
+func (codeWriter *CodeWriter) getAddCommandAssembly() string {
 	assembly := ""
 	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE   // read value which SP points to into M
 	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-1 points to into M
@@ -79,7 +86,7 @@ func getAddCommandAssembly() string {
 	return assembly
 }
 
-func getSubCommandAssembly() string {
+func (codeWriter *CodeWriter) getSubCommandAssembly() string {
 	assembly := ""
 	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE   // read value which SP points to into M
 	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-1 points to into M
@@ -90,7 +97,7 @@ func getSubCommandAssembly() string {
 	return assembly
 }
 
-func getAndCommandAssembly() string {
+func (codeWriter *CodeWriter) getAndCommandAssembly() string {
 	assembly := ""
 	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE   // read value which SP points to into M
 	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-1 points to into M
@@ -101,7 +108,7 @@ func getAndCommandAssembly() string {
 	return assembly
 }
 
-func getOrCommandAssembly() string {
+func (codeWriter *CodeWriter) getOrCommandAssembly() string {
 	assembly := ""
 	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE   // read value which SP points to into M
 	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-1 points to into M
@@ -112,7 +119,7 @@ func getOrCommandAssembly() string {
 	return assembly
 }
 
-func getNegCommandAssembly() string {
+func (codeWriter *CodeWriter) getNegCommandAssembly() string {
 	assembly := ""
 	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE // read value which SP points to into M
 	assembly += "A=A-1" + value.NEW_LINE                        // set value which SP-1 points to into M
@@ -120,7 +127,7 @@ func getNegCommandAssembly() string {
 	return assembly
 }
 
-func getNotCommandAssembly() string {
+func (codeWriter *CodeWriter) getNotCommandAssembly() string {
 	assembly := ""
 	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE // read value which SP points to into M
 	assembly += "A=A-1" + value.NEW_LINE                        // set value which SP-1 points to into M
@@ -128,7 +135,7 @@ func getNotCommandAssembly() string {
 	return assembly
 }
 
-func getCompareAssembly(compareCommandSymbol ast.CommandSymbol) string {
+func (codeWriter *CodeWriter) getCompareAssembly(compareCommandSymbol ast.CommandSymbol) string {
 	assembly := ""
 	// set x(RAM[SP-2]) - y(RAM[SP-1]) to D(==x-y)
 	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE // set RAM[SP-1]=y to D
@@ -151,17 +158,23 @@ func getCompareAssembly(compareCommandSymbol ast.CommandSymbol) string {
 	return assembly
 }
 
-func getPushAssembly(pushCommand *ast.PushCommand) (string, error) {
+func (codeWriter *CodeWriter) getPopAssembly(pushCommand *ast.PopCommand) (string, error) {
+	return "", nil
+}
+
+func (codeWriter *CodeWriter) getPushAssembly(pushCommand *ast.PushCommand) (string, error) {
 	switch pushCommand.Segment {
 	case ast.CONSTANT:
-		return getPushConstantAssembly(pushCommand), nil
-	case ast.ARGUMENT, ast.LOCAL, ast.THAT, ast.THIS:
-		return getPushCommandBaseAddressInRamAssembly(pushCommand), nil
+		return codeWriter.getPushConstantAssembly(pushCommand), nil
+	case ast.ARGUMENT, ast.LOCAL, ast.THAT, ast.THIS, ast.POINTER, ast.TEMP:
+		return codeWriter.getMemoryAccessPushAssembly(pushCommand), nil
+	case ast.STATIC:
+		return codeWriter.getPushStaticAssembly(pushCommand), nil
 	}
 	return "", fmt.Errorf("%T couldn't convert to pushAssembly", pushCommand)
 }
 
-func getPushConstantAssembly(pushCommand *ast.PushCommand) string {
+func (codeWriter *CodeWriter) getPushConstantAssembly(pushCommand *ast.PushCommand) string {
 	assembly := ""
 	assembly += "@" + strconv.Itoa(pushCommand.Index) + value.NEW_LINE + "D=A" + value.NEW_LINE // set constant value to D
 	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE                                 // read value which SP points to into M
@@ -170,9 +183,10 @@ func getPushConstantAssembly(pushCommand *ast.PushCommand) string {
 	return assembly
 }
 
-func getPushCommandBaseAddressInRamAssembly(pushCommand *ast.PushCommand) string {
+func (codeWriter *CodeWriter) getMemoryAccessPushAssembly(pushCommand *ast.PushCommand) string {
 	assembly := ""
 	assembly += strconv.Itoa(pushCommand.Index) + value.NEW_LINE + "D=A" + value.NEW_LINE // set constant value to D
+	TEMP_BASE_ADDRESS, POINTER_BASE_ADDRESS := 5, 3
 	// read Segment Base Address to A (A == {segment},M=R[{segment}])
 	switch pushCommand.Segment {
 	case ast.LOCAL:
@@ -183,11 +197,23 @@ func getPushCommandBaseAddressInRamAssembly(pushCommand *ast.PushCommand) string
 		assembly += "@THAT" + value.NEW_LINE + "A=M" + value.NEW_LINE
 	case ast.THIS:
 		assembly += "@THIS" + value.NEW_LINE + "A=M" + value.NEW_LINE
+	case ast.TEMP:
+		assembly += "@" + strconv.Itoa(TEMP_BASE_ADDRESS) + value.NEW_LINE
+	case ast.POINTER:
+		assembly += "@" + strconv.Itoa(POINTER_BASE_ADDRESS) + value.NEW_LINE
 	}
 	assembly += "A=A+D" + value.NEW_LINE                                                 // set A =  A + D (A == LCL + idx , M == RAM[LCL + idx])
 	assembly += "D=M" + value.NEW_LINE                                                   // set D=M (D == RAM[LCL + idx])
 	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE // set D to RAM[sp]
 	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                        // increment SP
+	return assembly
+}
+
+func (codeWriter *CodeWriter) getPushStaticAssembly(pushCommand *ast.PushCommand) string {
+	assembly := ""
+	assembly += fmt.Sprintf("@%s.%d", codeWriter.VmClassName, pushCommand.Index) + value.NEW_LINE + "D=M" + value.NEW_LINE // set static to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE                                   // set D to RAM[sp]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                                                          // increment SP
 	return assembly
 }
 
