@@ -201,7 +201,7 @@ func (codeWriter *CodeWriter) getMemoryAccessPopAssembly(popCommand *ast.PopComm
 	assembly += "@temp" + value.NEW_LINE + "M=D" + value.NEW_LINE                        // set {segment} + Idx to RAM[temp]
 	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE // set RAM[SP] to D
 	assembly += "@temp" + value.NEW_LINE + "A=M" + value.NEW_LINE                        // set {segment}+Idx to A → A=={segment} + Idx, M == RAM[{segment} + Idx]
-	assembly += "M=D"                                                                    // set D(==RAM[SP]) to RAM[{segment} + Idx]
+	assembly += "M=D" + value.NEW_LINE                                                   // set D(==RAM[SP]) to RAM[{segment} + Idx]
 	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE                        // decrement SP
 	return assembly
 }
@@ -229,7 +229,7 @@ func (codeWriter *CodeWriter) getPushConstantAssembly(pushCommand *ast.PushComma
 
 func (codeWriter *CodeWriter) getMemoryAccessPushAssembly(pushCommand *ast.PushCommand) string {
 	assembly := ""
-	assembly += strconv.Itoa(pushCommand.Index) + value.NEW_LINE + "D=A" + value.NEW_LINE // set constant value to D
+	assembly += "@" + strconv.Itoa(pushCommand.Index) + value.NEW_LINE + "D=A" + value.NEW_LINE // set constant value to D
 	TEMP_BASE_ADDRESS, POINTER_BASE_ADDRESS := 5, 3
 	// read Segment Base Address to A (A == {segment},M=R[{segment}])
 	switch pushCommand.Segment {
