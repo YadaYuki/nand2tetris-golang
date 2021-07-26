@@ -158,8 +158,52 @@ func (codeWriter *CodeWriter) getCompareAssembly(compareCommandSymbol ast.Comman
 	return assembly
 }
 
-func (codeWriter *CodeWriter) getPopAssembly(pushCommand *ast.PopCommand) (string, error) {
+func (codeWriter *CodeWriter) getPopAssembly(popCommand *ast.PopCommand) (string, error) {
+	switch popCommand.Segment {
+	case ast.STATIC:
+		return codeWriter.getPopStaticAssembly(popCommand), nil
+	case ast.ARGUMENT, ast.LOCAL, ast.THAT, ast.THIS, ast.POINTER, ast.TEMP:
+		return codeWriter.getMemoryAccessPopAssembly(popCommand), nil
+	}
 	return "", nil
+}
+
+func (codeWriter *CodeWriter) getPopStaticAssembly(popCommand *ast.PopCommand) string {
+	assembly := ""
+	// set RAM[SP] to  {VM Classname}.{idx} .
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE                                  // set RAM[SP] to D
+	assembly += fmt.Sprintf("@%s.%d", codeWriter.VmClassName, popCommand.Index) + value.NEW_LINE + "M=D" + value.NEW_LINE // set D(RAM[SP]) to RAM[{Vm Classname}.{idx}]
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE                                                         // decrement SP
+	return assembly
+}
+
+func (codeWriter *CodeWriter) getMemoryAccessPopAssembly(popCommand *ast.PopCommand) string {
+	assembly := ""
+	// set RAM[SP] to RAM[{segment} + idx]
+	assembly += fmt.Sprintf("@%d", popCommand.Index) + value.NEW_LINE + "D=A" + value.NEW_LINE // set Idx to D
+	TEMP_BASE_ADDRESS, POINTER_BASE_ADDRESS := 5, 3
+	// set Segment Base Address to A (A == {segment},M=R[{segment}])
+	switch popCommand.Segment {
+	case ast.LOCAL:
+		assembly += "@LCL" + value.NEW_LINE + "A=M" + value.NEW_LINE
+	case ast.ARGUMENT:
+		assembly += "@ARG" + value.NEW_LINE + "A=M" + value.NEW_LINE
+	case ast.THAT:
+		assembly += "@THAT" + value.NEW_LINE + "A=M" + value.NEW_LINE
+	case ast.THIS:
+		assembly += "@THIS" + value.NEW_LINE + "A=M" + value.NEW_LINE
+	case ast.TEMP:
+		assembly += "@" + strconv.Itoa(TEMP_BASE_ADDRESS) + value.NEW_LINE
+	case ast.POINTER:
+		assembly += "@" + strconv.Itoa(POINTER_BASE_ADDRESS) + value.NEW_LINE
+	}
+	assembly += "D=D+A" + value.NEW_LINE                                                 // set {segment} + Idx to D
+	assembly += "@temp" + value.NEW_LINE + "M=D" + value.NEW_LINE                        // set {segment} + Idx to RAM[temp]
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE // set RAM[SP] to D
+	assembly += "@temp" + value.NEW_LINE + "A=M" + value.NEW_LINE                        // set {segment}+Idx to A → A=={segment} + Idx, M == RAM[{segment} + Idx]
+	assembly += "M=D"                                                                    // set D(==RAM[SP]) to RAM[{segment} + Idx]
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE                        // decrement SP
+	return assembly
 }
 
 func (codeWriter *CodeWriter) getPushAssembly(pushCommand *ast.PushCommand) (string, error) {
