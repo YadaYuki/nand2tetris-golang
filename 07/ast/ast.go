@@ -34,7 +34,7 @@ const (
 )
 
 type VMCommand interface {
-	String()
+	String() string
 }
 
 type ArithmeticCommand struct {

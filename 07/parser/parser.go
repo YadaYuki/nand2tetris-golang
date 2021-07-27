@@ -46,9 +46,12 @@ func (p *Parser) CommandType() ast.CommandType {
 func (p *Parser) Advance() {
 	for {
 		p.CurrentCommandIdx++
+		if !p.HasMoreCommand() {
+			break
+		}
 		p.CurrentTokenIdx = 0
 		p.CurrentCommandTokenArr = strings.Split(p.CommandStrArr[p.CurrentCommandIdx], value.SPACE)
-		if p.CommandType() != ast.C_EMPTY || !p.HasMoreCommand() {
+		if p.CommandType() != ast.C_EMPTY {
 			break
 		}
 	}
@@ -76,4 +79,38 @@ func (p *Parser) Arg2() (int, error) {
 	default:
 		return -1, fmt.Errorf("%s cannnot call Arg2()", p.CommandType())
 	}
+}
+
+func (p *Parser) ParsePush() (*ast.PushCommand, error) {
+	arg1, err := p.Arg1()
+	if err != nil {
+		return nil, err
+	}
+	arg2, err := p.Arg2()
+	if err != nil {
+		return nil, err
+	}
+	command := &ast.PushCommand{Comamnd: ast.C_PUSH, Symbol: ast.PUSH, Segment: ast.SegmentType(arg1), Index: arg2}
+	return command, nil
+}
+
+func (p *Parser) ParsePop() (*ast.PopCommand, error) {
+	arg1, err := p.Arg1()
+	if err != nil {
+		return nil, err
+	}
+	arg2, err := p.Arg2()
+	if err != nil {
+		return nil, err
+	}
+	command := &ast.PopCommand{Comamnd: ast.C_POP, Symbol: ast.PUSH, Segment: ast.SegmentType(arg1), Index: arg2}
+	return command, nil
+}
+func (p *Parser) ParseArithmetic() (*ast.ArithmeticCommand, error) {
+	arg1, err := p.Arg1()
+	if err != nil {
+		return nil, err
+	}
+	command := &ast.ArithmeticCommand{Command: ast.C_ARITHMETIC, Symbol: ast.CommandSymbol(arg1)}
+	return command, nil
 }
