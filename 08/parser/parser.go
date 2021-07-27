@@ -119,6 +119,63 @@ func (p *Parser) ParsePop() (*ast.PopCommand, error) {
 	command := &ast.PopCommand{Comamnd: ast.C_POP, Symbol: ast.PUSH, Segment: ast.SegmentType(arg1), Index: arg2}
 	return command, nil
 }
+
+func (p *Parser) ParseLabel() (*ast.LabelCommand, error) {
+	arg1, err := p.Arg1()
+	if err != nil {
+		return nil, err
+	}
+	command := &ast.LabelCommand{Command: ast.C_LABEL, Symbol: ast.LABEL, LabelName: arg1}
+	return command, nil
+}
+
+func (p *Parser) ParseGoto() (*ast.GotoCommand, error) {
+	arg1, err := p.Arg1()
+	if err != nil {
+		return nil, err
+	}
+	command := &ast.GotoCommand{Command: ast.C_GOTO, Symbol: ast.GOTO, LabelName: arg1}
+	return command, nil
+}
+
+func (p *Parser) ParseIf() (*ast.IfCommand, error) {
+	arg1, err := p.Arg1()
+	if err != nil {
+		return nil, err
+	}
+	command := &ast.IfCommand{Command: ast.C_IF, Symbol: ast.IF_GOTO, LabelName: arg1}
+	return command, nil
+}
+func (p *Parser) ParseCall() (*ast.CallCommand, error) {
+	arg1, err := p.Arg1()
+	if err != nil {
+		return nil, err
+	}
+	arg2, err := p.Arg2()
+	if err != nil {
+		return nil, err
+	}
+	command := &ast.CallCommand{Command: ast.C_CALL, Symbol: ast.CALL, FunctionName: arg1, NumArgs: arg2}
+	return command, nil
+}
+
+func (p *Parser) ParseFunction() (*ast.FunctionCommand, error) {
+	arg1, err := p.Arg1()
+	if err != nil {
+		return nil, err
+	}
+	arg2, err := p.Arg2()
+	if err != nil {
+		return nil, err
+	}
+	command := &ast.FunctionCommand{Command: ast.C_CALL, Symbol: ast.CALL, FunctionName: arg1, NumLocals: arg2}
+	return command, nil
+}
+
+func (p *Parser) ParseReturn() (*ast.ReturnCommand, error) {
+	return &ast.ReturnCommand{Command: ast.C_RETURN, Symbol: ast.RETURN}, nil
+}
+
 func (p *Parser) ParseArithmetic() (*ast.ArithmeticCommand, error) {
 	arg1, err := p.Arg1()
 	if err != nil {

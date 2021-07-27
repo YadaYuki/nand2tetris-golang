@@ -125,22 +125,22 @@ type CallCommand struct {
 	Command      CommandType   // C_CALL
 	Symbol       CommandSymbol // call
 	FunctionName string
-	numArgs      int
+	NumArgs      int
 }
 
 func (callCommand *CallCommand) String() string {
-	return fmt.Sprintf("%s %s %d", callCommand.Symbol, callCommand.FunctionName, callCommand.numArgs)
+	return fmt.Sprintf("%s %s %d", callCommand.Symbol, callCommand.FunctionName, callCommand.NumArgs)
 }
 
 type FunctionCommand struct {
 	Command      CommandType   // C_FUNCTION
 	Symbol       CommandSymbol // function
 	FunctionName string
-	numLocals    int
+	NumLocals    int
 }
 
 func (functionCommand *FunctionCommand) String() string {
-	return fmt.Sprintf("%s %s %d", functionCommand.Symbol, functionCommand.FunctionName, functionCommand.numLocals)
+	return fmt.Sprintf("%s %s %d", functionCommand.Symbol, functionCommand.FunctionName, functionCommand.NumLocals)
 }
 
 type ReturnCommand struct {

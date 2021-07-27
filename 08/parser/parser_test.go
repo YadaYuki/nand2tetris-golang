@@ -85,7 +85,6 @@ func TestArg2(t *testing.T) {
 		{&Parser{CurrentCommandIdx: 0, CommandStrArr: []string{"add"}, CurrentCommandTokenArr: []string{"add"}}, -1},
 		{&Parser{CurrentCommandIdx: 0, CommandStrArr: []string{"function func 1"}, CurrentCommandTokenArr: []string{"function", "func", "1"}}, 1},
 	}
-
 	for _, tt := range testCases {
 		if arg2, _ := tt.p.Arg2(); arg2 != tt.arg2 {
 			t.Fatalf("p.Arg2 should be %d , but got %d", tt.arg2, arg2)
