@@ -20,21 +20,22 @@ const (
 type CommandSymbol string
 
 const (
-	PUSH    CommandSymbol = "push"
-	POP     CommandSymbol = "pop"
-	LABEL   CommandSymbol = "label"
-	GOTO    CommandSymbol = "goto"
-	IF_GOTO CommandSymbol = "if-goto"
-	CALL    CommandSymbol = "call"
-	ADD     CommandSymbol = "add"
-	SUB     CommandSymbol = "sub"
-	NEG     CommandSymbol = "neg"
-	EQ      CommandSymbol = "eq"
-	GT      CommandSymbol = "gt"
-	LT      CommandSymbol = "lt"
-	AND     CommandSymbol = "and"
-	OR      CommandSymbol = "or"
-	NOT     CommandSymbol = "not"
+	PUSH     CommandSymbol = "push"
+	POP      CommandSymbol = "pop"
+	LABEL    CommandSymbol = "label"
+	GOTO     CommandSymbol = "goto"
+	IF_GOTO  CommandSymbol = "if-goto"
+	CALL     CommandSymbol = "call"
+	FUNCTION CommandSymbol = "function"
+	ADD      CommandSymbol = "add"
+	SUB      CommandSymbol = "sub"
+	NEG      CommandSymbol = "neg"
+	EQ       CommandSymbol = "eq"
+	GT       CommandSymbol = "gt"
+	LT       CommandSymbol = "lt"
+	AND      CommandSymbol = "and"
+	OR       CommandSymbol = "or"
+	NOT      CommandSymbol = "not"
 )
 
 type VMCommand interface {
@@ -130,13 +131,13 @@ func (callCommand *CallCommand) String() string {
 	return fmt.Sprintf("%s %s %d", callCommand.Symbol, callCommand.FunctionName, callCommand.numArgs)
 }
 
-// type CallCommand struct {
-// 	Command      CommandType   // C_CALL
-// 	Symbol       CommandSymbol // if-goto
-// 	FunctionName string
-// 	numArgs      int
-// }
+type FunctionCommand struct {
+	Command      CommandType   // C_FUNCTION
+	Symbol       CommandSymbol // function
+	FunctionName string
+	numLocals    int
+}
 
-// func (callCommand *CallCommand) String() string {
-// 	return fmt.Sprintf("%s %s %d", callCommand.Symbol, callCommand.FunctionName, callCommand.numArgs)
-// }
+func (functionCommand *FunctionCommand) String() string {
+	return fmt.Sprintf("%s %s %d", functionCommand.Symbol, functionCommand.FunctionName, functionCommand.numLocals)
+}
