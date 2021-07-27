@@ -20,19 +20,20 @@ const (
 type CommandSymbol string
 
 const (
-	PUSH  CommandSymbol = "push"
-	POP   CommandSymbol = "pop"
-	LABEL CommandSymbol = "label"
-	GOTO  CommandSymbol = "goto"
-	ADD   CommandSymbol = "add"
-	SUB   CommandSymbol = "sub"
-	NEG   CommandSymbol = "neg"
-	EQ    CommandSymbol = "eq"
-	GT    CommandSymbol = "gt"
-	LT    CommandSymbol = "lt"
-	AND   CommandSymbol = "and"
-	OR    CommandSymbol = "or"
-	NOT   CommandSymbol = "not"
+	PUSH    CommandSymbol = "push"
+	POP     CommandSymbol = "pop"
+	LABEL   CommandSymbol = "label"
+	GOTO    CommandSymbol = "goto"
+	IF_GOTO CommandSymbol = "if-goto"
+	ADD     CommandSymbol = "add"
+	SUB     CommandSymbol = "sub"
+	NEG     CommandSymbol = "neg"
+	EQ      CommandSymbol = "eq"
+	GT      CommandSymbol = "gt"
+	LT      CommandSymbol = "lt"
+	AND     CommandSymbol = "and"
+	OR      CommandSymbol = "or"
+	NOT     CommandSymbol = "not"
 )
 
 type VMCommand interface {
@@ -105,4 +106,14 @@ type GotoCommand struct {
 
 func (gotoCommand *GotoCommand) String() string {
 	return fmt.Sprintf("%s %s", gotoCommand.Symbol, gotoCommand.LabelName)
+}
+
+type IfCommand struct {
+	Command   CommandType   // C_IF
+	Symbol    CommandSymbol // if-goto
+	LabelName string
+}
+
+func (ifCommand *IfCommand) String() string {
+	return fmt.Sprintf("%s %s", ifCommand.Symbol, ifCommand.LabelName)
 }
