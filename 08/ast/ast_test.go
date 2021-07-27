@@ -105,3 +105,31 @@ func TestCallCommandString(t *testing.T) {
 		}
 	}
 }
+
+func TestFunctionCommandString(t *testing.T) {
+	testCases := []struct {
+		command    *FunctionCommand
+		commandStr string
+	}{
+		{&FunctionCommand{C_FUNCTION, FUNCTION, "func", 10}, "function func 10"},
+	}
+	for _, tt := range testCases {
+		if tt.commandStr != tt.command.String() {
+			t.Fatalf("command.String() should be %s , but got %s", tt.commandStr, tt.command.String())
+		}
+	}
+}
+
+func TestReturnCommandString(t *testing.T) {
+	testCases := []struct {
+		command    *ReturnCommand
+		commandStr string
+	}{
+		{&ReturnCommand{C_RETURN, RETURN}, "return"},
+	}
+	for _, tt := range testCases {
+		if tt.commandStr != tt.command.String() {
+			t.Fatalf("command.String() should be %s , but got %s", tt.commandStr, tt.command.String())
+		}
+	}
+}

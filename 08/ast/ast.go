@@ -27,6 +27,7 @@ const (
 	IF_GOTO  CommandSymbol = "if-goto"
 	CALL     CommandSymbol = "call"
 	FUNCTION CommandSymbol = "function"
+	RETURN   CommandSymbol = "return"
 	ADD      CommandSymbol = "add"
 	SUB      CommandSymbol = "sub"
 	NEG      CommandSymbol = "neg"
@@ -140,4 +141,13 @@ type FunctionCommand struct {
 
 func (functionCommand *FunctionCommand) String() string {
 	return fmt.Sprintf("%s %s %d", functionCommand.Symbol, functionCommand.FunctionName, functionCommand.numLocals)
+}
+
+type ReturnCommand struct {
+	Command CommandType   // C_FUNCTION
+	Symbol  CommandSymbol // function
+}
+
+func (returnCommand *ReturnCommand) String() string {
+	return string(returnCommand.Symbol)
 }
