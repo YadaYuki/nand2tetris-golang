@@ -8,7 +8,6 @@ import (
 )
 
 func TestClose(t *testing.T) {
-
 	assembly := []byte("Hello,World")
 	filename := "test.asm"
 	codeWriter := &CodeWriter{
@@ -24,7 +23,7 @@ func TestClose(t *testing.T) {
 func TestWriteAssembly(t *testing.T) {
 
 	assembly := "Hello,World"
-	codeWriter := New("test.asm")
+	codeWriter := New("test.asm", "Test")
 	codeWriter.writeAssembly(string(assembly))
 	if !bytes.Equal(codeWriter.Assembly, []byte(assembly)) {
 		t.Fatalf("assembly should be %s. got %s", assembly, codeWriter.Assembly)

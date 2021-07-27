@@ -10,7 +10,7 @@ import (
 func main() {
 	vm, _ := ioutil.ReadFile("MemoryAccess/BasicTest/BasicTest.vm")
 	parser := parser.New(string(vm))
-	codeWriter := codewriter.New("BasicTest.asm", "BasicTest")
+	codeWriter := codewriter.New("MemoryAccess/BasicTest/BasicTest.asm", "BasicTest")
 	for parser.HasMoreCommand() {
 		switch parser.CommandType() {
 		case ast.C_PUSH:
