@@ -63,3 +63,17 @@ func TestLabelCommandString(t *testing.T) {
 		}
 	}
 }
+
+func TestGotoCommandString(t *testing.T) {
+	testCases := []struct {
+		command    *GotoCommand
+		commandStr string
+	}{
+		{&GotoCommand{C_LABEL, GOTO, "IF_ELSE"}, "goto IF_ELSE"},
+	}
+	for _, tt := range testCases {
+		if tt.commandStr != tt.command.String() {
+			t.Fatalf("command.String() should be %s , but got %s", tt.commandStr, tt.command.String())
+		}
+	}
+}

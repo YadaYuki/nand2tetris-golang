@@ -23,6 +23,7 @@ const (
 	PUSH  CommandSymbol = "push"
 	POP   CommandSymbol = "pop"
 	LABEL CommandSymbol = "label"
+	GOTO  CommandSymbol = "goto"
 	ADD   CommandSymbol = "add"
 	SUB   CommandSymbol = "sub"
 	NEG   CommandSymbol = "neg"
@@ -94,4 +95,14 @@ type LabelCommand struct {
 
 func (labelCommand *LabelCommand) String() string {
 	return fmt.Sprintf("%s %s", labelCommand.Symbol, labelCommand.LabelName)
+}
+
+type GotoCommand struct {
+	Command   CommandType   // C_GOTO
+	Symbol    CommandSymbol // goto
+	LabelName string
+}
+
+func (gotoCommand *GotoCommand) String() string {
+	return fmt.Sprintf("%s %s", gotoCommand.Symbol, gotoCommand.LabelName)
 }
