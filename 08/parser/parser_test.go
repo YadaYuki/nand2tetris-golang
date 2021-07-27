@@ -28,6 +28,12 @@ func TestCommandType(t *testing.T) {
 		{&Parser{CurrentCommandIdx: 0, CurrentCommandTokenArr: []string{"push", "local", "1"}, CommandStrArr: []string{"push local 1", "", "add"}}, ast.C_PUSH},
 		{&Parser{CurrentCommandIdx: 1, CurrentCommandTokenArr: []string{}, CommandStrArr: []string{"push local 1", ""}}, ast.C_EMPTY},
 		{&Parser{CurrentCommandIdx: 2, CurrentCommandTokenArr: []string{"add"}, CommandStrArr: []string{"push local 1", "", "add"}}, ast.C_ARITHMETIC},
+		{&Parser{CurrentCommandIdx: 0, CurrentCommandTokenArr: []string{"label"}, CommandStrArr: []string{"push local 1", "", "add"}}, ast.C_LABEL},
+		{&Parser{CurrentCommandIdx: 0, CurrentCommandTokenArr: []string{"goto"}, CommandStrArr: []string{"push local 1", "", "add"}}, ast.C_GOTO},
+		{&Parser{CurrentCommandIdx: 0, CurrentCommandTokenArr: []string{"if-goto"}, CommandStrArr: []string{"push local 1", "", "add"}}, ast.C_IF},
+		{&Parser{CurrentCommandIdx: 0, CurrentCommandTokenArr: []string{"call"}, CommandStrArr: []string{"push local 1", "", "add"}}, ast.C_CALL},
+		{&Parser{CurrentCommandIdx: 0, CurrentCommandTokenArr: []string{"function"}, CommandStrArr: []string{"push local 1", "", "add"}}, ast.C_FUNCTION},
+		{&Parser{CurrentCommandIdx: 0, CurrentCommandTokenArr: []string{"return"}, CommandStrArr: []string{"push local 1", "", "add"}}, ast.C_RETURN},
 	}
 	for _, tt := range testCases {
 		if tt.p.CommandType() != tt.commandType {
@@ -77,6 +83,7 @@ func TestArg2(t *testing.T) {
 		{&Parser{CurrentCommandIdx: 0, CommandStrArr: []string{"pop local 111"}, CurrentCommandTokenArr: []string{"pop", "local", "111"}}, 111},
 		{&Parser{CurrentCommandIdx: 0, CommandStrArr: []string{""}, CurrentCommandTokenArr: []string{""}}, -1},
 		{&Parser{CurrentCommandIdx: 0, CommandStrArr: []string{"add"}, CurrentCommandTokenArr: []string{"add"}}, -1},
+		{&Parser{CurrentCommandIdx: 0, CommandStrArr: []string{"function func 1"}, CurrentCommandTokenArr: []string{"function", "func", "1"}}, 1},
 	}
 
 	for _, tt := range testCases {

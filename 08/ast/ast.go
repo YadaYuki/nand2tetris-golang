@@ -144,8 +144,8 @@ func (functionCommand *FunctionCommand) String() string {
 }
 
 type ReturnCommand struct {
-	Command CommandType   // C_FUNCTION
-	Symbol  CommandSymbol // function
+	Command CommandType   // C_RETURN
+	Symbol  CommandSymbol // return
 }
 
 func (returnCommand *ReturnCommand) String() string {

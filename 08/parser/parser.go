@@ -38,6 +38,18 @@ func (p *Parser) CommandType() ast.CommandType {
 		return ast.C_POP
 	case ast.ADD, ast.SUB, ast.NEG, ast.EQ, ast.GT, ast.LT, ast.AND, ast.OR, ast.NOT:
 		return ast.C_ARITHMETIC
+	case ast.LABEL:
+		return ast.C_LABEL
+	case ast.GOTO:
+		return ast.C_GOTO
+	case ast.IF_GOTO:
+		return ast.C_IF
+	case ast.CALL:
+		return ast.C_CALL
+	case ast.FUNCTION:
+		return ast.C_FUNCTION
+	case ast.RETURN:
+		return ast.C_RETURN
 	default:
 		return ast.C_EMPTY
 	}
@@ -69,6 +81,7 @@ func (p *Parser) Arg1() (string, error) {
 }
 
 func (p *Parser) Arg2() (int, error) {
+	fmt.Println(p.CommandType())
 	switch p.CommandType() {
 	case ast.C_PUSH, ast.C_POP, ast.C_FUNCTION, ast.C_CALL:
 		arg2, err := strconv.Atoi(p.CurrentCommandTokenArr[2])
