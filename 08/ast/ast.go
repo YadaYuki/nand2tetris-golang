@@ -25,6 +25,7 @@ const (
 	LABEL   CommandSymbol = "label"
 	GOTO    CommandSymbol = "goto"
 	IF_GOTO CommandSymbol = "if-goto"
+	CALL    CommandSymbol = "call"
 	ADD     CommandSymbol = "add"
 	SUB     CommandSymbol = "sub"
 	NEG     CommandSymbol = "neg"
@@ -117,3 +118,25 @@ type IfCommand struct {
 func (ifCommand *IfCommand) String() string {
 	return fmt.Sprintf("%s %s", ifCommand.Symbol, ifCommand.LabelName)
 }
+
+type CallCommand struct {
+	Command      CommandType   // C_CALL
+	Symbol       CommandSymbol // call
+	FunctionName string
+	numArgs      int
+}
+
+func (callCommand *CallCommand) String() string {
+	return fmt.Sprintf("%s %s %d", callCommand.Symbol, callCommand.FunctionName, callCommand.numArgs)
+}
+
+// type CallCommand struct {
+// 	Command      CommandType   // C_CALL
+// 	Symbol       CommandSymbol // if-goto
+// 	FunctionName string
+// 	numArgs      int
+// }
+
+// func (callCommand *CallCommand) String() string {
+// 	return fmt.Sprintf("%s %s %d", callCommand.Symbol, callCommand.FunctionName, callCommand.numArgs)
+// }
