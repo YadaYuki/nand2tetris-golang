@@ -1,0 +1,65 @@
+package ast
+
+import "testing"
+
+func TestArithmeticCommandString(t *testing.T) {
+	testCases := []struct {
+		command    *ArithmeticCommand
+		commandStr string
+	}{
+		{&ArithmeticCommand{C_ARITHMETIC, ADD}, "add"},
+		{&ArithmeticCommand{C_ARITHMETIC, NEG}, "neg"},
+		{&ArithmeticCommand{C_ARITHMETIC, AND}, "and"},
+	}
+	for _, tt := range testCases {
+		if tt.commandStr != tt.command.String() {
+			t.Fatalf("command.String() should be %s , but got %s", tt.commandStr, tt.command.String())
+		}
+	}
+}
+
+func TestPushCommandString(t *testing.T) {
+	testCases := []struct {
+		command    *PushCommand
+		commandStr string
+	}{
+		{&PushCommand{C_PUSH, PUSH, ARGUMENT, 4}, "push argument 4"},
+		{&PushCommand{C_PUSH, PUSH, LOCAL, 111}, "push local 111"},
+		{&PushCommand{C_PUSH, PUSH, THIS, 12}, "push this 12"},
+	}
+	for _, tt := range testCases {
+		if tt.commandStr != tt.command.String() {
+			t.Fatalf("command.String() should be %s , but got %s", tt.commandStr, tt.command.String())
+		}
+	}
+}
+
+func TestPopCommandString(t *testing.T) {
+	testCases := []struct {
+		command    *PopCommand
+		commandStr string
+	}{
+		{&PopCommand{C_POP, POP, ARGUMENT, 4}, "pop argument 4"},
+		{&PopCommand{C_POP, POP, LOCAL, 111}, "pop local 111"},
+		{&PopCommand{C_POP, POP, THIS, 12}, "pop this 12"},
+	}
+	for _, tt := range testCases {
+		if tt.commandStr != tt.command.String() {
+			t.Fatalf("command.String() should be %s , but got %s", tt.commandStr, tt.command.String())
+		}
+	}
+}
+
+func TestLabelCommandString(t *testing.T) {
+	testCases := []struct {
+		command    *LabelCommand
+		commandStr string
+	}{
+		{&LabelCommand{C_LABEL, LABEL, "IF_ELSE"}, "label IF_ELSE"},
+	}
+	for _, tt := range testCases {
+		if tt.commandStr != tt.command.String() {
+			t.Fatalf("command.String() should be %s , but got %s", tt.commandStr, tt.command.String())
+		}
+	}
+}
