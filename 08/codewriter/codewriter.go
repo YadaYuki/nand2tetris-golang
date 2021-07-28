@@ -83,6 +83,23 @@ func (codeWrite *CodeWriter) getGotoAssembly(command *ast.GotoCommand) (string, 
 	return assembly, nil
 }
 
+func (codeWriter *CodeWriter) WriteIf(command *ast.IfCommand) error {
+	ifAssembly, err := codeWriter.getIfAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(ifAssembly)
+	return nil
+}
+
+func (codeWrite *CodeWriter) getIfAssembly(command *ast.IfCommand) (string, error) {
+	assembly := ""
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE                                 // decrement SP
+	assembly += "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE                                   // set RAM[SP] to D
+	assembly += fmt.Sprintf("@%s", command.LabelName) + value.NEW_LINE + "D;JEQ" + value.NEW_LINE // if D == RAM[SP] == 0 then jump to Label else continue
+	return assembly, nil
+}
+
 func (codeWriter *CodeWriter) getArithmeticAssembly(arithmeticCommand *ast.ArithmeticCommand) (string, error) {
 	switch arithmeticCommand.Symbol {
 	case ast.ADD:
