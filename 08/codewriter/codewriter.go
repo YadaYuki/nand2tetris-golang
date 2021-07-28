@@ -55,6 +55,20 @@ func (codeWriter *CodeWriter) WriteArithmetic(command *ast.ArithmeticCommand) er
 	return nil
 }
 
+func (codeWriter *CodeWriter) WriteLabel(command *ast.LabelCommand) error {
+	labelAssembly, err := codeWriter.getLabelAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(labelAssembly)
+	return nil
+}
+
+func (codeWrite *CodeWriter) getLabelAssembly(command *ast.LabelCommand) (string, error) {
+	assembly := fmt.Sprintf("@%s", command.LabelName)
+	return assembly, nil
+}
+
 func (codeWriter *CodeWriter) getArithmeticAssembly(arithmeticCommand *ast.ArithmeticCommand) (string, error) {
 	switch arithmeticCommand.Symbol {
 	case ast.ADD:

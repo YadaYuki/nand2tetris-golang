@@ -22,6 +22,9 @@ func main() {
 		case ast.C_ARITHMETIC:
 			command, _ := parser.ParseArithmetic()
 			codeWriter.WriteArithmetic(command)
+		case ast.C_LABEL:
+			command, _ := parser.ParseLabel()
+			codeWriter.WriteLabel(command)
 		}
 		parser.Advance()
 	}
