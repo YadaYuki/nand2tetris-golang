@@ -65,7 +65,21 @@ func (codeWriter *CodeWriter) WriteLabel(command *ast.LabelCommand) error {
 }
 
 func (codeWrite *CodeWriter) getLabelAssembly(command *ast.LabelCommand) (string, error) {
-	assembly := fmt.Sprintf("@%s", command.LabelName)
+	assembly := fmt.Sprintf("@%s", command.LabelName) + value.NEW_LINE
+	return assembly, nil
+}
+
+func (codeWriter *CodeWriter) WriteGoto(command *ast.GotoCommand) error {
+	gotoAssembly, err := codeWriter.getGotoAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(gotoAssembly)
+	return nil
+}
+
+func (codeWrite *CodeWriter) getGotoAssembly(command *ast.GotoCommand) (string, error) {
+	assembly := fmt.Sprintf("@%s", command.LabelName) + value.NEW_LINE + "0;JMP" + value.NEW_LINE // jump to label
 	return assembly, nil
 }
 

@@ -25,6 +25,9 @@ func main() {
 		case ast.C_LABEL:
 			command, _ := parser.ParseLabel()
 			codeWriter.WriteLabel(command)
+		case ast.C_GOTO:
+			command, _ := parser.ParseGoto()
+			codeWriter.WriteGoto(command)
 		}
 		parser.Advance()
 	}
