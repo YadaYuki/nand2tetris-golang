@@ -100,6 +100,26 @@ func (codeWrite *CodeWriter) getIfAssembly(command *ast.IfCommand) (string, erro
 	return assembly, nil
 }
 
+func (codeWriter *CodeWriter) WriteFunction(command *ast.FunctionCommand) error {
+	functionAssembly, err := codeWriter.getFunctionAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(functionAssembly)
+	return nil
+
+}
+
+func (codeWriter *CodeWriter) getFunctionAssembly(command *ast.FunctionCommand) (string, error) {
+	pushZeroConstCommand := &ast.PushCommand{Segment: ast.CONSTANT, Comamnd: ast.C_PUSH, Index: 0}
+	// initialize local variable by 0
+	assembly := ""
+	for i := 0; i < command.NumLocals; i++ {
+		assembly += codeWriter.getPushConstantAssembly(pushZeroConstCommand) // push 0 to stack for initialization.
+	}
+	return assembly, nil
+}
+
 func (codeWriter *CodeWriter) getArithmeticAssembly(arithmeticCommand *ast.ArithmeticCommand) (string, error) {
 	switch arithmeticCommand.Symbol {
 	case ast.ADD:

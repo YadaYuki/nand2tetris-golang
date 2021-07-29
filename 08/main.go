@@ -28,6 +28,9 @@ func main() {
 		case ast.C_GOTO:
 			command, _ := parser.ParseGoto()
 			codeWriter.WriteGoto(command)
+		case ast.C_FUNCTION:
+			command, _ := parser.ParseFunction()
+			codeWriter.WriteFunction(command)
 		}
 		parser.Advance()
 	}

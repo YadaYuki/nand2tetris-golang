@@ -21,7 +21,6 @@ func TestClose(t *testing.T) {
 }
 
 func TestWriteAssembly(t *testing.T) {
-
 	assembly := "Hello,World"
 	codeWriter := New("test.asm", "Test")
 	codeWriter.writeAssembly(string(assembly))
