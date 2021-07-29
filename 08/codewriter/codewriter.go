@@ -107,7 +107,63 @@ func (codeWriter *CodeWriter) WriteFunction(command *ast.FunctionCommand) error 
 	}
 	codeWriter.writeAssembly(functionAssembly)
 	return nil
+}
 
+func (codeWriter *CodeWriter) getCallAssembly(command *ast.CallCommand) (string, error) {
+	assembly := ""
+	returnAddressFlag := strconv.Itoa(rand.Intn(1000000))
+	returnLabel := "RETURN" + returnAddressFlag
+	//push return-address
+	assembly += fmt.Sprintf("@%s", returnLabel) + value.NEW_LINE + "D=A" + value.NEW_LINE //set  Return Address to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE  // set D to RAM[SP]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                         // increment SP
+	//push LCL
+	assembly += "@LCL" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=A" + value.NEW_LINE // set LCL to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE  // set D to RAM[SP]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                         // increment SP
+	//push ARG
+	assembly += "@ARG" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=A" + value.NEW_LINE // set ARG to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE  // set D to RAM[SP]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                         // increment SP
+	//push THIS
+	assembly += "@THIS" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=A" + value.NEW_LINE // set THIS to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE   // set D to RAM[SP]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                          // increment SP
+	//push THAT
+	assembly += "@THAT" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=A" + value.NEW_LINE // set THAT to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE   // set D to RAM[SP]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                          // increment SP
+	// ARG = SP - n - 5
+	assembly += fmt.Sprintf("@%d", command.NumArgs) + value.NEW_LINE + "D=A" + value.NEW_LINE + "@5" + value.NEW_LINE + "D=D+A" + value.NEW_LINE // set (n  + 5)  to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M-D" + value.NEW_LINE                                                       // set SP-n-5 (=SP-(n+5)) to D
+	assembly += "@ARG" + value.NEW_LINE + "A=M" + value.NEW_LINE                                                                                 // set D to ARG
+	// LCL = SP
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE  // set SP to D
+	assembly += "@LCL" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE // set D to LCL
+	// goto f
+	gotoFCommand := &ast.GotoCommand{Command: ast.C_GOTO, Symbol: ast.GOTO, LabelName: command.FunctionName}
+	gotoFuncAssembly, err := codeWriter.getGotoAssembly(gotoFCommand)
+	if err != nil {
+		return "", err
+	}
+	assembly += gotoFuncAssembly
+	// (return address)
+	returnLabelCommand := &ast.LabelCommand{Command: ast.C_LABEL, Symbol: ast.LABEL, LabelName: returnLabel}
+	returnLabelAssembly, err := codeWriter.getLabelAssembly(returnLabelCommand)
+	if err != nil {
+		return "", err
+	}
+	assembly += returnLabelAssembly
+	return assembly, nil
+}
+
+func (codeWriter *CodeWriter) WriteCall(command *ast.CallCommand) error {
+	callAssembly, err := codeWriter.getCallAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(callAssembly)
+	return nil
 }
 
 func (codeWriter *CodeWriter) getFunctionAssembly(command *ast.FunctionCommand) (string, error) {
