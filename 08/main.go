@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	vm, _ := ioutil.ReadFile("MemoryAccess/BasicTest/BasicTest.vm")
+	vm, _ := ioutil.ReadFile("FunctionCalls/FibonacciElement/Main.vm")
 	parser := parser.New(string(vm))
-	codeWriter := codewriter.New("MemoryAccess/BasicTest/BasicTest.asm", "BasicTest")
+	codeWriter := codewriter.New("FunctionCalls/FibonacciElement/Main.asm", "Main")
 	for parser.HasMoreCommand() {
 		switch parser.CommandType() {
 		case ast.C_PUSH:
