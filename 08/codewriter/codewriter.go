@@ -109,6 +109,51 @@ func (codeWriter *CodeWriter) WriteFunction(command *ast.FunctionCommand) error 
 	return nil
 }
 
+func (codeWriter *CodeWriter) WriteReturn(command *ast.ReturnCommand) error {
+	returnAssembly, err := codeWriter.getReturnAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(returnAssembly)
+	return nil
+}
+
+func (codeWriter *CodeWriter) getReturnAssembly(command *ast.ReturnCommand) (string, error) {
+	assembly := ""
+	// FRAME = LCL
+	assembly += "@LCL" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE // set LCL to D
+	assembly += "@FRAME" + value.NEW_LINE + "M=D" + value.NEW_LINE                        // set D to FRAME
+	// RET = *(FRAME - 5)
+	assembly += "@5" + value.NEW_LINE + "D=A" + value.NEW_LINE + "@FRAME" + value.NEW_LINE + "D=M-D" + value.NEW_LINE // set FRAME - 5 to D
+	assembly += "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                                                       // set *(FRAME-5) == RAM[FRAME-5] to D
+	assembly += "@RETURN" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                   // set D to RETURN
+	popArgZeroCommand := &ast.PopCommand{Comamnd: ast.C_POP, Segment: ast.ARGUMENT, Index: 0}
+	// *ARG = POP
+	assembly += codeWriter.getMemoryAccessPopAssembly(popArgZeroCommand)
+	// SP = ARG + 1
+	assembly += "@ARG" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE + "D=D+1" + value.NEW_LINE // set ARG+1 to D
+	assembly += "@SP" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                      // set ARG+1 to D
+	// THAT = *(FRAME-1)
+	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "D=M-1" + value.NEW_LINE // set FRAME-1 to D
+	assembly += "A=D" + value.NEW_LINE + "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE      // set *(FRAME-1) to D
+	assembly += "@THAT" + value.NEW_LINE + "M=D" + value.NEW_LINE                             // set D to THAT
+	// THIS = *(FRAME-2)
+	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "@2" + value.NEW_LINE + "D=D-A" + value.NEW_LINE // set FRAME-2 to D
+	assembly += "A=D" + value.NEW_LINE + "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                              // set *(FRAME-2) to D
+	assembly += "@THIS" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                     // set D to THIS
+	// ARG = *(FRAME-3)
+	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "@3" + value.NEW_LINE + "D=D-A" + value.NEW_LINE // set FRAME-3 to D
+	assembly += "A=D" + value.NEW_LINE + "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                              // set *(FRAME-3) to D
+	assembly += "@ARG" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                      // set D to ARG
+	// LCL = *(FRAME-4)
+	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "@4" + value.NEW_LINE + "D=D-A" + value.NEW_LINE // set FRAME-4 to D
+	assembly += "A=D" + value.NEW_LINE + "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                              // set *(FRAME-4) to D
+	assembly += "@LCL" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                      // set D to LCL
+	// goto RETURN
+	assembly += "@RETURN" + value.NEW_LINE + "A=M" + value.NEW_LINE + "0;JMP" + value.NEW_LINE
+	return assembly, nil
+}
+
 func (codeWriter *CodeWriter) getCallAssembly(command *ast.CallCommand) (string, error) {
 	assembly := ""
 	returnAddressFlag := strconv.Itoa(rand.Intn(1000000))
@@ -167,9 +212,16 @@ func (codeWriter *CodeWriter) WriteCall(command *ast.CallCommand) error {
 }
 
 func (codeWriter *CodeWriter) getFunctionAssembly(command *ast.FunctionCommand) (string, error) {
-	pushZeroConstCommand := &ast.PushCommand{Segment: ast.CONSTANT, Comamnd: ast.C_PUSH, Index: 0}
-	// initialize local variable by 0
 	assembly := ""
+	functionLabelCommand := &ast.LabelCommand{Command: ast.C_LABEL, Symbol: ast.LABEL, LabelName: command.FunctionName}
+	labelAssembly, err := codeWriter.getLabelAssembly(functionLabelCommand)
+	if err != nil {
+		return "", err
+	}
+	assembly += labelAssembly
+
+	// initialize local variable by 0
+	pushZeroConstCommand := &ast.PushCommand{Segment: ast.CONSTANT, Comamnd: ast.C_PUSH, Index: 0}
 	for i := 0; i < command.NumLocals; i++ {
 		assembly += codeWriter.getPushConstantAssembly(pushZeroConstCommand) // push 0 to stack for initialization.
 	}

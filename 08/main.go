@@ -34,6 +34,9 @@ func main() {
 		case ast.C_CALL:
 			command, _ := parser.ParseCall()
 			codeWriter.WriteCall(command)
+		case ast.C_RETURN:
+			command, _ := parser.ParseReturn()
+			codeWriter.WriteReturn(command)
 		}
 		parser.Advance()
 	}
