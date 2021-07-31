@@ -8,12 +8,16 @@ import (
 )
 
 func main() {
-	vm, _ := ioutil.ReadFile("FunctionCalls/FibonacciElement/Main.vm")
+	vm, err := ioutil.ReadFile("FunctionCalls/NestedCall/Sys.vm")
+	if err != nil {
+		panic(err)
+	}
 	parser := parser.New(string(vm))
-	codeWriter := codewriter.New("FunctionCalls/FibonacciElement/Main.asm", "Main")
+	codeWriter := codewriter.New("FunctionCalls/NestedCall/Sys.asm", "Main")
 	for parser.HasMoreCommand() {
 		switch parser.CommandType() {
 		case ast.C_PUSH:
+
 			command, _ := parser.ParsePush()
 			codeWriter.WritePushPop(command)
 		case ast.C_POP:

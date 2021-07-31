@@ -65,7 +65,7 @@ func (codeWriter *CodeWriter) WriteLabel(command *ast.LabelCommand) error {
 }
 
 func (codeWrite *CodeWriter) getLabelAssembly(command *ast.LabelCommand) (string, error) {
-	assembly := fmt.Sprintf("@%s", command.LabelName) + value.NEW_LINE
+	assembly := fmt.Sprintf("(%s)", command.LabelName) + value.NEW_LINE
 	return assembly, nil
 }
 
@@ -121,8 +121,8 @@ func (codeWriter *CodeWriter) WriteReturn(command *ast.ReturnCommand) error {
 func (codeWriter *CodeWriter) getReturnAssembly(command *ast.ReturnCommand) (string, error) {
 	assembly := ""
 	// FRAME = LCL
-	assembly += "@LCL" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE // set LCL to D
-	assembly += "@FRAME" + value.NEW_LINE + "M=D" + value.NEW_LINE                        // set D to FRAME
+	assembly += "@LCL" + value.NEW_LINE + "D=M" + value.NEW_LINE   // set LCL to D
+	assembly += "@FRAME" + value.NEW_LINE + "M=D" + value.NEW_LINE // set D to FRAME
 	// RET = *(FRAME - 5)
 	assembly += "@5" + value.NEW_LINE + "D=A" + value.NEW_LINE + "@FRAME" + value.NEW_LINE + "D=M-D" + value.NEW_LINE // set FRAME - 5 to D
 	assembly += "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                                                       // set *(FRAME-5) == RAM[FRAME-5] to D
@@ -131,23 +131,23 @@ func (codeWriter *CodeWriter) getReturnAssembly(command *ast.ReturnCommand) (str
 	// *ARG = POP
 	assembly += codeWriter.getMemoryAccessPopAssembly(popArgZeroCommand)
 	// SP = ARG + 1
-	assembly += "@ARG" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE + "D=D+1" + value.NEW_LINE // set ARG+1 to D
-	assembly += "@SP" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                      // set ARG+1 to D
+	assembly += "@ARG" + value.NEW_LINE + "D=M" + value.NEW_LINE + "D=D+1" + value.NEW_LINE // set ARG+1 to D
+	assembly += "@SP" + value.NEW_LINE + "M=D" + value.NEW_LINE                             // set ARG+1 to D
 	// THAT = *(FRAME-1)
 	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "D=M-1" + value.NEW_LINE // set FRAME-1 to D
-	assembly += "A=D" + value.NEW_LINE + "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE      // set *(FRAME-1) to D
+	assembly += "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                               // set *(FRAME-1) to D
 	assembly += "@THAT" + value.NEW_LINE + "M=D" + value.NEW_LINE                             // set D to THAT
 	// THIS = *(FRAME-2)
 	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "@2" + value.NEW_LINE + "D=D-A" + value.NEW_LINE // set FRAME-2 to D
-	assembly += "A=D" + value.NEW_LINE + "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                              // set *(FRAME-2) to D
+	assembly += "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                                                       // set *(FRAME-2) to D
 	assembly += "@THIS" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                     // set D to THIS
 	// ARG = *(FRAME-3)
 	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "@3" + value.NEW_LINE + "D=D-A" + value.NEW_LINE // set FRAME-3 to D
-	assembly += "A=D" + value.NEW_LINE + "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                              // set *(FRAME-3) to D
+	assembly += "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                                                       // set *(FRAME-3) to D
 	assembly += "@ARG" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                      // set D to ARG
 	// LCL = *(FRAME-4)
 	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "@4" + value.NEW_LINE + "D=D-A" + value.NEW_LINE // set FRAME-4 to D
-	assembly += "A=D" + value.NEW_LINE + "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                              // set *(FRAME-4) to D
+	assembly += "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                                                       // set *(FRAME-4) to D
 	assembly += "@LCL" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                      // set D to LCL
 	// goto RETURN
 	assembly += "@RETURN" + value.NEW_LINE + "A=M" + value.NEW_LINE + "0;JMP" + value.NEW_LINE
