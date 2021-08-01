@@ -81,7 +81,6 @@ func (p *Parser) Arg1() (string, error) {
 }
 
 func (p *Parser) Arg2() (int, error) {
-	fmt.Println(p.CommandType())
 	switch p.CommandType() {
 	case ast.C_PUSH, ast.C_POP, ast.C_FUNCTION, ast.C_CALL:
 		arg2, err := strconv.Atoi(p.CurrentCommandTokenArr[2])

@@ -15,8 +15,12 @@ type CodeWriter struct {
 	VmClassName string
 }
 
-func New(filename string, vmClassName string) *CodeWriter {
-	return &CodeWriter{Filename: filename, Assembly: []byte{}, VmClassName: vmClassName}
+func New(filename string) *CodeWriter {
+	return &CodeWriter{Filename: filename, Assembly: []byte{}}
+}
+
+func (codeWriter *CodeWriter) SetVmClassName(vmClassName string) {
+	codeWriter.VmClassName = vmClassName
 }
 
 func (codeWriter *CodeWriter) Close() {
@@ -24,6 +28,30 @@ func (codeWriter *CodeWriter) Close() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (codeWriter *CodeWriter) WriteInit() error {
+	callInitAssembly, err := codeWriter.getInitAssembly()
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(callInitAssembly)
+	return nil
+}
+
+func (codeWriter *CodeWriter) getInitAssembly() (string, error) {
+	assembly := ""
+	// SP = 256
+	assembly += "@256" + value.NEW_LINE + "D=A" + value.NEW_LINE // set 256 to D
+	assembly += "@SP" + value.NEW_LINE + "M=D" + value.NEW_LINE  // set D to M
+	// call Sys.init 0
+	callInitCommand := &ast.CallCommand{Command: ast.C_CALL, Symbol: ast.CALL, FunctionName: "Sys.init", NumArgs: 0}
+	callInitAssembly, err := codeWriter.getCallAssembly(callInitCommand)
+	if err != nil {
+		return "", err
+	}
+	assembly += callInitAssembly
+	return assembly, nil
 }
 
 func (codeWriter *CodeWriter) WritePushPop(command ast.MemoryAccessCommand) error {
@@ -53,6 +81,179 @@ func (codeWriter *CodeWriter) WriteArithmetic(command *ast.ArithmeticCommand) er
 	}
 	codeWriter.writeAssembly(arithmeticAssembly)
 	return nil
+}
+
+func (codeWriter *CodeWriter) WriteLabel(command *ast.LabelCommand) error {
+	labelAssembly, err := codeWriter.getLabelAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(labelAssembly)
+	return nil
+}
+
+func (codeWrite *CodeWriter) getLabelAssembly(command *ast.LabelCommand) (string, error) {
+	assembly := fmt.Sprintf("(%s)", command.LabelName) + value.NEW_LINE
+	return assembly, nil
+}
+
+func (codeWriter *CodeWriter) WriteGoto(command *ast.GotoCommand) error {
+	gotoAssembly, err := codeWriter.getGotoAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(gotoAssembly)
+	return nil
+}
+
+func (codeWrite *CodeWriter) getGotoAssembly(command *ast.GotoCommand) (string, error) {
+	assembly := fmt.Sprintf("@%s", command.LabelName) + value.NEW_LINE + "0;JMP" + value.NEW_LINE // jump to label
+	return assembly, nil
+}
+
+func (codeWriter *CodeWriter) WriteIf(command *ast.IfCommand) error {
+	ifAssembly, err := codeWriter.getIfAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(ifAssembly)
+	return nil
+}
+
+func (codeWrite *CodeWriter) getIfAssembly(command *ast.IfCommand) (string, error) {
+	assembly := ""
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE                                 // decrement SP
+	assembly += "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE                                   // set RAM[SP] to D
+	assembly += fmt.Sprintf("@%s", command.LabelName) + value.NEW_LINE + "D;JNE" + value.NEW_LINE // if D == RAM[SP] != 0 then jump to Label else continue
+	return assembly, nil
+}
+
+func (codeWriter *CodeWriter) WriteFunction(command *ast.FunctionCommand) error {
+	functionAssembly, err := codeWriter.getFunctionAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(functionAssembly)
+	return nil
+}
+
+func (codeWriter *CodeWriter) WriteReturn(command *ast.ReturnCommand) error {
+	returnAssembly, err := codeWriter.getReturnAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(returnAssembly)
+	return nil
+}
+
+func (codeWriter *CodeWriter) getReturnAssembly(command *ast.ReturnCommand) (string, error) {
+	assembly := ""
+	// FRAME = LCL
+	assembly += "@LCL" + value.NEW_LINE + "D=M" + value.NEW_LINE   // set LCL to D
+	assembly += "@FRAME" + value.NEW_LINE + "M=D" + value.NEW_LINE // set D to FRAME
+	// RET = *(FRAME - 5)
+	assembly += "@5" + value.NEW_LINE + "D=A" + value.NEW_LINE + "@FRAME" + value.NEW_LINE + "D=M-D" + value.NEW_LINE // set FRAME - 5 to D
+	assembly += "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                                                       // set *(FRAME-5) == RAM[FRAME-5] to D
+	assembly += "@RETURN" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                   // set D to RETURN
+	popArgZeroCommand := &ast.PopCommand{Comamnd: ast.C_POP, Segment: ast.ARGUMENT, Index: 0}
+	// *ARG = POP
+	assembly += codeWriter.getMemoryAccessPopAssembly(popArgZeroCommand)
+	// SP = ARG + 1
+	assembly += "@ARG" + value.NEW_LINE + "D=M" + value.NEW_LINE + "D=D+1" + value.NEW_LINE // set ARG+1 to D
+	assembly += "@SP" + value.NEW_LINE + "M=D" + value.NEW_LINE                             // set ARG+1 to D
+	// THAT = *(FRAME-1)
+	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "D=M-1" + value.NEW_LINE // set FRAME-1 to D
+	assembly += "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                               // set *(FRAME-1) to D
+	assembly += "@THAT" + value.NEW_LINE + "M=D" + value.NEW_LINE                             // set D to THAT
+	// THIS = *(FRAME-2)
+	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "@2" + value.NEW_LINE + "D=D-A" + value.NEW_LINE // set FRAME-2 to D
+	assembly += "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                                                       // set *(FRAME-2) to D
+	assembly += "@THIS" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                     // set D to THIS
+	// ARG = *(FRAME-3)
+	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "@3" + value.NEW_LINE + "D=D-A" + value.NEW_LINE // set FRAME-3 to D
+	assembly += "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                                                       // set *(FRAME-3) to D
+	assembly += "@ARG" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                      // set D to ARG
+	// LCL = *(FRAME-4)
+	assembly += "@FRAME" + value.NEW_LINE + "D=M" + value.NEW_LINE + "@4" + value.NEW_LINE + "D=D-A" + value.NEW_LINE // set FRAME-4 to D
+	assembly += "A=D" + value.NEW_LINE + "D=M" + value.NEW_LINE                                                       // set *(FRAME-4) to D
+	assembly += "@LCL" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                      // set D to LCL
+	// goto RETURN
+	assembly += "@RETURN" + value.NEW_LINE + "A=M" + value.NEW_LINE + "0;JMP" + value.NEW_LINE
+	return assembly, nil
+}
+
+func (codeWriter *CodeWriter) getCallAssembly(command *ast.CallCommand) (string, error) {
+	assembly := ""
+	returnAddressFlag := strconv.Itoa(rand.Intn(1000000))
+	returnLabel := "RETURN" + returnAddressFlag
+	//push return-address
+	assembly += fmt.Sprintf("@%s", returnLabel) + value.NEW_LINE + "D=A" + value.NEW_LINE //set  Return Address to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE  // set D to RAM[SP]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                         // increment SP
+	//push LCL
+	assembly += "@LCL" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=A" + value.NEW_LINE // set LCL to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE  // set D to RAM[SP]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                         // increment SP
+	//push ARG
+	assembly += "@ARG" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=A" + value.NEW_LINE // set ARG to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE  // set D to RAM[SP]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                         // increment SP
+	//push THIS
+	assembly += "@THIS" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=A" + value.NEW_LINE // set THIS to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE   // set D to RAM[SP]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                          // increment SP
+	//push THAT
+	assembly += "@THAT" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=A" + value.NEW_LINE // set THAT to D
+	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE   // set D to RAM[SP]
+	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                          // increment SP
+	// ARG = SP - n - 5
+	assembly += fmt.Sprintf("@%d", command.NumArgs) + value.NEW_LINE + "D=A" + value.NEW_LINE + "@5" + value.NEW_LINE + "D=D+A" + value.NEW_LINE // set (n  + 5)  to D
+	assembly += "@SP" + value.NEW_LINE + "D=M-D" + value.NEW_LINE                                                                                // set SP-n-5 (=SP-(n+5)) to D
+	assembly += "@ARG" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                                                 // set D to ARG
+	// LCL = SP
+	assembly += "@SP" + value.NEW_LINE + "D=M" + value.NEW_LINE  // set SP to D
+	assembly += "@LCL" + value.NEW_LINE + "M=D" + value.NEW_LINE // set D to LCL
+	// goto f
+	gotoFCommand := &ast.GotoCommand{Command: ast.C_GOTO, Symbol: ast.GOTO, LabelName: command.FunctionName}
+	gotoFuncAssembly, err := codeWriter.getGotoAssembly(gotoFCommand)
+	if err != nil {
+		return "", err
+	}
+	assembly += gotoFuncAssembly
+	// (return address)
+	returnLabelCommand := &ast.LabelCommand{Command: ast.C_LABEL, Symbol: ast.LABEL, LabelName: returnLabel}
+	returnLabelAssembly, err := codeWriter.getLabelAssembly(returnLabelCommand)
+	if err != nil {
+		return "", err
+	}
+	assembly += returnLabelAssembly
+	return assembly, nil
+}
+
+func (codeWriter *CodeWriter) WriteCall(command *ast.CallCommand) error {
+	callAssembly, err := codeWriter.getCallAssembly(command)
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(callAssembly)
+	return nil
+}
+
+func (codeWriter *CodeWriter) getFunctionAssembly(command *ast.FunctionCommand) (string, error) {
+	assembly := ""
+	functionLabelCommand := &ast.LabelCommand{Command: ast.C_LABEL, Symbol: ast.LABEL, LabelName: command.FunctionName}
+	labelAssembly, err := codeWriter.getLabelAssembly(functionLabelCommand)
+	if err != nil {
+		return "", err
+	}
+	assembly += labelAssembly
+
+	// initialize local variable by 0
+	pushZeroConstCommand := &ast.PushCommand{Segment: ast.CONSTANT, Comamnd: ast.C_PUSH, Index: 0}
+	for i := 0; i < command.NumLocals; i++ {
+		assembly += codeWriter.getPushConstantAssembly(pushZeroConstCommand) // push 0 to stack for initialization.
+	}
+	return assembly, nil
 }
 
 func (codeWriter *CodeWriter) getArithmeticAssembly(arithmeticCommand *ast.ArithmeticCommand) (string, error) {
@@ -93,7 +294,7 @@ func (codeWriter *CodeWriter) getSubCommandAssembly() string {
 	assembly += "D=M" + value.NEW_LINE                            // set M to D
 	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-2 points to into M
 	assembly += "M=M-D" + value.NEW_LINE                          // set RAM[SP-2] = RAM[SP-2] - RAM[SP-1]
-	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE // decrement SP
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE // decrement SPftemp
 	return assembly
 }
 

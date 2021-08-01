@@ -6,7 +6,8 @@
 // Does not return.  (Enters infinite loop.)
 
 function Sys.init 0
-push constant 4000	// test THIS and THAT context save
+push constant 4000
+	// test THIS and THAT context save
 pop pointer 0
 push constant 5000
 pop pointer 1
