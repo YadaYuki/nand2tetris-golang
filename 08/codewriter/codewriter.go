@@ -15,8 +15,12 @@ type CodeWriter struct {
 	VmClassName string
 }
 
-func New(filename string, vmClassName string) *CodeWriter {
-	return &CodeWriter{Filename: filename, Assembly: []byte{}, VmClassName: vmClassName}
+func New(filename string) *CodeWriter {
+	return &CodeWriter{Filename: filename, Assembly: []byte{}}
+}
+
+func (codeWriter *CodeWriter) SetVmClassName(vmClassName string) {
+	codeWriter.VmClassName = vmClassName
 }
 
 func (codeWriter *CodeWriter) Close() {
@@ -120,7 +124,7 @@ func (codeWrite *CodeWriter) getIfAssembly(command *ast.IfCommand) (string, erro
 	assembly := ""
 	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE                                 // decrement SP
 	assembly += "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE                                   // set RAM[SP] to D
-	assembly += fmt.Sprintf("@%s", command.LabelName) + value.NEW_LINE + "D;JEQ" + value.NEW_LINE // if D == RAM[SP] == 0 then jump to Label else continue
+	assembly += fmt.Sprintf("@%s", command.LabelName) + value.NEW_LINE + "D;JNE" + value.NEW_LINE // if D == RAM[SP] != 0 then jump to Label else continue
 	return assembly, nil
 }
 
@@ -204,11 +208,11 @@ func (codeWriter *CodeWriter) getCallAssembly(command *ast.CallCommand) (string,
 	assembly += "@SP" + value.NEW_LINE + "M=M+1" + value.NEW_LINE                          // increment SP
 	// ARG = SP - n - 5
 	assembly += fmt.Sprintf("@%d", command.NumArgs) + value.NEW_LINE + "D=A" + value.NEW_LINE + "@5" + value.NEW_LINE + "D=D+A" + value.NEW_LINE // set (n  + 5)  to D
-	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M-D" + value.NEW_LINE                                                       // set SP-n-5 (=SP-(n+5)) to D
-	assembly += "@ARG" + value.NEW_LINE + "A=M" + value.NEW_LINE                                                                                 // set D to ARG
+	assembly += "@SP" + value.NEW_LINE + "D=M-D" + value.NEW_LINE                                                                                // set SP-n-5 (=SP-(n+5)) to D
+	assembly += "@ARG" + value.NEW_LINE + "M=D" + value.NEW_LINE                                                                                 // set D to ARG
 	// LCL = SP
-	assembly += "@SP" + value.NEW_LINE + "A=M" + value.NEW_LINE + "D=M" + value.NEW_LINE  // set SP to D
-	assembly += "@LCL" + value.NEW_LINE + "A=M" + value.NEW_LINE + "M=D" + value.NEW_LINE // set D to LCL
+	assembly += "@SP" + value.NEW_LINE + "D=M" + value.NEW_LINE  // set SP to D
+	assembly += "@LCL" + value.NEW_LINE + "M=D" + value.NEW_LINE // set D to LCL
 	// goto f
 	gotoFCommand := &ast.GotoCommand{Command: ast.C_GOTO, Symbol: ast.GOTO, LabelName: command.FunctionName}
 	gotoFuncAssembly, err := codeWriter.getGotoAssembly(gotoFCommand)
@@ -290,7 +294,7 @@ func (codeWriter *CodeWriter) getSubCommandAssembly() string {
 	assembly += "D=M" + value.NEW_LINE                            // set M to D
 	assembly += "A=A-1" + value.NEW_LINE                          // set value which SP-2 points to into M
 	assembly += "M=M-D" + value.NEW_LINE                          // set RAM[SP-2] = RAM[SP-2] - RAM[SP-1]
-	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE // decrement SP
+	assembly += "@SP" + value.NEW_LINE + "M=M-1" + value.NEW_LINE // decrement SPftemp
 	return assembly
 }
 

@@ -23,3 +23,19 @@ func TestGetVmFileList(t *testing.T) {
 		}
 	}
 }
+
+func TestRemoveExt(t *testing.T) {
+	testCases := []struct {
+		filename           string
+		filenameExtRemoved string
+	}{
+		{"index.js", "index"},
+		{"index.vm", "index"},
+	}
+	for _, tt := range testCases {
+		filenameExtRemoved := removeExt(tt.filename)
+		if tt.filenameExtRemoved != filenameExtRemoved {
+			t.Fatalf("filenameExtRemoved should be %s, but got %s", tt.filenameExtRemoved, filenameExtRemoved)
+		}
+	}
+}
