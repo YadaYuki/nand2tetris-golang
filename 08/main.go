@@ -4,20 +4,44 @@ import (
 	"VMtranslator/ast"
 	"VMtranslator/codewriter"
 	"VMtranslator/parser"
+	"VMtranslator/value"
 	"io/ioutil"
+	"path/filepath"
+	"strings"
 )
 
+func getVmFileListInDir(dirPath string) ([]string, error) {
+	vmPathPattern := filepath.Join(dirPath, "*.vm")
+	vmFileListInDir, err := filepath.Glob(vmPathPattern)
+	if err != nil {
+		return []string{}, err
+	}
+	return vmFileListInDir, nil
+}
+
 func main() {
-	vm, err := ioutil.ReadFile("FunctionCalls/NestedCall/Sys.vm")
+	//
+	vmFileList, err := getVmFileListInDir("FunctionCalls/FibonacciElement")
 	if err != nil {
 		panic(err)
 	}
+	// join all vm code in dir.
+	vmCodeList := []string{}
+	for _, vmFile := range vmFileList {
+		vmCode, err := ioutil.ReadFile(vmFile)
+		if err != nil {
+			panic(err)
+		}
+		vmCodeList = append(vmCodeList, string(vmCode))
+	}
+	vm := strings.Join(vmCodeList, value.NEW_LINE)
+
+	// TODO:   writeInit
 	parser := parser.New(string(vm))
 	codeWriter := codewriter.New("FunctionCalls/NestedCall/Sys.asm", "Main")
 	for parser.HasMoreCommand() {
 		switch parser.CommandType() {
 		case ast.C_PUSH:
-
 			command, _ := parser.ParsePush()
 			codeWriter.WritePushPop(command)
 		case ast.C_POP:
