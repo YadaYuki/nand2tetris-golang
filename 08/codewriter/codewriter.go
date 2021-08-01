@@ -26,6 +26,30 @@ func (codeWriter *CodeWriter) Close() {
 	}
 }
 
+func (codeWriter *CodeWriter) WriteInit() error {
+	callInitAssembly, err := codeWriter.getInitAssembly()
+	if err != nil {
+		return err
+	}
+	codeWriter.writeAssembly(callInitAssembly)
+	return nil
+}
+
+func (codeWriter *CodeWriter) getInitAssembly() (string, error) {
+	assembly := ""
+	// SP = 256
+	assembly += "@256" + value.NEW_LINE + "D=A" + value.NEW_LINE // set 256 to D
+	assembly += "@SP" + value.NEW_LINE + "M=D" + value.NEW_LINE  // set D to M
+	// call Sys.init 0
+	callInitCommand := &ast.CallCommand{Command: ast.C_CALL, Symbol: ast.CALL, FunctionName: "Sys.init", NumArgs: 0}
+	callInitAssembly, err := codeWriter.getCallAssembly(callInitCommand)
+	if err != nil {
+		return "", err
+	}
+	assembly += callInitAssembly
+	return assembly, nil
+}
+
 func (codeWriter *CodeWriter) WritePushPop(command ast.MemoryAccessCommand) error {
 	var assembly string
 	switch c := command.(type) {

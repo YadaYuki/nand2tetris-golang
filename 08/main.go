@@ -36,9 +36,12 @@ func main() {
 	}
 	vm := strings.Join(vmCodeList, value.NEW_LINE)
 
-	// TODO:   writeInit
 	parser := parser.New(string(vm))
 	codeWriter := codewriter.New("FunctionCalls/NestedCall/Sys.asm", "Main")
+
+	// writeInit
+	codeWriter.WriteInit()
+
 	for parser.HasMoreCommand() {
 		switch parser.CommandType() {
 		case ast.C_PUSH:
