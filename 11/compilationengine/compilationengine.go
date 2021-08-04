@@ -40,6 +40,13 @@ func (ce *CompilationEngine) CompileVarDec(varDecAst *ast.VarDecStatement) error
 }
 
 func (ce *CompilationEngine) CompileExpression(expressionAst ast.Expression) error {
-	ce.WritePush(vmwriter.CONST, 7)
+	switch expressionAst.(type) {
+	case *ast.SingleExpression:
+		ce.WritePush(vmwriter.CONST, 7)
+	case *ast.InfixExpression:
+		ce.WritePush(vmwriter.CONST, 7)
+		ce.WritePush(vmwriter.CONST, 8)
+		ce.WriteArithmetic(vmwriter.ADD)
+	}
 	return nil
 }

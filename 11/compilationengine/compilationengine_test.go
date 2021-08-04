@@ -40,6 +40,7 @@ func TestExpression(t *testing.T) {
 		vmCode          string
 	}{
 		{"7", "push constant 7" + value.NEW_LINE},
+		{"7 + 8", "push constant 7" + value.NEW_LINE + "push constant 8" + value.NEW_LINE + "add" + value.NEW_LINE},
 	}
 
 	for _, tt := range testCases {
