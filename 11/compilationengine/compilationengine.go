@@ -21,20 +21,25 @@ func New(vm *vmwriter.VMWriter, st *symboltable.SymbolTable) *CompilationEngine 
 
 func (ce *CompilationEngine) CompileProgram(programAst *ast.Program) {
 	for _, stmtAst := range programAst.Statements {
-		ce.compileStatement(stmtAst)
+		ce.CompileStatement(stmtAst)
 	}
 }
 
-func (ce *CompilationEngine) compileStatement(statementAst ast.Statement) error {
+func (ce *CompilationEngine) CompileStatement(statementAst ast.Statement) error {
 	switch statementAst := statementAst.(type) {
 	case *ast.VarDecStatement:
-		return ce.compileVarDec(statementAst)
+		return ce.CompileVarDec(statementAst)
 	default:
 		return errors.New("statementAst type: %T is not valid")
 	}
 }
 
-func (ce *CompilationEngine) compileVarDec(varDecAst *ast.VarDecStatement) error {
+func (ce *CompilationEngine) CompileVarDec(varDecAst *ast.VarDecStatement) error {
 	ce.WriteIf("hoge")
+	return nil
+}
+
+func (ce *CompilationEngine) CompileExpression(expressionAst ast.Expression) error {
+	ce.WritePush(vmwriter.CONST, 7)
 	return nil
 }

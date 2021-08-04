@@ -11,16 +11,15 @@ import (
 	// "fmt"
 )
 
-var commonVmWriter *vmwriter.VMWriter = vmwriter.New("test.vm", 0644)
-var commonSymbolTable *symboltable.SymbolTable = symboltable.New()
-
 func newParser(input string) *parser.Parser {
 	jt := tokenizer.New(input)
 	p := parser.New(jt)
 	return p
 }
 func newCompilationEngine() *CompilationEngine {
-	ce := New(commonVmWriter, commonSymbolTable)
+	vmWriter := vmwriter.New("test.vm", 0644)
+	symbolTable := symboltable.New()
+	ce := New(vmWriter, symbolTable)
 	return ce
 }
 
@@ -32,5 +31,24 @@ func TestVarDecStatements(t *testing.T) {
 	ce.CompileProgram(ast)
 	if !bytes.Equal([]byte("if-goto hoge"+value.NEW_LINE), ce.VMCode) {
 		t.Fatalf("VarDecStatement VMCode should be %s, got %s", "hoge", ce.VMCode)
+	}
+}
+
+func TestExpression(t *testing.T) {
+	testCases := []struct {
+		expressionInput string
+		vmCode          string
+	}{
+		{"7", "push constant 7" + value.NEW_LINE},
+	}
+
+	for _, tt := range testCases {
+		p := newParser(tt.expressionInput)
+		ast := p.ParseExpression()
+		ce := newCompilationEngine()
+		ce.CompileExpression(ast)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("VarDecStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
 	}
 }

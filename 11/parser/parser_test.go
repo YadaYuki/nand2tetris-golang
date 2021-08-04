@@ -1,4 +1,4 @@
-package Parser
+package parser
 
 import (
 	"jack_compiler/ast"
