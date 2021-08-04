@@ -41,6 +41,7 @@ func TestExpression(t *testing.T) {
 	}{
 		{"7", "push constant 7" + value.NEW_LINE},
 		{"7 + 8", "push constant 7" + value.NEW_LINE + "push constant 8" + value.NEW_LINE + "add" + value.NEW_LINE},
+		// {"2 * 3", "push constant 2" + value.NEW_LINE + "push constant 3" + value.NEW_LINE + "mul" + value.NEW_LINE},
 	}
 
 	for _, tt := range testCases {

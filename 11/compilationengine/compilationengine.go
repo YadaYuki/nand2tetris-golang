@@ -4,6 +4,7 @@ import (
 	"errors"
 	"jack_compiler/ast"
 	"jack_compiler/symboltable"
+	"jack_compiler/token"
 	"jack_compiler/vmwriter"
 )
 
@@ -40,13 +41,46 @@ func (ce *CompilationEngine) CompileVarDec(varDecAst *ast.VarDecStatement) error
 }
 
 func (ce *CompilationEngine) CompileExpression(expressionAst ast.Expression) error {
-	switch expressionAst.(type) {
+	switch c := expressionAst.(type) {
 	case *ast.SingleExpression:
-		ce.WritePush(vmwriter.CONST, 7)
+		ce.CompileSingleExpression(c)
 	case *ast.InfixExpression:
-		ce.WritePush(vmwriter.CONST, 7)
-		ce.WritePush(vmwriter.CONST, 8)
-		ce.WriteArithmetic(vmwriter.ADD)
+		ce.CompileInfixExpression(c)
 	}
+	return nil
+}
+
+func (ce *CompilationEngine) CompileSingleExpression(singleExpressionAst *ast.SingleExpression) error {
+	ce.CompileTerm(singleExpressionAst.Value)
+	return nil
+}
+
+func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.InfixExpression) error {
+	ce.CompileTerm(infixExpressionAst.Left)
+	ce.CompileTerm(infixExpressionAst.Right)
+	ce.WriteArithmetic(ce.getArithmeticCommand(token.Symbol(infixExpressionAst.Operator.Literal)))
+	return nil
+}
+
+func (ce *CompilationEngine) getArithmeticCommand(symbol token.Symbol) vmwriter.Command {
+	switch symbol {
+	case token.PLUS:
+		return vmwriter.ADD
+		// case token.ASTERISK:
+		// 	return vmwriter.
+	}
+	return ""
+}
+
+func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
+	switch c := termAst.(type) {
+	case *ast.IntergerConstTerm:
+		return ce.CompileIntergerConstTerm(c)
+	}
+	return nil
+}
+
+func (ce *CompilationEngine) CompileIntergerConstTerm(intergerConstTerm *ast.IntergerConstTerm) error {
+	ce.WritePush(vmwriter.CONST, int(intergerConstTerm.Value))
 	return nil
 }
