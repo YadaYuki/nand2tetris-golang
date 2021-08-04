@@ -28,6 +28,7 @@ const (
 	FIELD    VarKind = "field"
 	ARGUMENT VarKind = "argument"
 	VAR      VarKind = "var"
+	NONE     VarKind = "none"
 )
 
 type Scope int

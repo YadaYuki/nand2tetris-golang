@@ -19,16 +19,17 @@ func newParser(input string) *parser.Parser {
 	p := parser.New(jt)
 	return p
 }
-func newCompilationEngine(input string) *CompilationEngine {
-	p := newParser(input)
-	ce := New(p, commonVmWriter, commonSymbolTable)
+func newCompilationEngine() *CompilationEngine {
+	ce := New(commonVmWriter, commonSymbolTable)
 	return ce
 }
 
 func TestVarDecStatements(t *testing.T) {
 	input := "var int temp;"
-	ce := newCompilationEngine(input)
-	ce.CompileProgram()
+	p := newParser(input)
+	ast := p.ParseProgram()
+	ce := newCompilationEngine()
+	ce.CompileProgram(ast)
 	if !bytes.Equal([]byte("if-goto hoge"+value.NEW_LINE), ce.VMCode) {
 		t.Fatalf("VarDecStatement VMCode should be %s, got %s", "hoge", ce.VMCode)
 	}
