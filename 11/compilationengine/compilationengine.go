@@ -66,7 +66,7 @@ func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.Infi
 		}
 	case token.ASTERISK:
 		{
-			ce.WriteCall("mul", 2)
+			ce.WriteCall("mul", 2) // TODO: add mul logic in VM Layer.
 			return nil
 		}
 	}
@@ -77,6 +77,8 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 	switch c := termAst.(type) {
 	case *ast.IntergerConstTerm:
 		return ce.CompileIntergerConstTerm(c)
+	case *ast.BracketTerm:
+		return ce.CompileBracketTerm(c)
 	}
 	return nil
 }
@@ -84,4 +86,8 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 func (ce *CompilationEngine) CompileIntergerConstTerm(intergerConstTerm *ast.IntergerConstTerm) error {
 	ce.WritePush(vmwriter.CONST, int(intergerConstTerm.Value))
 	return nil
+}
+
+func (ce *CompilationEngine) CompileBracketTerm(bracketTerm *ast.BracketTerm) error {
+	return ce.CompileExpression(bracketTerm.Value)
 }
