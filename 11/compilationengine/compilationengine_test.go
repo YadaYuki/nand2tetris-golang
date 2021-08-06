@@ -56,3 +56,23 @@ func TestExpression(t *testing.T) {
 		}
 	}
 }
+
+func TestDoStatement(t *testing.T) {
+	testCases := []struct {
+		expressionInput string
+		vmCode          string
+	}{
+		{"do Output.printInt(1);", "push constant 1" + value.NEW_LINE + "call Output.printInt 1" + value.NEW_LINE + "pop temp 0" + value.NEW_LINE},
+		{"do Output.printInt(1,3,4);", "push constant 1" + value.NEW_LINE + "push constant 3" + value.NEW_LINE + "push constant 4" + value.NEW_LINE + "call Output.printInt 3" + value.NEW_LINE + "pop temp 0" + value.NEW_LINE},
+		{"do Output.printInt(1 + (2*3));", "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "push constant 3" + value.NEW_LINE + "call multiply 2" + value.NEW_LINE + "add" + value.NEW_LINE + "call Output.printInt 1" + value.NEW_LINE + "pop temp 0" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.expressionInput)
+		ast := p.ParseDoStatement()
+		ce := newCompilationEngine()
+		ce.CompileDoStatement(ast)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("doStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}

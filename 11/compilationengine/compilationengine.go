@@ -2,6 +2,7 @@ package compilationengine
 
 import (
 	"errors"
+	"fmt"
 	"jack_compiler/ast"
 	"jack_compiler/symboltable"
 	"jack_compiler/token"
@@ -90,4 +91,14 @@ func (ce *CompilationEngine) CompileIntergerConstTerm(intergerConstTerm *ast.Int
 
 func (ce *CompilationEngine) CompileBracketTerm(bracketTerm *ast.BracketTerm) error {
 	return ce.CompileExpression(bracketTerm.Value)
+}
+
+func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) error {
+	expressionListStmt := doStatement.ExpressionListStmt
+	for i := range expressionListStmt.ExpressionList {
+		ce.CompileExpression(expressionListStmt.ExpressionList[i])
+	}
+	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.String(), doStatement.VarName.String()), len(expressionListStmt.ExpressionList))
+	ce.WritePop(vmwriter.TEMP, 0)
+	return nil
 }
