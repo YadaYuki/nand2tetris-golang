@@ -58,18 +58,19 @@ func (ce *CompilationEngine) CompileSingleExpression(singleExpressionAst *ast.Si
 func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.InfixExpression) error {
 	ce.CompileTerm(infixExpressionAst.Left)
 	ce.CompileTerm(infixExpressionAst.Right)
-	ce.WriteArithmetic(ce.getArithmeticCommand(token.Symbol(infixExpressionAst.Operator.Literal)))
-	return nil
-}
-
-func (ce *CompilationEngine) getArithmeticCommand(symbol token.Symbol) vmwriter.Command {
-	switch symbol {
+	switch token.Symbol(infixExpressionAst.Operator.Literal) {
 	case token.PLUS:
-		return vmwriter.ADD
-		// case token.ASTERISK:
-		// 	return vmwriter.
+		{
+			ce.WriteArithmetic(vmwriter.ADD)
+			return nil
+		}
+	case token.ASTERISK:
+		{
+			ce.WriteCall("mul", 2)
+			return nil
+		}
 	}
-	return ""
+	return nil
 }
 
 func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
