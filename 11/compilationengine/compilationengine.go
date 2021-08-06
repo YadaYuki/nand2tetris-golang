@@ -66,7 +66,7 @@ func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.Infi
 		}
 	case token.ASTERISK:
 		{
-			ce.WriteCall("mul", 2) // TODO: add mul logic in VM Layer.
+			ce.WriteCall("multiply", 2) // TODO: add mul logic in VM Layer.
 			return nil
 		}
 	}
