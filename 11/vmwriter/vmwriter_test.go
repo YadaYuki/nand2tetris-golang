@@ -37,16 +37,16 @@ func TestWriteData(t *testing.T) {
 func TestWritePush(t *testing.T) {
 	vmWriter := New("test.vm", 0644)
 	vmWriter.WritePush(CONST, 0)
-	if !bytes.Equal(vmWriter.VMCode, []byte("push const 0"+value.NEW_LINE)) {
-		t.Fatalf("vmCode should be %s. got %s", "push const 0", vmWriter.VMCode)
+	if !bytes.Equal(vmWriter.VMCode, []byte("push constant 0"+value.NEW_LINE)) {
+		t.Fatalf("vmCode should be %s. got %s", "push constant 0", vmWriter.VMCode)
 	}
 }
 
 func TestWritePop(t *testing.T) {
 	vmWriter := New("test.vm", 0644)
 	vmWriter.WritePop(CONST, 0)
-	if !bytes.Equal(vmWriter.VMCode, []byte("pop const 0"+value.NEW_LINE)) {
-		t.Fatalf("vmCode should be %s. got %s", "pop const 0", vmWriter.VMCode)
+	if !bytes.Equal(vmWriter.VMCode, []byte("pop constant 0"+value.NEW_LINE)) {
+		t.Fatalf("vmCode should be %s. got %s", "pop constant 0", vmWriter.VMCode)
 	}
 }
 func TestWriteArithmetic(t *testing.T) {

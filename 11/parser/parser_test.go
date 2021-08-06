@@ -308,7 +308,7 @@ func TestParseIntConstTermExpression(t *testing.T) {
 	input := `33+33`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	expression := p.parseExpression()
+	expression := p.ParseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -326,7 +326,7 @@ func TestParseIdentifierTermExpression(t *testing.T) {
 	input := `hoge`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	expression := p.parseExpression()
+	expression := p.ParseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -344,7 +344,7 @@ func TestParseStringConstTermExpression(t *testing.T) {
 	input := `"hoge"`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	expression := p.parseExpression()
+	expression := p.ParseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -406,7 +406,7 @@ func TestParseExpressionListStatement(t *testing.T) {
 	input := `(a,b,c,d,e,f)`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	expressionListStmt := p.parseExpressionListStatement()
+	expressionListStmt := p.ParseExpressionListStatement()
 	if len(expressionListStmt.ExpressionList) != 6 {
 		t.Fatalf("len(program.Statements) is not 1,got = %d", len(expressionListStmt.ExpressionList))
 	}
@@ -416,7 +416,7 @@ func TestParseSubroutineCallTermExpression(t *testing.T) {
 	input := `hoge.fuga(a,b,c,d,e,f)`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	expression := p.parseExpression()
+	expression := p.ParseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -440,7 +440,7 @@ func TestParseArrayElementExpression(t *testing.T) {
 	input := `hoge[a]`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	expression := p.parseExpression()
+	expression := p.ParseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -457,7 +457,7 @@ func TestParsePrefixExpression(t *testing.T) {
 	input := `-124`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	expression := p.parseExpression()
+	expression := p.ParseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -475,7 +475,7 @@ func TestParseBracketExpression(t *testing.T) {
 	input := `(4)`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	expression := p.parseExpression()
+	expression := p.ParseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -503,7 +503,7 @@ func TestParseParameterStatement(t *testing.T) {
 	input := `int hoge`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	stmt := p.parseParameterStatement()
+	stmt := p.ParseParameterStatement()
 	if stmt.Name != "hoge" {
 		t.Fatalf("stmt.Name is not hoge,got = %s", stmt.Name)
 	}
@@ -516,7 +516,7 @@ func TestParseParameterListStatement(t *testing.T) {
 	input := `(int hoge,char fuga,boolean pepe)`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	stmt := p.parseParameterListStatement()
+	stmt := p.ParseParameterListStatement()
 	if len(stmt.ParameterList) != 3 {
 		t.Fatalf("len(stmt.ParameterList) is not 3 ,got = %d", len(stmt.ParameterList))
 	}
@@ -552,7 +552,7 @@ func TestParseClassStatement(t *testing.T) {
 	}`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	stmt := p.parseClassStatement()
+	stmt := p.ParseClassStatement()
 	if stmt.Name.Literal != "hoge" {
 		t.Fatalf("stmt.Name  is not hoge ,got = %s", stmt.Name)
 	}
@@ -581,7 +581,7 @@ func TestParseSubroutineBodyStatement(t *testing.T) {
 	}`
 	jt := tokenizer.New(input)
 	p := New(jt)
-	stmt := p.parseSubroutineBodyStatement()
+	stmt := p.ParseSubroutineBodyStatement()
 	if len(stmt.VarDecList) != 4 {
 		t.Fatalf("len(stmt.VarDecList)  is not 4 ,got = %d", len(stmt.VarDecList))
 	}
