@@ -24,7 +24,7 @@ func removeExt(filename string) string {
 }
 
 func main() {
-	vmMainClassName := "StaticsTest"
+	vmMainClassName := "HelloWorld"
 	vmFileList, err := getVmFileListInDir(fmt.Sprintf("FunctionCalls/%s", vmMainClassName))
 	if err != nil {
 		panic(err)
