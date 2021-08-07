@@ -12,8 +12,7 @@ func TestLetStatements(t *testing.T) {
 	input := `let x=5;
 		let y=10;
 		let hoge=111;
-		let foo=838383;
-		`
+		let foo=838383;`
 
 	jt := tokenizer.New(input)
 	p := New(jt)

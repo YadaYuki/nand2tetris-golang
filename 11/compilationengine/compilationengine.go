@@ -13,11 +13,12 @@ import (
 type CompilationEngine struct {
 	*vmwriter.VMWriter
 	*symboltable.SymbolTable
+	ClassName string
 }
 
 // New is initializer of compilation engine
-func New(vm *vmwriter.VMWriter, st *symboltable.SymbolTable) *CompilationEngine {
-	ce := &CompilationEngine{VMWriter: vm, SymbolTable: st}
+func New(className string, vm *vmwriter.VMWriter, st *symboltable.SymbolTable) *CompilationEngine {
+	ce := &CompilationEngine{VMWriter: vm, SymbolTable: st, ClassName: className}
 	return ce
 }
 
@@ -36,17 +37,35 @@ func (ce *CompilationEngine) CompileStatement(statementAst ast.Statement) error 
 	}
 }
 
+func (ce *CompilationEngine) CompileInit() {
+	jackBasicLibraries := []string{
+		"Math", "Output", "Keyboard", "Memory", "Screen", "Sys",
+	}
+	for i := range jackBasicLibraries {
+		ce.WriteCall(fmt.Sprintf("%s.init", jackBasicLibraries[i]), 0)
+	}
+}
+
 func (ce *CompilationEngine) CompileVarDec(varDecAst *ast.VarDecStatement) error {
-	ce.WriteIf("hoge")
+	return nil
+}
+
+func (ce *CompilationEngine) CompileReturnStatement(statementAst *ast.ReturnStatement) error {
+	if statementAst.Value != nil {
+		ce.CompileExpression(statementAst.Value)
+	} else {
+		ce.WritePush(vmwriter.CONST, 0)
+	}
+	ce.WriteReturn()
 	return nil
 }
 
 func (ce *CompilationEngine) CompileExpression(expressionAst ast.Expression) error {
 	switch c := expressionAst.(type) {
 	case *ast.SingleExpression:
-		ce.CompileSingleExpression(c)
+		return ce.CompileSingleExpression(c)
 	case *ast.InfixExpression:
-		ce.CompileInfixExpression(c)
+		return ce.CompileInfixExpression(c)
 	}
 	return nil
 }
@@ -67,7 +86,7 @@ func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.Infi
 		}
 	case token.ASTERISK:
 		{
-			ce.WriteCall("multiply", 2) // TODO: add mul logic in VM Layer.
+			ce.WriteCall("Math.multiply", 2) // TODO: add mul logic in VM Layer.
 			return nil
 		}
 	}
