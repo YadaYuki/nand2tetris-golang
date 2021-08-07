@@ -36,6 +36,8 @@ func (ce *CompilationEngine) CompileStatement(statementAst ast.Statement) error 
 		return ce.CompileDoStatement(statementAst)
 	case *ast.ReturnStatement:
 		return ce.CompileReturnStatement(statementAst)
+	case *ast.ClassStatement:
+		return ce.CompileClassStatement(statementAst)
 	default:
 		return errors.New("statementAst type: %T is not valid")
 	}
@@ -64,6 +66,16 @@ func (ce *CompilationEngine) CompileReturnStatement(statementAst *ast.ReturnStat
 	return nil
 }
 
+func (ce *CompilationEngine) CompileClassStatement(statementAst *ast.ClassStatement) error {
+	_, subroutineDecList := statementAst.ClassVarDecList, statementAst.SubroutineDecList
+	// for range varDecList {
+	// }
+	for _, subroutineDec := range subroutineDecList {
+		ce.CompileSubroutineDecStatement(&subroutineDec)
+	}
+	return nil
+}
+
 func (ce *CompilationEngine) CompileSubroutineDecStatement(statementAst *ast.SubroutineDecStatement) error {
 	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, statementAst.Name.Literal), 0)
 	_, statements := statementAst.SubroutineBody.VarDecList, statementAst.SubroutineBody.Statements.Statements
@@ -84,8 +96,7 @@ func (ce *CompilationEngine) CompileExpression(expressionAst ast.Expression) err
 }
 
 func (ce *CompilationEngine) CompileSingleExpression(singleExpressionAst *ast.SingleExpression) error {
-	ce.CompileTerm(singleExpressionAst.Value)
-	return nil
+	return ce.CompileTerm(singleExpressionAst.Value)
 }
 
 func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.InfixExpression) error {
@@ -99,7 +110,7 @@ func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.Infi
 		}
 	case token.ASTERISK:
 		{
-			ce.WriteCall("Math.multiply", 2) // TODO: add mul logic in VM Layer.
+			ce.WriteCall("Math.multiply", 2)
 			return nil
 		}
 	}
@@ -112,6 +123,8 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 		return ce.CompileIntergerConstTerm(c)
 	case *ast.BracketTerm:
 		return ce.CompileBracketTerm(c)
+	case *ast.StringConstTerm:
+		return ce.CompileStringConstTerm(c)
 	}
 	return nil
 }
@@ -123,6 +136,16 @@ func (ce *CompilationEngine) CompileIntergerConstTerm(intergerConstTerm *ast.Int
 
 func (ce *CompilationEngine) CompileBracketTerm(bracketTerm *ast.BracketTerm) error {
 	return ce.CompileExpression(bracketTerm.Value)
+}
+
+func (ce *CompilationEngine) CompileStringConstTerm(stringConstTerm *ast.StringConstTerm) error {
+	ce.WritePush(vmwriter.CONST, len(stringConstTerm.Value))
+	ce.WriteCall("String.new", 1)
+	for _, c := range stringConstTerm.Value {
+		ce.WritePush(vmwriter.CONST, int(c))
+		ce.WriteCall("String.appendChar", 2)
+	}
+	return nil
 }
 
 func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) error {
