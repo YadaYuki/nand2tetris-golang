@@ -19,19 +19,8 @@ func newParser(input string) *parser.Parser {
 func newCompilationEngine() *CompilationEngine {
 	vmWriter := vmwriter.New("test.vm", 0644)
 	symbolTable := symboltable.New()
-	ce := New(vmWriter, symbolTable)
+	ce := New("test", vmWriter, symbolTable)
 	return ce
-}
-
-func TestVarDecStatements(t *testing.T) {
-	input := "var int temp;"
-	p := newParser(input)
-	ast := p.ParseProgram()
-	ce := newCompilationEngine()
-	ce.CompileProgram(ast)
-	if !bytes.Equal([]byte("if-goto hoge"+value.NEW_LINE), ce.VMCode) {
-		t.Fatalf("VarDecStatement VMCode should be %s, got %s", "hoge", ce.VMCode)
-	}
 }
 
 func TestExpression(t *testing.T) {
@@ -73,6 +62,24 @@ func TestDoStatement(t *testing.T) {
 		ce.CompileDoStatement(ast)
 		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
 			t.Fatalf("doStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
+func TestReturnStatement(t *testing.T) {
+	testCases := []struct {
+		expressionInput string
+		vmCode          string
+	}{
+		{"return;", "push constant 0" + value.NEW_LINE + "return" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.expressionInput)
+		ast := p.ParseReturnStatement()
+		ce := newCompilationEngine()
+		ce.CompileReturnStatement(ast)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("returnStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
 		}
 	}
 }

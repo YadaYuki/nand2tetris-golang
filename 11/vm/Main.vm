@@ -3,6 +3,9 @@ call Output.init 0
 call Keyboard.init 0
 call Memory.init 0
 call Screen.init 0
+call Sys.init 0
+
+function Main.main 0
 push constant 1
 push constant 2
 push constant 3
@@ -10,3 +13,5 @@ call Math.multiply 2
 add
 call Output.printInt 1
 pop temp 0
+push constant 0
+return 
