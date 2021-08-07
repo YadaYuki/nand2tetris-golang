@@ -72,6 +72,8 @@ func TestReturnStatement(t *testing.T) {
 		vmCode          string
 	}{
 		{"return;", "push constant 0" + value.NEW_LINE + "return" + value.NEW_LINE},
+		{"return 1;", "push constant 1" + value.NEW_LINE + "return" + value.NEW_LINE},
+		{"return 1+2;", "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "add" + value.NEW_LINE + "return" + value.NEW_LINE},
 	}
 	for _, tt := range testCases {
 		p := newParser(tt.expressionInput)

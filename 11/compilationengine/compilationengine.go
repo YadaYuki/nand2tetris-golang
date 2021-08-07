@@ -51,6 +51,11 @@ func (ce *CompilationEngine) CompileVarDec(varDecAst *ast.VarDecStatement) error
 }
 
 func (ce *CompilationEngine) CompileReturnStatement(statementAst *ast.ReturnStatement) error {
+	if statementAst.Value != nil {
+		ce.CompileExpression(statementAst.Value)
+	} else {
+		ce.WritePush(vmwriter.CONST, 0)
+	}
 	ce.WriteReturn()
 	return nil
 }
