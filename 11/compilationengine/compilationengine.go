@@ -44,9 +44,9 @@ func (ce *CompilationEngine) CompileVarDec(varDecAst *ast.VarDecStatement) error
 func (ce *CompilationEngine) CompileExpression(expressionAst ast.Expression) error {
 	switch c := expressionAst.(type) {
 	case *ast.SingleExpression:
-		ce.CompileSingleExpression(c)
+		return ce.CompileSingleExpression(c)
 	case *ast.InfixExpression:
-		ce.CompileInfixExpression(c)
+		return ce.CompileInfixExpression(c)
 	}
 	return nil
 }
@@ -67,7 +67,7 @@ func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.Infi
 		}
 	case token.ASTERISK:
 		{
-			ce.WriteCall("multiply", 2) // TODO: add mul logic in VM Layer.
+			ce.WriteCall("Math.multiply", 2) // TODO: add mul logic in VM Layer.
 			return nil
 		}
 	}
