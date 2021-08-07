@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"io/ioutil"
 	"jack_compiler/compilationengine"
 	"jack_compiler/parser"
 	"jack_compiler/symboltable"
@@ -9,19 +11,19 @@ import (
 )
 
 func main() {
-	jt := tokenizer.New(`
-	class Main {
-		function void main() {
-			 do Output.printInt(1 + (2 * 3));
-			 return;
-		}
- }`)
+	flag.Parse()
+	jackFilename := flag.Arg(0)
+	jackCode, err := ioutil.ReadFile(jackFilename)
+	if err != nil {
+		panic(err)
+	}
+	jt := tokenizer.New(string(jackCode))
 	parser := parser.New(jt)
-	ast := parser.ParseDoStatement()
-	vm := vmwriter.New("Main.vm", 0644)
+	ast := parser.ParseProgram()
+	vm := vmwriter.New("vm/Main.vm", 0644)
 	st := symboltable.New()
 	ce := compilationengine.New("Main", vm, st)
-	ce.CompileDoStatement(ast)
-
+	ce.CompileInit()
+	ce.CompileProgram(ast)
 	ce.Close()
 }

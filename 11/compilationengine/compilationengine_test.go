@@ -34,7 +34,6 @@ func TestExpression(t *testing.T) {
 		{"4 * 3", "push constant 4" + value.NEW_LINE + "push constant 3" + value.NEW_LINE + "call Math.multiply 2" + value.NEW_LINE},
 		{"(2+3)*(5+4)", "push constant 2" + value.NEW_LINE + "push constant 3" + value.NEW_LINE + "add" + value.NEW_LINE + "push constant 5" + value.NEW_LINE + "push constant 4" + value.NEW_LINE + "add" + value.NEW_LINE + "call Math.multiply 2" + value.NEW_LINE},
 	}
-
 	for _, tt := range testCases {
 		p := newParser(tt.expressionInput)
 		ast := p.ParseExpression()
@@ -42,6 +41,25 @@ func TestExpression(t *testing.T) {
 		ce.CompileExpression(ast)
 		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
 			t.Fatalf("Expression VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
+func TestStringConstTerm(t *testing.T) {
+	testCases := []struct {
+		expressionInput string
+		vmCode          string
+	}{
+		{`"a"`, "push constant 1" + value.NEW_LINE + "call String.new 1" + value.NEW_LINE + "push constant 97" + value.NEW_LINE + "call String.appendChar 2" + value.NEW_LINE},
+		{`"abcde"`, "push constant 5" + value.NEW_LINE + "call String.new 1" + value.NEW_LINE + "push constant 97" + value.NEW_LINE + "call String.appendChar 2" + value.NEW_LINE + "push constant 98" + value.NEW_LINE + "call String.appendChar 2" + value.NEW_LINE + "push constant 99" + value.NEW_LINE + "call String.appendChar 2" + value.NEW_LINE + "push constant 100" + value.NEW_LINE + "call String.appendChar 2" + value.NEW_LINE + "push constant 101" + value.NEW_LINE + "call String.appendChar 2" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.expressionInput)
+		ast := p.ParseExpression()
+		ce := newCompilationEngine("Main")
+		ce.CompileExpression(ast)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("StringConstTerm VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
 		}
 	}
 }
@@ -102,6 +120,25 @@ func TestSubroutineDecStatement(t *testing.T) {
 		ce.CompileSubroutineDecStatement(ast)
 		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
 			t.Fatalf("subroutineDecStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
+func TestClassStatement(t *testing.T) {
+	testCases := []struct {
+		expressionInput string
+		vmCode          string
+	}{
+		{"Class Main {}", ""},
+		{"Class Main {function void main(){}}", "function Main.main 0" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.expressionInput)
+		ast := p.ParseClassStatement()
+		ce := newCompilationEngine("Main")
+		ce.CompileClassStatement(ast)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("classStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
 		}
 	}
 }
