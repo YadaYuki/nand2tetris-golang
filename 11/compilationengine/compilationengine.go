@@ -32,6 +32,10 @@ func (ce *CompilationEngine) CompileStatement(statementAst ast.Statement) error 
 	switch statementAst := statementAst.(type) {
 	case *ast.VarDecStatement:
 		return ce.CompileVarDec(statementAst)
+	case *ast.DoStatement:
+		return ce.CompileDoStatement(statementAst)
+	case *ast.ReturnStatement:
+		return ce.CompileReturnStatement(statementAst)
 	default:
 		return errors.New("statementAst type: %T is not valid")
 	}
@@ -57,6 +61,15 @@ func (ce *CompilationEngine) CompileReturnStatement(statementAst *ast.ReturnStat
 		ce.WritePush(vmwriter.CONST, 0)
 	}
 	ce.WriteReturn()
+	return nil
+}
+
+func (ce *CompilationEngine) CompileSubroutineDecStatement(statementAst *ast.SubroutineDecStatement) error {
+	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, statementAst.Name.Literal), 0)
+	_, statements := statementAst.SubroutineBody.VarDecList, statementAst.SubroutineBody.Statements.Statements
+	for _, stmt := range statements {
+		ce.CompileStatement(stmt)
+	}
 	return nil
 }
 
@@ -113,6 +126,7 @@ func (ce *CompilationEngine) CompileBracketTerm(bracketTerm *ast.BracketTerm) er
 }
 
 func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) error {
+
 	expressionListStmt := doStatement.ExpressionListStmt
 	for i := range expressionListStmt.ExpressionList {
 		ce.CompileExpression(expressionListStmt.ExpressionList[i])
