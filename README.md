@@ -11,6 +11,33 @@ You can emulate them by using [Hardware Simulator](https://www.nand2tetris.org/s
 
 ## Assembly
 
+[Assembler](https://github.com/YadaYuki/nand2tetris/tree/main/assembler) convert assembly( \*.asm ) to  machine leannguage ( \*.hack)
+
+For example, create a assembly file Add/add.asm
+```
+@2
+D=A
+@3
+D=D+A
+@0
+D=M
+```
+Then, run command follow
+```
+go run main.go -asm add/Add.asm -hack add/Add.hack
+```
+After that, machine language file Add/add.hack will be generated.
+```
+0000000000000010
+1110110000010000
+0000000000000011
+1110000010010000
+0000000000000000
+1111110000010000
+```
+
+
+
 ## VMTranslator
 
 ## JackCompiler
