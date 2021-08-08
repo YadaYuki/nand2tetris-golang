@@ -1,7 +1,7 @@
 package code
 
 import (
-	"assembly/ast"
+	"assembler/ast"
 	"fmt"
 )
 

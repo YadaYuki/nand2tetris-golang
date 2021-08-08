@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"assembly/ast"
-	"assembly/symboltable"
+	"assembler/ast"
+	"assembler/symboltable"
 	"testing"
 )
 

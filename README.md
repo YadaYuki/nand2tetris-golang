@@ -2,7 +2,20 @@
 
 Implmentation of Nand2Tetris by Golang ʕ◔ϖ◔ʔ
 
-# Reference
+# How To Work
+
+## CPU & Logic Circuit
+01 ~ 05 folders are implementation of Logic Circuit and CPU. 
+You can emulate them by using [Hardware Simulator](https://www.nand2tetris.org/software).
+![image](https://user-images.githubusercontent.com/57289763/128625790-8b70d3a0-bc7d-46cd-94f7-131c240742b3.png)
+
+## Assembly
+
+## VMTranslator
+
+## JackCompiler
+
+#  Reference
 
 - [「Nand2Tetris Official Site」](https://www.nand2tetris.org/)
 

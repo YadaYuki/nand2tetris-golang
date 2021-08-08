@@ -1,8 +1,8 @@
 package code
 
 import (
-	"assembly/ast"
-	// "assembly/value"
+	"assembler/ast"
+	// "assembler/value"
 	"testing"
 )
 

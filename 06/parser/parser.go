@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"assembly/ast"
-	"assembly/symboltable"
-	"assembly/value"
+	"assembler/ast"
+	"assembler/symboltable"
+	"assembler/value"
 	"fmt"
 	"strconv"
 	"strings"

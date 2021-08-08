@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"assembly/value"
+	"assembler/value"
 	"fmt"
 	"strings"
 )
