@@ -1,7 +1,7 @@
-package assembly
+package main
 
 import (
-	"assembly/value"
+	"assembler/value"
 	"io/ioutil"
 	"strings"
 	"testing"

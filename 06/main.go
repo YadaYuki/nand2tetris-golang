@@ -1,11 +1,12 @@
-package assembly
+package main
 
 import (
-	"assembly/ast"
-	"assembly/code"
-	"assembly/parser"
-	"assembly/symboltable"
-	"assembly/value"
+	"assembler/ast"
+	"assembler/code"
+	"assembler/parser"
+	"assembler/symboltable"
+	"assembler/value"
+	"flag"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -60,4 +61,10 @@ func AssembleAsmFile(asmFilename string, hackFilename string) error {
 	binaryArr, _ := Assemble(input)
 	ioutil.WriteFile(hackFilename, []byte(strings.Join(binaryArr, value.NEW_LINE)), os.ModePerm)
 	return nil
+}
+
+func main() {
+	asmFilename, hackFilename := flag.String("asm", "add/Add.asm", "filename of asm"), flag.String("hack", "Main.hack", "filename of hack")
+	flag.Parse()
+	AssembleAsmFile(*asmFilename, *hackFilename)
 }
