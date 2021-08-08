@@ -1,4 +1,4 @@
-# Nand2Tetris :smirk_cat
+# Nand2Tetris :smiley_cat:
 
 Implmentation of Nand2Tetris by Golang ʕ◔ϖ◔ʔ
 
