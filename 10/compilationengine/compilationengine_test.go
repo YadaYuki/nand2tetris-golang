@@ -42,21 +42,21 @@ func TestLetStatements(t *testing.T) {
 }
 
 func TestLetArrayElementStatements(t *testing.T) {
-	input := `let a[1+1] = 8080;`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	program := ce.ParseProgram()
-	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
-	}
 	testCases := []struct {
+		input              string
 		expectedIdentifier string
 		expectedIdx        string
 		expectedValue      string
 	}{
-		{"a", "1+1", "8080"},
+		{`let a[1+1] = 8080;`, "a", "1+1", "8080"},
 	}
 	for i, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		program := ce.ParseProgram()
+		if program == nil {
+			t.Fatalf("ParseProgram() returned nil")
+		}
 		stmt := program.Statements[i]
 		if !testLetArrayElementStatement(t, stmt, tt.expectedIdentifier, tt.expectedIdx, tt.expectedValue) {
 			return
