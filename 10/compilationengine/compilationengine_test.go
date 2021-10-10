@@ -5,7 +5,6 @@ import (
 	"jack_compiler/token"
 	"jack_compiler/tokenizer"
 	"testing"
-	// "fmt"
 )
 
 func TestLetStatements(t *testing.T) {
@@ -73,46 +72,36 @@ func TestLetArrayElemetStatements(t *testing.T) {
 }
 
 func TestReturnStatements(t *testing.T) {
-	input := `
-	return x;
-	return 1;
-	return;
-`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	program := ce.ParseProgram()
-	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
-	}
-	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
-	}
 	testCases := []struct {
-		expectedIdentifier string
+		input               string
+		expectedValueString string
 	}{
-		{"x"},
-		{"1"},
-		{},
+		{`return x;`, "x"},
+		{`return 1;`, "1"},
+		{`return 1+1;`, "1+1"},
+		{`return;`, ""},
 	}
-	for i, tt := range testCases {
-		stmt := program.Statements[i]
-		if !testReturnStatement(t, stmt, tt.expectedIdentifier) {
-			return
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		returnStmt := ce.parseReturnStatement()
+		if returnStmt == nil {
+			t.Fatalf("parseReturnStatement() returned nil")
 		}
-	}
-}
+		if returnStmt.TokenLiteral() != string(token.RETURN) {
+			t.Errorf("s.TokenLiteral not %s. got %q", token.RETURN, returnStmt.TokenLiteral())
+		}
+		if tt.expectedValueString != "" { // 戻り値が存在する場合
+			if returnStmt.Value.String() != tt.expectedValueString {
+				t.Errorf("returnStmt.Value.String() not '%s'.got '%s'", tt.expectedValueString, returnStmt.Value.String())
+			}
+		} else {
+			if returnStmt.Value != nil {
+				t.Errorf("returnStmt.Value should be nil. got %s ", returnStmt.Value.String())
+			}
+		}
 
-func testReturnStatement(t *testing.T, s ast.Statement, name string) bool {
-	if s.TokenLiteral() != "return" {
-		t.Errorf("s.TokenLiteral not 'return'. got %q", s.TokenLiteral())
-		return false
 	}
-	_, ok := s.(*ast.ReturnStatement)
-	if !ok {
-		t.Errorf("s not *ast.ReturnStatement. got %T", s)
-		return false
-	}
-	return true
 }
 
 func TestParseDoStatements(t *testing.T) {
@@ -367,7 +356,6 @@ func TestParseWhileStatement(t *testing.T) {
 	if len(whileStmt.Statements.Statements) != 3 {
 		t.Fatalf("len(whileStmt.Statements.Statements)  is not 3,got = %d", len(whileStmt.Statements.Statements))
 	}
-	// t.Log(whileStmt.Xml())
 }
 
 func TestParseExpressionListStatement(t *testing.T) {
