@@ -9,99 +9,67 @@ import (
 )
 
 func TestLetStatements(t *testing.T) {
-	input := `let x=5;
-		let y=10;
-		let hoge=111;
-		let foo=838383;
-		`
-
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	program := ce.ParseProgram()
-	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
-	}
-	if len(program.Statements) != 4 {
-		t.Fatalf("program.Statements does not contain 4 statements. got=%d", len(program.Statements))
-	}
 	testCases := []struct {
-		expectedIdentifier string
+		input               string
+		expectedName        string
+		expectedValueString string
 	}{
-		{"x"},
-		{"y"},
-		{"hoge"},
-		{"foo"},
+		{`let y=10;`, "y", "10"},
+		{`let hoge =111;`, "hoge", "111"},
+		{`let x = 5+5;`, "x", "5+5"},
+		{`let x = (5+5)+4;`, "x", "(5+5)+4"},
 	}
-
-	for i, tt := range testCases {
-		stmt := program.Statements[i]
-		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
-			return
-		}
-	}
-}
-
-func TestLetArrayElementStatements(t *testing.T) {
-	testCases := []struct {
-		input              string
-		expectedIdentifier string
-		expectedIdx        string
-		expectedValue      string
-	}{
-		{`let a[1+1] = 8080;`, "a", "1+1", "8080"},
-	}
-	for i, tt := range testCases {
+	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		program := ce.ParseProgram()
-		if program == nil {
-			t.Fatalf("ParseProgram() returned nil")
+		letStmt := ce.parseLetStatement()
+		if letStmt == nil {
+			t.Fatalf("parseLetStatement() returned nil")
 		}
-		stmt := program.Statements[i]
-		if !testLetArrayElementStatement(t, stmt, tt.expectedIdentifier, tt.expectedIdx, tt.expectedValue) {
-			return
+		if letStmt.TokenLiteral() != "let" {
+			t.Errorf("s.TokenLiteral not 'let'. got %q", letStmt.TokenLiteral())
+		}
+		if letStmt.Name.Literal != tt.expectedName {
+			t.Errorf("letStmt.Name.TokenLiteral() not '%s'.got '%s'", tt.expectedName, letStmt.Name.Literal)
+		}
+		if letStmt.Value.String() != tt.expectedValueString {
+			t.Errorf("letStmt.Value.String() not '%s'.got '%s'", tt.expectedValueString, letStmt.Value.String())
 		}
 	}
 }
-func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
-	if s.TokenLiteral() != "let" {
-		t.Errorf("s.TokenLiteral not 'let'. got %q", s.TokenLiteral())
-	}
-	letStmt, ok := s.(*ast.LetStatement)
-	if !ok {
-		t.Errorf("s not *ast.LetStatement. got %T", s)
-		return false
-	}
-	if letStmt.Name.Literal != name {
-		t.Errorf("letStmt.Name.TokenLiteral() not '%s'.got '%s'", name, letStmt.Name.Literal)
-		return false
-	}
-	return true
-}
 
-func testLetArrayElementStatement(t *testing.T, s ast.Statement, name string, idx string, value string) bool {
-	if s.TokenLiteral() != "let" {
-		t.Errorf("s.TokenLiteral not 'let'. got %q", s.TokenLiteral())
+func TestLetArrayElemetStatements(t *testing.T) {
+	testCases := []struct {
+		input               string
+		expectedName        string
+		expectedIdxString   string
+		expectedValueString string
+	}{
+		{`let y[1]=10;`, "y", "1", "10"},
+		{`let hoge[a] =111;`, "hoge", "a", "111"},
+		{`let x[a+1] = 5+5;`, "x", "a+1", "5+5"},
+		{`let x[(5+5)+4] = (5+5)+4;`, "x", "(5+5)+4", "(5+5)+4"},
 	}
-	letStmt, ok := s.(*ast.LetStatement)
-	if !ok {
-		t.Errorf("s not *ast.LetStatement. got %T", s)
-		return false
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		letStmt := ce.parseLetStatement()
+		if letStmt == nil {
+			t.Fatalf("parseLetStatement() returned nil")
+		}
+		if letStmt.TokenLiteral() != "let" {
+			t.Errorf("s.TokenLiteral not 'let'. got %q", letStmt.TokenLiteral())
+		}
+		if letStmt.Name.Literal != tt.expectedName {
+			t.Errorf("letStmt.Name.TokenLiteral() not '%s'.got '%s'", tt.expectedName, letStmt.Name.Literal)
+		}
+		if letStmt.Value.String() != tt.expectedValueString {
+			t.Errorf("letStmt.Value.String() not '%s'.got '%s'", tt.expectedValueString, letStmt.Value.String())
+		}
+		if letStmt.Idx.String() != tt.expectedIdxString {
+			t.Errorf("letStmt.Idx.String() not '%s'.got '%s'", tt.expectedIdxString, letStmt.Idx.String())
+		}
 	}
-	if letStmt.Name.Literal != name {
-		t.Errorf("letStmt.Name.TokenLiteral() not '%s'.got '%s'", name, letStmt.Name.Literal)
-		return false
-	}
-	if letStmt.Idx.String() != idx {
-		t.Errorf("letStmt.Idx.String() not '%s'.got '%s'", idx, letStmt.Idx.String())
-		return false
-	}
-
-	if letStmt.Value.String() != value {
-		t.Errorf("letStmt.Value.String()  not '%s'.got '%s'", value, letStmt.Value.String())
-		return false
-	}
-	return true
 }
 
 func TestReturnStatements(t *testing.T) {

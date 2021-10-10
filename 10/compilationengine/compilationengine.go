@@ -162,7 +162,6 @@ func (ce *CompilationEngine) parseSubroutineBodyStatement() *ast.SubroutineBodyS
 	return stmt
 }
 
-// TODO:Add Error Handling
 func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{Token: ce.curToken}
 	if !ce.expectNext(token.IDENTIFIER) {
