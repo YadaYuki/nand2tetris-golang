@@ -173,10 +173,8 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 
 	if token.Symbol(ce.curToken.Literal) == token.LBRACKET {
 		ce.advanceToken()
-
 		stmt.Idx = ce.parseExpression()
 		ce.advanceToken()
-
 		if token.Symbol(ce.curToken.Literal) != token.RBRACKET {
 			return nil
 		}
