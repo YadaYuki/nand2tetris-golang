@@ -550,37 +550,34 @@ func TestParseSubroutineBodyStatement(t *testing.T) {
 }
 
 func TestParseSubroutineDecStatement(t *testing.T) {
-	input := `method void fuga (int hoge,boolean fuga){
-		var int a,b,c;
-		var int length;
-		var char casdfasdf;
-		var boolean a1,b2,cx;
-		let x=5;
-		let y=10;
-		let hoge=111;
-		let foo=838383;
-		let bar="hogehoge";
-	}`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	stmt := ce.ParseProgram()
-	if len(stmt.Statements) != 1 {
-		t.Fatalf("len(stmt.Statements)  is not hoge ,got = %d", len(stmt.Statements))
+	testCases := []struct {
+		input                  string
+		expectedSubroutineType token.KeyWord
+		expectedReturnType     string
+		expectedName           string
+	}{
+		{"method void hoge (){}", token.METHOD, "void", "hoge"},
+		{"constructor void hoge (){}", token.CONSTRUCTOR, "void", "hoge"},
+		{"function void hoge (){}", token.FUNCTION, "void", "hoge"},
+		{"method int hoge (){}", token.METHOD, string(token.INT), "hoge"},
+		{"method char hoge (){}", token.METHOD, string(token.CHAR), "hoge"},
+		{"method boolean hoge (){}", token.METHOD, string(token.BOOLEAN), "hoge"},
+		{"method ClassName hoge (){}", token.METHOD, "ClassName", "hoge"},
 	}
-	subroutineDecStmt, ok := stmt.Statements[0].(*ast.SubroutineDecStatement)
-	if !ok {
-		t.Fatalf("stmt.Statements[0]  is not SubroutineDecStatement ,got = %T", stmt.Statements[0])
+
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		subroutineDecStmt := ce.parseSubroutineDecStatement()
+		if token.KeyWord(subroutineDecStmt.Token.Literal) != tt.expectedSubroutineType {
+			t.Fatalf("subroutineDecStmt.Token.Literal is not %s ,got = %s", subroutineDecStmt.Token.Literal, tt.expectedSubroutineType)
+		}
+		if subroutineDecStmt.ReturnType.Literal != tt.expectedReturnType {
+			t.Fatalf("subroutineDecStmt.ReturnType.Literal  is not %s ,got = %s", subroutineDecStmt.ReturnType.Literal, tt.expectedReturnType)
+		}
+		if subroutineDecStmt.Name.Literal != tt.expectedName {
+			t.Fatalf("subroutineDecStmt.Name.Literal should be %s ,got = %s", tt.expectedName, subroutineDecStmt.Name.Literal)
+		}
 	}
-	if token.KeyWord(subroutineDecStmt.ReturnType.Literal) != token.VOID {
-		t.Fatalf("subroutineDecStmt.ReturnType.Literal  is not void ,got = %s", subroutineDecStmt.ReturnType.Literal)
-	}
-	if len(subroutineDecStmt.ParameterList.ParameterList) != 2 {
-		t.Fatalf("len(subroutineDecStmt.ParameterList.ParameterList)  is not 2 ,got = %d", len(subroutineDecStmt.ParameterList.ParameterList))
-	}
-	if len(subroutineDecStmt.SubroutineBody.VarDecList) != 4 {
-		t.Fatalf("len(subroutineDecStmt.Statements.Statements)  is not 4 ,got = %d", len(subroutineDecStmt.SubroutineBody.VarDecList))
-	}
-	if len(subroutineDecStmt.SubroutineBody.Statements.Statements) != 5 {
-		t.Fatalf("len(subroutineDecStmt.Statements.Statements)  is not 5 ,got = %d", len(subroutineDecStmt.SubroutineBody.Statements.Statements))
-	}
+
 }

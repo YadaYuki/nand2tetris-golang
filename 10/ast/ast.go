@@ -106,7 +106,7 @@ func (cs *ClassStatement) Xml() string {
 }
 
 type SubroutineDecStatement struct {
-	Token          token.Token // KEYWORD:"class"
+	Token          token.Token // KEYWORD:"constructor" or "method" or "function"
 	ReturnType     token.Token // KEYWORD:"void" or IDENTIFIER
 	Name           token.Token // IDENTIFIER
 	ParameterList  *ParameterListStatement
