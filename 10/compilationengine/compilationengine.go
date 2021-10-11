@@ -297,6 +297,7 @@ func (ce *CompilationEngine) parseIfStatement() *ast.IfStatement {
 		}
 		stmt.Alternative = ce.parseBlockStatement()
 	}
+	ce.advanceToken()
 	return stmt
 }
 

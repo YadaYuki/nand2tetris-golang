@@ -130,58 +130,33 @@ func TestParseDoStatements(t *testing.T) {
 }
 
 func TestVarDecStatements(t *testing.T) {
-	input := `
-	var int a,b,c;
-	var int length;
-	var char casdfasdf;
-	var boolean a1,b2,cx;
-`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	program := ce.ParseProgram()
-	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
-	}
-	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
-	}
 	testCases := []struct {
+		input               string
 		expectedValueType   string
 		expectedIdentifiers []string
 	}{
-		{"int", []string{"a", "b", "c"}},
-		{"char", []string{"casdfasdf"}},
-		{"boolean", []string{"a1", "b2", "cx"}},
+		{"var int a;", "int", []string{"a"}},
+		{"var char a;", "char", []string{"a"}},
+		{"var boolean a;", "boolean", []string{"a"}},
+		{"var ClassName a;", "ClassName", []string{"a"}},
+		{"var int a,b,c;", "int", []string{"a", "b", "c"}},
 	}
-	for i, tt := range testCases {
-		stmt := program.Statements[i]
-		if !testVarDecStatement(t, stmt, tt.expectedValueType, tt.expectedIdentifiers) {
-			return
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		varDecStmt := ce.parseVarDecStatement()
+		if varDecStmt.TokenLiteral() != string(token.VAR) {
+			t.Errorf("varDecStmt.TokenLiteral not %s. got %q", token.VAR, varDecStmt.TokenLiteral())
+		}
+		if varDecStmt.ValueType.Literal != tt.expectedValueType {
+			t.Errorf("varDecStmt.ValueType.Literal no %s . got %s", tt.expectedValueType, varDecStmt.ValueType.Literal)
+		}
+		for i, ident := range varDecStmt.Identifiers {
+			if tt.expectedIdentifiers[i] != ident.Literal {
+				t.Errorf("identifiers no %s . got %s", tt.expectedIdentifiers[i], ident.Literal)
+			}
 		}
 	}
-}
-
-func testVarDecStatement(t *testing.T, s ast.Statement, expectedValueType string, identifiers []string) bool {
-	if s.TokenLiteral() != "var" {
-		t.Errorf("s.TokenLiteral not 'var'. got %q", s.TokenLiteral())
-		return false
-	}
-	vds, ok := s.(*ast.VarDecStatement)
-	if !ok {
-		t.Errorf("s not *ast.VarDecStatement. got %T", s)
-		return false
-	}
-	if vds.ValueType.Literal != expectedValueType {
-		t.Errorf("valueType no %s . got %s", expectedValueType, vds.ValueType.Literal)
-		return false
-	}
-	for i, ident := range vds.Identifiers {
-		if identifiers[i] != ident.Literal {
-			t.Errorf("identifiers no %s . got %s", identifiers[i], ident)
-			return false
-		}
-	}
-	return true
 }
 
 func TestClassVarDecStatements(t *testing.T) {
@@ -300,17 +275,8 @@ func TestParseIfStatement(t *testing.T) {
 	 }`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	program := ce.ParseProgram()
-	if len(program.Statements) != 1 {
-		t.Fatalf("len(program.Statements) is not 1,got = %d", len(program.Statements))
-	}
-	ifStmt, ok := program.Statements[0].(*ast.IfStatement)
-	if !ok {
-		t.Fatalf("ifStmt is not ast.IfStatement,got = %T", ifStmt)
-	}
-	if len(ifStmt.Consequence.Statements) != 3 {
-		t.Fatalf("len(ifStmt.Consequence)  is not 3,got = %d", len(ifStmt.Consequence.Statements))
-	}
+	program := ce.parseIfStatement()
+	t.Log(program)
 }
 
 func TestParseWhileStatement(t *testing.T) {
