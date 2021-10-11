@@ -140,9 +140,9 @@ func (sds *SubroutineDecStatement) Xml() string {
 }
 
 type SubroutineBodyStatement struct {
-	Token      token.Token // SYMBOL:"{"
+	Token      token.Token // "{"
 	VarDecList []VarDecStatement
-	Statements *BlockStatement
+	Statements []Statement
 }
 
 func (sbs *SubroutineBodyStatement) statementNode() {}
@@ -155,7 +155,9 @@ func (sbs *SubroutineBodyStatement) String() string {
 	for _, varDec := range sbs.VarDecList {
 		out.WriteString(varDec.String())
 	}
-	out.WriteString(sbs.Statements.String())
+	for _, stmt := range sbs.Statements {
+		out.WriteString(stmt.String())
+	}
 	out.WriteString("}")
 	return out.String()
 }
@@ -167,8 +169,9 @@ func (sbs *SubroutineBodyStatement) Xml() string {
 	for _, varDec := range sbs.VarDecList {
 		out.WriteString(varDec.Xml())
 	}
-
-	out.WriteString(sbs.Statements.Xml())
+	for _, stmt := range sbs.Statements {
+		out.WriteString(stmt.Xml())
+	}
 	out.WriteString(symbolXml("}"))
 	out.WriteString("</subroutineBody>")
 	return out.String()

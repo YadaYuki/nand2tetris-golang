@@ -147,15 +147,11 @@ func (ce *CompilationEngine) parseSubroutineBodyStatement() *ast.SubroutineBodyS
 		stmt.VarDecList = append(stmt.VarDecList, *varDec)
 		ce.advanceToken()
 	}
-	// NOTE: originally, should call parseBlockStatement.
-	// But, the block statement in subroutine body does not start "{".
-	// so, implement original parser here.
-	stmt.Statements = &ast.BlockStatement{}
-	stmt.Statements.Statements = []ast.Statement{}
+	stmt.Statements = []ast.Statement{}
 	for token.Symbol(ce.curToken.Literal) != token.RBRACE && !ce.curTokenIs(token.EOF) {
 		statement := ce.parseStatement()
 		if statement != nil {
-			stmt.Statements.Statements = append(stmt.Statements.Statements, statement)
+			stmt.Statements = append(stmt.Statements, statement)
 		}
 		ce.advanceToken()
 	}

@@ -527,25 +527,25 @@ func TestParseClassStatement(t *testing.T) {
 }
 
 func TestParseSubroutineBodyStatement(t *testing.T) {
-	input := `{
-		var int a,b,c;
-		var int length;
-		var char casdfasdf;
-		var boolean a1,b2,cx;
-		let x=5;
-		let y=10;
-		let hoge=111;
-		let foo=838383;
-		let bar="hogehoge";
-	}`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	stmt := ce.parseSubroutineBodyStatement()
-	if len(stmt.VarDecList) != 4 {
-		t.Fatalf("len(stmt.VarDecList)  is not 4 ,got = %d", len(stmt.VarDecList))
+	testCases := []struct {
+		input               string
+		expectedVarDecCount int
+		expectedStmtCount   int
+	}{
+		{"{}", 0, 0},
+		{`{var int a,b,c;var int length;var char casdfasdf;var boolean a1,b2,cx;}`, 4, 0},
+		{`{var int a,b,c;var int length;var char casdfasdf;var boolean a1,b2,cx;do draw();return x; }`, 4, 2},
 	}
-	if len(stmt.Statements.Statements) != 5 {
-		t.Fatalf("len(stmt.Statements.Statements)  is not 5 ,got = %d", len(stmt.Statements.Statements))
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		subroutineBodyStmt := ce.parseSubroutineBodyStatement()
+		if len(subroutineBodyStmt.VarDecList) != tt.expectedVarDecCount {
+			t.Fatalf("len(subroutineBodyStmt.VarDecList) should be %d ,got = %d", len(subroutineBodyStmt.VarDecList), tt.expectedVarDecCount)
+		}
+		if len(subroutineBodyStmt.Statements) != tt.expectedStmtCount {
+			t.Fatalf("len(subroutineBodyStmt.Statements) should be %d ,got = %d", len(subroutineBodyStmt.Statements), tt.expectedStmtCount)
+		}
 	}
 }
 
@@ -564,7 +564,6 @@ func TestParseSubroutineDecStatement(t *testing.T) {
 		{"method boolean hoge (){}", token.METHOD, string(token.BOOLEAN), "hoge"},
 		{"method ClassName hoge (){}", token.METHOD, "ClassName", "hoge"},
 	}
-
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
