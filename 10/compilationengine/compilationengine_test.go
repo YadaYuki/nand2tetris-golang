@@ -105,51 +105,28 @@ func TestReturnStatements(t *testing.T) {
 }
 
 func TestParseDoStatements(t *testing.T) {
-	input := `
-	do ClassName.VarName(a,b,c,d,e);
-`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	program := ce.ParseProgram()
-	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
-	}
-	if len(program.Statements) != 1 {
-		t.Fatalf("program.Statements does not contain 1 statements. got=%d", len(program.Statements))
-	}
 	testCases := []struct {
-		expectedClassName string
-		expectedVarName   string
+		input                  string
+		expectedClassName      string
+		expectedSubroutineName string
 	}{
-		{"ClassName", "VarName"},
+		{"do HogeClass.HogeFunc();", "HogeClass", "HogeFunc"},
+		{"do HogeFunc();", "", "HogeFunc"},
 	}
-	for i, tt := range testCases {
-		stmt := program.Statements[i]
-		if !testDoStatement(t, stmt, tt.expectedClassName, tt.expectedVarName) {
-			return
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		doStmt := ce.parseDoStatement()
+		if token.KeyWord(doStmt.TokenLiteral()) != token.DO {
+			t.Errorf("s.TokenLiteral not %s. got %q", token.DO, doStmt.TokenLiteral())
+		}
+		if doStmt.ClassName.Literal != tt.expectedClassName {
+			t.Errorf("doStmt.ClassName.Literal not %s. got %s", tt.expectedClassName, doStmt.ClassName.Literal)
+		}
+		if doStmt.SubroutineName.Literal != tt.expectedSubroutineName {
+			t.Errorf("doStmt.SubroutineName.Literal not %s. got %s", tt.expectedSubroutineName, doStmt.SubroutineName.Literal)
 		}
 	}
-}
-
-func testDoStatement(t *testing.T, s ast.Statement, className string, varName string) bool {
-	if s.TokenLiteral() != "do" {
-		t.Errorf("s.TokenLiteral not 'do'. got %q", s.TokenLiteral())
-		return false
-	}
-	doStmt, ok := s.(*ast.DoStatement)
-	if !ok {
-		t.Errorf("s not *ast.DoStatement. got %T", s)
-		return false
-	}
-	if doStmt.ClassName.Literal != className {
-		t.Errorf("doStmt.VarName.Literal not %s. got %s", className, doStmt.ClassName.Literal)
-		return false
-	}
-	if doStmt.VarName.Literal != varName {
-		t.Errorf("doStmt.VarName.Literal not %s. got %s", varName, doStmt.VarName.Literal)
-		return false
-	}
-	return true
 }
 
 func TestVarDecStatements(t *testing.T) {

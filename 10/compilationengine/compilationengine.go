@@ -213,13 +213,11 @@ func (ce *CompilationEngine) parseDoStatement() *ast.DoStatement {
 		ce.advanceToken() // className
 		ce.advanceToken() // token.DOT
 	}
-	stmt.VarName = ce.curToken
+	stmt.SubroutineName = ce.curToken
 	ce.advanceToken()
-
 	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
 		return nil
 	}
-
 	stmt.ExpressionListStmt = ce.parseExpressionListStatement()
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
