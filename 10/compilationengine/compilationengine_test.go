@@ -495,31 +495,34 @@ func TestParseParameterListStatement(t *testing.T) {
 }
 
 func TestParseClassStatement(t *testing.T) {
-	input := `class hoge {
-		static boolean test;
-		function void main() {
-			var Array a;
-			let i = 0;
+	testCases := []struct {
+		input                      string
+		expectedClassName          string
+		expectedClassVarDecCount   int
+		expectedSubroutineDecCount int
+	}{
+		{`class Hoge{}`, "Hoge", 0, 0},
+		{`class Hoge{field int x, y;field int size;}`, "Hoge", 2, 0},
+		{`class Hoge{constructor Square new(int Ax, int Ay, int Asize) {} method void dispose() {}}`, "Hoge", 0, 2},
+		{`class Hoge{field int x, y;field int size; constructor Square new(int Ax, int Ay, int Asize) {} method void dispose() {}}`, "Hoge", 2, 2},
+	}
+
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		stmt := ce.parseClassStatement()
+		if stmt.Name.Literal != tt.expectedClassName {
+			t.Fatalf("ClassName is not  %s,got = %s", tt.expectedClassName, stmt.Name.Literal)
 		}
-		constructor void main() {
-			var Array a;
-			let i = 0;
+		if token.KeyWord(stmt.Token.Literal) != token.CLASS {
+			t.Fatalf("token.KeyWord(stmt.Token.Literal)  is not token.CLASS ,got = %s", token.KeyWord(stmt.Token.Literal))
 		}
-	}`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	stmt := ce.parseClassStatement()
-	if stmt.Name.Literal != "hoge" {
-		t.Fatalf("stmt.Name  is not hoge ,got = %s", stmt.Name)
-	}
-	if token.KeyWord(stmt.Token.Literal) != token.CLASS {
-		t.Fatalf("token.KeyWord(stmt.Token.Literal)  is not token.CLASS ,got = %s", token.KeyWord(stmt.Token.Literal))
-	}
-	if len(stmt.ClassVarDecList) != 1 {
-		t.Fatalf("len(stmt.ClassVarDecList) is not 1 ,got = %d", len(stmt.ClassVarDecList))
-	}
-	if len(stmt.SubroutineDecList) != 2 {
-		t.Fatalf("len(stmt.SubroutineDecList) is not 2 ,got = %d", len(stmt.SubroutineDecList))
+		if len(stmt.ClassVarDecList) != tt.expectedClassVarDecCount {
+			t.Fatalf("len(stmt.ClassVarDecList) is not %d ,got = %d", tt.expectedClassVarDecCount, len(stmt.ClassVarDecList))
+		}
+		if len(stmt.SubroutineDecList) != tt.expectedSubroutineDecCount {
+			t.Fatalf("len(stmt.SubroutineDecList) is not %d ,got = %d", tt.expectedSubroutineDecCount, len(stmt.SubroutineDecList))
+		}
 	}
 }
 
