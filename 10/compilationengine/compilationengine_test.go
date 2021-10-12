@@ -160,57 +160,38 @@ func TestVarDecStatements(t *testing.T) {
 }
 
 func TestClassVarDecStatements(t *testing.T) {
-	input := `
-	static int a,b,c;
-	field char casdfasdf;
-	static boolean a1,b2,cx;
-`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	program := ce.ParseProgram()
-	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
-	}
-	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
-	}
 	testCases := []struct {
-		expectedValueType   string
-		expectedIdentifiers []string
+		input                   string
+		expectedClassVarDecType token.KeyWord
+		expectedValueType       string
+		expectedIdentifiers     []string
 	}{
-		{"int", []string{"a", "b", "c"}},
-		{"char", []string{"casdfasdf"}},
-		{"boolean", []string{"a1", "b2", "cx"}},
+		{"static int a;", token.STATIC, string(token.INT), []string{"a"}},
+		{"field int a;", token.FIELD, string(token.INT), []string{"a"}},
+		{"static boolean a;", token.STATIC, string(token.BOOLEAN), []string{"a"}},
+		{"static char a;", token.STATIC, string(token.CHAR), []string{"a"}},
+		{"static ClassName a;", token.STATIC, "ClassName", []string{"a"}},
+		{"static int a,b,c;", token.STATIC, string(token.INT), []string{"a", "b", "c"}},
 	}
-	for i, tt := range testCases {
-		stmt := program.Statements[i]
-		if !testClassVarDecStatement(t, stmt, tt.expectedValueType, tt.expectedIdentifiers) {
-			return
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		classVarDecStmt := ce.parseClassVarDecStatement()
+		if classVarDecStmt == nil {
+			t.Fatalf("parseClassVarDecStatement() returned nil")
+		}
+		if tt.expectedClassVarDecType != token.KeyWord(classVarDecStmt.Token.Literal) {
+			t.Fatalf("ClassVarDecType should be %s. got %s", tt.expectedClassVarDecType, classVarDecStmt.Token.Literal)
+		}
+		if tt.expectedValueType != classVarDecStmt.ValueType.Literal {
+			t.Fatalf("valueType should be %s . got %s", tt.expectedValueType, classVarDecStmt.ValueType.Literal)
+		}
+		for i, ident := range classVarDecStmt.Identifiers {
+			if tt.expectedIdentifiers[i] != ident.Literal {
+				t.Fatalf("identifiers should be %s . got %s", tt.expectedIdentifiers[i], ident.Literal)
+			}
 		}
 	}
-}
-
-func testClassVarDecStatement(t *testing.T, s ast.Statement, expectedValueType string, identifiers []string) bool {
-	if s.TokenLiteral() != "static" && s.TokenLiteral() != "field" {
-		t.Errorf("s.TokenLiteral not 'static' and 'field'. got %q", s.TokenLiteral())
-		return false
-	}
-	vds, ok := s.(*ast.ClassVarDecStatement)
-	if !ok {
-		t.Errorf("s not *ast.ClassVarDecStatement. got %T", s)
-		return false
-	}
-	if vds.ValueType.Literal != expectedValueType {
-		t.Errorf("valueType no %s . got %s", expectedValueType, vds.ValueType.Literal)
-		return false
-	}
-	for i, ident := range vds.Identifiers {
-		if identifiers[i] != ident.Literal {
-			t.Errorf("identifiers no %s . got %s", identifiers[i], ident)
-			return false
-		}
-	}
-	return true
 }
 
 func TestParseIntConstTermExpression(t *testing.T) {
@@ -270,7 +251,6 @@ func TestParseStringConstTermExpression(t *testing.T) {
 func TestParseIfStatement(t *testing.T) {
 	input := `
 	 if(x=1){
-	
 	 }else{
 	 }`
 	jt := tokenizer.New(input)
