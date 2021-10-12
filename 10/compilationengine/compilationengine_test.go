@@ -282,12 +282,21 @@ func TestParseWhileStatement(t *testing.T) {
 }
 
 func TestParseExpressionListStatement(t *testing.T) {
-	input := `(a,b,c,d,e,f)`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	expressionListStmt := ce.parseExpressionListStatement()
-	if len(expressionListStmt.ExpressionList) != 6 {
-		t.Fatalf("len(program.Statements) is not 1,got = %d", len(expressionListStmt.ExpressionList))
+	testCases := []struct {
+		input                   string
+		expectedExpressionCount int
+	}{
+		{"()", 0},
+		{"(a,b,c,d,e,f)", 6},
+		{"(a,1+1,c,2*2)", 4},
+	}
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		expressionListStmt := ce.parseExpressionListStatement()
+		if len(expressionListStmt.ExpressionList) != tt.expectedExpressionCount {
+			t.Fatalf("len(program.Statements) should be %d,got = %d", tt.expectedExpressionCount, len(expressionListStmt.ExpressionList))
+		}
 	}
 }
 

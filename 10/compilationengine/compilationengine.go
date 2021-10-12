@@ -344,11 +344,11 @@ func (ce *CompilationEngine) parseExpressionListStatement() *ast.ExpressionListS
 			expressionListStmt.ExpressionList = append(expressionListStmt.ExpressionList, expression)
 		}
 		ce.advanceToken()
-		if token.Symbol(ce.curToken.Literal) == token.RPAREN {
+		if token.Symbol(ce.curToken.Literal) == token.RPAREN { // ")"の場合はparseを終了
 			break
-		} else if token.Symbol(ce.curToken.Literal) == token.COMMA {
+		} else if token.Symbol(ce.curToken.Literal) == token.COMMA { // ","の場合はまだ式が存在する
 			ce.advanceToken()
-		} else {
+		} else { // TODO: 例外
 			return nil
 		}
 	}
