@@ -417,6 +417,26 @@ func TestParseParameterListStatement(t *testing.T) {
 	}
 }
 
+func TestParseBlockStatement(t *testing.T) {
+	testCases := []struct {
+		input                  string
+		expectedStatementCount int
+	}{
+		{`{}`, 0},
+		{`{return 1;do Hoge();}`, 2},
+	}
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		blockStmt := ce.parseBlockStatement()
+		if blockStmt == nil {
+			t.Fatalf("parseBlockStatement() returned nil")
+		}
+		if tt.expectedStatementCount != len(blockStmt.Statements) {
+			t.Fatalf("StatementCount should be %d. got %d", tt.expectedStatementCount, len(blockStmt.Statements))
+		}
+	}
+}
 func TestParseClassStatement(t *testing.T) {
 	testCases := []struct {
 		input                      string
