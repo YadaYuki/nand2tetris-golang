@@ -249,14 +249,29 @@ func TestParseStringConstTermExpression(t *testing.T) {
 }
 
 func TestParseIfStatement(t *testing.T) {
-	input := `
-	 if(x=1){
-	 }else{
-	 }`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	program := ce.parseIfStatement()
-	t.Log(program)
+	testCases := []struct {
+		input                   string
+		expectedConditionString string
+		expectedHasAlternative  bool
+	}{
+		{`if(a){}`, "a", false},
+		{`if(a){}else{}`, "a", true},
+	}
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		ifStmt := ce.parseIfStatement()
+		if ifStmt == nil {
+			t.Fatalf("parseIfStatement() returned nil")
+		}
+		if ifStmt.Condition.String() != tt.expectedConditionString {
+			t.Fatalf("ifStmt.Condition.String() should be %s,got = %s", tt.expectedConditionString, ifStmt.Condition.String())
+		}
+		hasAlternative := ifStmt.Alternative != nil
+		if hasAlternative != tt.expectedHasAlternative {
+			t.Fatalf("hasAlternative should be %t,got = %t", tt.expectedHasAlternative, hasAlternative)
+		}
+	}
 }
 
 func TestParseWhileStatement(t *testing.T) {

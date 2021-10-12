@@ -275,29 +275,29 @@ func (ce *CompilationEngine) parseClassVarDecStatement() *ast.ClassVarDecStateme
 
 func (ce *CompilationEngine) parseIfStatement() *ast.IfStatement {
 	stmt := &ast.IfStatement{Token: ce.curToken}
-	if ce.expectNext(token.SYMBOL) {
-		if token.Symbol(ce.curToken.Literal) != token.LPAREN {
-			return nil
-		}
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
+		fmt.Println("1")
+		return nil
 	}
+
+	ce.advanceToken()
 	stmt.Condition = ce.parseExpression()
 	ce.advanceToken()
-
 	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		return nil
 	}
 	ce.advanceToken()
 
 	stmt.Consequence = ce.parseBlockStatement()
-	ce.advanceToken()
+	ce.advanceToken() // advance "}"
 	if token.KeyWord(ce.curToken.Literal) == token.ELSE {
 		ce.advanceToken()
-		if ce.expectNext(token.SYMBOL) {
+		if token.Symbol(ce.curToken.Literal) != token.LBRACE {
 			return nil
 		}
 		stmt.Alternative = ce.parseBlockStatement()
 	}
-	ce.advanceToken()
 	return stmt
 }
 
