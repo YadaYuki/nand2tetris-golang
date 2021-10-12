@@ -311,7 +311,6 @@ func (ce *CompilationEngine) parseWhileStatement() *ast.WhileStatement {
 	ce.advanceToken()
 	stmt.Condition = ce.parseExpression()
 	ce.advanceToken()
-
 	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		return nil
 	}

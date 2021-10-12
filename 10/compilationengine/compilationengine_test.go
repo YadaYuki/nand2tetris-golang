@@ -260,24 +260,25 @@ func TestParseIfStatement(t *testing.T) {
 }
 
 func TestParseWhileStatement(t *testing.T) {
-	input := `
-	 while(x=1){
-		do x;
-		do 1;
-		do a;
-	 }`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	program := ce.ParseProgram()
-	if len(program.Statements) != 1 {
-		t.Fatalf("len(program.Statements) is not 1,got = %d", len(program.Statements))
+	testCases := []struct {
+		input                   string
+		expectedConditionString string
+		expectedStatementCount  int
+	}{
+		{`while(x=1){}`, "x=1", 0},
+		{`while(a){}`, "a", 0},
+		{`while(a){do Hoge();return 1;}`, "a", 2},
 	}
-	whileStmt, ok := program.Statements[0].(*ast.WhileStatement)
-	if !ok {
-		t.Fatalf("whileStmt is not ast.WhileStatement,got = %T", whileStmt)
-	}
-	if len(whileStmt.Statements.Statements) != 3 {
-		t.Fatalf("len(whileStmt.Statements.Statements)  is not 3,got = %d", len(whileStmt.Statements.Statements))
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		whileStmt := ce.parseWhileStatement()
+		if whileStmt.Condition.String() != tt.expectedConditionString {
+			t.Fatalf("whileStmt.Condition.String() should be %s,got = %s", tt.expectedConditionString, whileStmt.Condition.String())
+		}
+		if len(whileStmt.Statements.Statements) != tt.expectedStatementCount {
+			t.Fatalf("len(whileStmt.Statements.Statements)  is not %d,got = %d", tt.expectedStatementCount, len(whileStmt.Statements.Statements))
+		}
 	}
 }
 
