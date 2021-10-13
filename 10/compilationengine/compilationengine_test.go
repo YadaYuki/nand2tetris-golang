@@ -341,20 +341,26 @@ func TestParseSubroutineCallTermExpression(t *testing.T) {
 }
 
 func TestParseArrayElementExpression(t *testing.T) {
-	input := `hoge[a]`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	expression := ce.parseExpression()
-	singleExpression, ok := expression.(*ast.SingleExpression)
-	if !ok {
-		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
+	testCases := []struct {
+		input             string
+		expectedArrayName string
+		expectedIdxString string
+	}{
+		{"y[1]", "y", "1"},
+		{"hoge[a]", "hoge", "a"},
+		{"x[a+1]", "x", "a+1"},
+		{"x[(5+5)+4]", "x", "(5+5)+4"},
 	}
-	arrayElementTerm, ok := singleExpression.Value.(*ast.ArrayElementTerm)
-	if !ok {
-		t.Fatalf("arrayElementTerm is not ast.ArrayElementTerm,got = %T", arrayElementTerm)
-	}
-	if arrayElementTerm.Idx.TokenLiteral() == "4" {
-		t.Fatalf("arrayElementTerm.Idx.TokenLiteral() is not `4`,got = %s", arrayElementTerm.Idx.TokenLiteral())
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		arrayElemTerm := ce.parseArrayElementTerm()
+		if arrayElemTerm.ArrayName.Literal != tt.expectedArrayName {
+			t.Fatalf("arrayElemTerm.ArrayName.Literal is not %s,got = %s", tt.expectedArrayName, arrayElemTerm.ArrayName.Literal)
+		}
+		if arrayElemTerm.Idx.String() != tt.expectedIdxString {
+			t.Fatalf("arrayElemTerm.Idx.String() is not %s,got = %s", tt.expectedIdxString, arrayElemTerm.Idx.String())
+		}
 	}
 }
 func TestParsePrefixExpression(t *testing.T) {

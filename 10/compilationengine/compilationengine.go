@@ -479,7 +479,7 @@ func (ce *CompilationEngine) parseSubroutineCallTerm() ast.Term {
 	return subroutineCallTerm
 }
 
-func (ce *CompilationEngine) parseArrayElementTerm() ast.Term {
+func (ce *CompilationEngine) parseArrayElementTerm() *ast.ArrayElementTerm {
 	arrayElementTerm := &ast.ArrayElementTerm{Token: ce.curToken, ArrayName: ce.curToken}
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.LBRACKET {
