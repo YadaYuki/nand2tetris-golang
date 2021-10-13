@@ -364,20 +364,24 @@ func TestParseArrayElementExpression(t *testing.T) {
 	}
 }
 func TestParsePrefixExpression(t *testing.T) {
-	input := `-124`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	expression := ce.parseExpression()
-	singleExpression, ok := expression.(*ast.SingleExpression)
-	if !ok {
-		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
+	testCases := []struct {
+		input               string
+		expectedPrefix      token.Symbol
+		expectedValueString string
+	}{
+		{"-124", token.MINUS, "124"},
+		{"~124", token.BANG, "124"},
 	}
-	prefixTerm, ok := singleExpression.Value.(*ast.PrefixTerm)
-	if !ok {
-		t.Fatalf("prefixTerm is not ast.PrefixTerm,got = %T", prefixTerm)
-	}
-	if prefixTerm.Prefix != token.MINUS {
-		t.Fatalf("prefixTerm.Prefix is not token.MINUS,got = %s", prefixTerm.Prefix)
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		prefixTerm := ce.parsePrefixTerm()
+		if prefixTerm.Value.String() != tt.expectedValueString {
+			t.Fatalf("prefixTerm.Value.String() is not %s ,got = %s", tt.expectedValueString, prefixTerm.Value.String())
+		}
+		if prefixTerm.Prefix != tt.expectedPrefix {
+			t.Fatalf("prefixTerm.Prefix is not %s ,got = %s", tt.expectedPrefix, prefixTerm.Prefix)
+		}
 	}
 }
 

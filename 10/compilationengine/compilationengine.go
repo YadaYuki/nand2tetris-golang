@@ -495,7 +495,7 @@ func (ce *CompilationEngine) parseArrayElementTerm() *ast.ArrayElementTerm {
 	return arrayElementTerm
 }
 
-func (ce *CompilationEngine) parsePrefixTerm() ast.Term {
+func (ce *CompilationEngine) parsePrefixTerm() *ast.PrefixTerm {
 	prefixTerm := &ast.PrefixTerm{Token: ce.curToken, Prefix: token.Symbol(ce.curToken.Literal)}
 	ce.advanceToken()
 	prefixTerm.Value = ce.parseTerm()
