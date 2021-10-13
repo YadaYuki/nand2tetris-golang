@@ -169,9 +169,11 @@ func (sbs *SubroutineBodyStatement) Xml() string {
 	for _, varDec := range sbs.VarDecList {
 		out.WriteString(varDec.Xml())
 	}
+	out.WriteString("<statements>")
 	for _, stmt := range sbs.Statements {
 		out.WriteString(stmt.Xml())
 	}
+	out.WriteString("</statements>")
 	out.WriteString(symbolXml("}"))
 	out.WriteString("</subroutineBody>")
 	return out.String()
@@ -391,13 +393,21 @@ func (ifs *IfStatement) String() string {
 
 func (ifs *IfStatement) Xml() string {
 	var out bytes.Buffer
+	out.WriteString("<ifStatement>")
 	out.WriteString(keywordXml("if"))
+	out.WriteString(symbolXml("("))
 	out.WriteString(ifs.Condition.Xml())
+	out.WriteString(symbolXml(")"))
+	out.WriteString(symbolXml("{"))
 	out.WriteString(ifs.Consequence.Xml())
+	out.WriteString(symbolXml("}"))
 	if ifs.Alternative != nil {
 		out.WriteString(keywordXml("else"))
+		out.WriteString(symbolXml("{"))
 		out.WriteString(ifs.Alternative.Xml())
+		out.WriteString(symbolXml("}"))
 	}
+	out.WriteString("</ifStatement>")
 	return out.String()
 }
 
