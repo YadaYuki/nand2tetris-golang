@@ -212,7 +212,7 @@ func TestParseIntConstTermExpression(t *testing.T) {
 	}
 }
 
-func TestParseIdentifierTermExpression(t *testing.T) {
+func TestParseIdentifierTerm(t *testing.T) {
 	input := `hoge`
 	jt := tokenizer.New(input)
 	ce := New(jt)
@@ -222,19 +222,11 @@ func TestParseIdentifierTermExpression(t *testing.T) {
 	}
 }
 
-func TestParseStringConstTermExpression(t *testing.T) {
+func TestParseStringConstTerm(t *testing.T) {
 	input := `"hoge"`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseExpression()
-	singleExpression, ok := expression.(*ast.SingleExpression)
-	if !ok {
-		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
-	}
-	stringConstTerm, ok := singleExpression.Value.(*ast.StringConstTerm)
-	if !ok {
-		t.Fatalf("stringConstTerm is not ast.StringConstTerm,got = %T", stringConstTerm)
-	}
+	stringConstTerm := ce.parseStringConstTerm()
 	if stringConstTerm.Value != "hoge" {
 		t.Fatalf("stringConstTerm.Value is not hoge,got = %s", stringConstTerm.Value)
 	}

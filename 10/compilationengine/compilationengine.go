@@ -450,7 +450,7 @@ func (ce *CompilationEngine) parseIdentifierTerm() *ast.IdentifierTerm {
 	return &ast.IdentifierTerm{Token: ce.curToken, Value: ce.curToken.Literal}
 }
 
-func (ce *CompilationEngine) parseStringConstTerm() ast.Term {
+func (ce *CompilationEngine) parseStringConstTerm() *ast.StringConstTerm {
 	return &ast.StringConstTerm{Token: ce.curToken, Value: ce.curToken.Literal}
 }
 
