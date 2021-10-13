@@ -535,9 +535,9 @@ func (pls *ParameterListStatement) Xml() string {
 }
 
 type ParameterStatement struct {
-	Token token.Token // 式の最初のトークン
-	Type  token.KeyWord
-	Name  string
+	Token     token.Token // 式の最初のトークン
+	ValueType token.Token // "int","char","boolean",{class name}
+	Name      string
 }
 
 func (ps *ParameterStatement) statementNode() {}
@@ -545,11 +545,11 @@ func (ps *ParameterStatement) statementNode() {}
 func (ps *ParameterStatement) TokenLiteral() string { return ps.Token.Literal }
 
 func (ps *ParameterStatement) String() string {
-	return string(ps.Type) + " " + ps.Name
+	return ps.ValueType.String() + " " + ps.Name
 }
 
 func (ps *ParameterStatement) Xml() string {
-	return keywordXml(string(ps.Type)) + identifierXml(ps.Name)
+	return ps.ValueType.Xml() + identifierXml(ps.Name)
 }
 
 type SingleExpression struct {

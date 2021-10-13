@@ -195,7 +195,7 @@ func TestClassVarDecStatements(t *testing.T) {
 }
 
 func TestParseIntConstTermExpression(t *testing.T) {
-	input := `33+33`
+	input := `33`
 	jt := tokenizer.New(input)
 	ce := New(jt)
 	expression := ce.parseExpression()
@@ -255,7 +255,7 @@ func TestParseIfStatement(t *testing.T) {
 		expectedHasAlternative  bool
 	}{
 		{`if(a){}`, "a", false},
-		{`if(a){}else{}`, "a", true},
+		{`if(a){return;}else{}`, "a", true},
 	}
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
@@ -400,44 +400,65 @@ func TestParseBracketExpression(t *testing.T) {
 	if intergerConstTerm.Value != 4 {
 		t.Fatalf("value.Value is not 4,got = %d", value.Value)
 	}
-	t.Log(expression.Xml())
 }
 
 func TestParseParameterStatement(t *testing.T) {
-	input := `int hoge`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	stmt := ce.parseParameterStatement()
-	if stmt.Name != "hoge" {
-		t.Fatalf("stmt.Name is not hoge,got = %s", stmt.Name)
+
+	testCases := []struct {
+		input              string
+		expectedTypeString string
+		expectedName       string
+	}{
+		{"int hoge", string(token.INT), "hoge"},
+		{"char fuga", string(token.CHAR), "fuga"},
+		{"boolean pepe", string(token.BOOLEAN), "pepe"},
+		{"HogeClass papa", "HogeClass", "papa"},
 	}
-	if stmt.Type != token.INT {
-		t.Fatalf("stmt.Type is not token.INT,got = %s", stmt.Type)
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		parameterStmt := ce.parseParameterStatement()
+		if parameterStmt == nil {
+			t.Fatalf("parse '%s' returned nil ", tt.input)
+		}
+		if parameterStmt.ValueType.Literal != tt.expectedTypeString {
+			t.Fatalf("stmt.Type is not %s ,got = %s", tt.expectedTypeString, parameterStmt.ValueType.Literal)
+		}
+		if parameterStmt.Name != tt.expectedName {
+			t.Fatalf("stmt.Name is not %s,got = %s", tt.expectedName, parameterStmt.Name)
+		}
 	}
 }
 
 func TestParseParameterListStatement(t *testing.T) {
-	input := `(int hoge,char fuga,boolean pepe)`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	stmt := ce.parseParameterListStatement()
-	if len(stmt.ParameterList) != 3 {
-		t.Fatalf("len(stmt.ParameterList) is not 3 ,got = %d", len(stmt.ParameterList))
+	type TestCase struct {
+		expectedTypeString string
+		expectedIdentifier string
 	}
 	testCases := []struct {
-		expectedType       token.KeyWord
-		expectedIdentifier string
+		input              string
+		expectedParameters []TestCase
 	}{
-		{token.INT, "hoge"},
-		{token.CHAR, "fuga"},
-		{token.BOOLEAN, "pepe"},
+		{`()`, []TestCase{}},
+		{`(int hoge,char fuga,boolean pepe,HogeClass papa)`, []TestCase{
+			{string(token.INT), "hoge"},
+			{string(token.CHAR), "fuga"},
+			{string(token.BOOLEAN), "pepe"},
+			{"HogeClass", "papa"},
+		},
+		},
 	}
-	for idx, testCase := range testCases {
-		if stmt.ParameterList[idx].Name != testCase.expectedIdentifier {
-			t.Fatalf("stmt.ParameterList[%d].Name is not %s,got %s", idx, testCase.expectedIdentifier, stmt.ParameterList[idx].Name)
-		}
-		if stmt.ParameterList[idx].Type != testCase.expectedType {
-			t.Fatalf("stmt.ParameterList[%d].Type is not %s,got %s", idx, testCase.expectedType, stmt.ParameterList[idx].Type)
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		parameterListStmt := ce.parseParameterListStatement()
+		for idx, testCase := range tt.expectedParameters {
+			if parameterListStmt.ParameterList[idx].Name != testCase.expectedIdentifier {
+				t.Fatalf("stmt.ParameterList[%d].Name is not %s,got %s", idx, testCase.expectedIdentifier, parameterListStmt.ParameterList[idx].Name)
+			}
+			if parameterListStmt.ParameterList[idx].ValueType.Literal != testCase.expectedTypeString {
+				t.Fatalf("stmt.ParameterList[%d].Type is not %s,got %s", idx, testCase.expectedTypeString, parameterListStmt.ParameterList[idx].ValueType.Literal)
+			}
 		}
 	}
 }

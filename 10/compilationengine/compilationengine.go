@@ -44,7 +44,7 @@ func (ce *CompilationEngine) advanceToken() {
 
 func (ce *CompilationEngine) parseStatement() ast.Statement {
 	if ce.curToken.Type != token.KEYWORD {
-		panic(fmt.Sprintf("Initial Token Type should be KEYWORD. got %s ", ce.curToken.Type))
+		panic(fmt.Sprintf("Initial Token Type should be KEYWORD. got %s(%s) ", ce.curToken.Type, ce.curToken.String()))
 	}
 	return ce.parseKeyWord()
 }
@@ -277,10 +277,8 @@ func (ce *CompilationEngine) parseIfStatement() *ast.IfStatement {
 	stmt := &ast.IfStatement{Token: ce.curToken}
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
-		fmt.Println("1")
 		return nil
 	}
-
 	ce.advanceToken()
 	stmt.Condition = ce.parseExpression()
 	ce.advanceToken()
@@ -290,9 +288,9 @@ func (ce *CompilationEngine) parseIfStatement() *ast.IfStatement {
 	ce.advanceToken()
 
 	stmt.Consequence = ce.parseBlockStatement()
-	ce.advanceToken() // advance "}"
-	if token.KeyWord(ce.curToken.Literal) == token.ELSE {
-		ce.advanceToken()
+	if token.KeyWord(ce.nextToken.Literal) == token.ELSE {
+		ce.advanceToken() // advance "}" of "if(x){}"
+		ce.advanceToken() // advance "else"
 		if token.Symbol(ce.curToken.Literal) != token.LBRACE {
 			return nil
 		}
@@ -375,10 +373,10 @@ func (ce *CompilationEngine) parseParameterListStatement() *ast.ParameterListSta
 
 func (ce *CompilationEngine) parseParameterStatement() *ast.ParameterStatement {
 	parameterStmt := &ast.ParameterStatement{Token: ce.curToken}
-	if ce.curToken.Type != token.KEYWORD {
+	if ce.curToken.Type != token.KEYWORD && ce.curToken.Type != token.IDENTIFIER {
 		return nil
 	}
-	parameterStmt.Type = token.KeyWord(ce.curToken.Literal)
+	parameterStmt.ValueType = token.Token{Type: ce.curToken.Type, Literal: ce.curToken.Literal}
 	ce.advanceToken()
 	if ce.curToken.Type != token.IDENTIFIER {
 		return nil
