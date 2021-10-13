@@ -675,7 +675,7 @@ func (kct *KeywordConstTerm) Xml() string {
 type SubroutineCallTerm struct {
 	Token              token.Token // FunctionName
 	ClassName          token.Token
-	VarName            token.Token
+	SubroutineName     token.Token
 	ExpressionListStmt *ExpressionListStatement
 }
 
@@ -688,7 +688,7 @@ func (sct *SubroutineCallTerm) String() string {
 	if sct.ClassName.Literal != "" {
 		out.WriteString(sct.ClassName.Literal + ".")
 	}
-	out.WriteString(sct.VarName.Literal)
+	out.WriteString(sct.SubroutineName.Literal)
 	out.WriteString(sct.ExpressionListStmt.String())
 	return out.String()
 }
@@ -698,7 +698,7 @@ func (sct *SubroutineCallTerm) Xml() string {
 	if sct.ClassName.Literal != "" {
 		out.WriteString(sct.ClassName.Xml() + symbolXml("."))
 	}
-	out.WriteString(sct.VarName.Xml())
+	out.WriteString(sct.SubroutineName.Xml())
 	out.WriteString(sct.ExpressionListStmt.Xml())
 	return termXml(out.String())
 }

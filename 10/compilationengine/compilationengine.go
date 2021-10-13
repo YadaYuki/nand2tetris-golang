@@ -461,14 +461,14 @@ func (ce *CompilationEngine) parseKeyWordConstTerm() ast.Term {
 	return &ast.KeywordConstTerm{Token: ce.curToken, KeyWord: token.KeyWord(ce.curToken.Literal)}
 }
 
-func (ce *CompilationEngine) parseSubroutineCallTerm() ast.Term {
+func (ce *CompilationEngine) parseSubroutineCallTerm() *ast.SubroutineCallTerm {
 	subroutineCallTerm := &ast.SubroutineCallTerm{Token: ce.curToken}
 	if token.Symbol(ce.nextToken.Literal) == token.DOT {
 		subroutineCallTerm.ClassName = ce.curToken
 		ce.advanceToken() // className
 		ce.advanceToken() // token.DOT
 	}
-	subroutineCallTerm.VarName = ce.curToken
+	subroutineCallTerm.SubroutineName = ce.curToken
 	ce.advanceToken()
 
 	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
