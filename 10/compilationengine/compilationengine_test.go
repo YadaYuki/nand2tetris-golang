@@ -216,16 +216,8 @@ func TestParseIdentifierTermExpression(t *testing.T) {
 	input := `hoge`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseExpression()
-	singleExpression, ok := expression.(*ast.SingleExpression)
-	if !ok {
-		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
-	}
-	identifierTerm, ok := singleExpression.Value.(*ast.IdentifierTerm)
-	if !ok {
-		t.Fatalf("identifierTerm is not ast.IdentifierTerm,got = %T", identifierTerm)
-	}
-	if identifierTerm.Value != "hoge" {
+	identifierTerm := ce.parseIdentifierTerm()
+	if identifierTerm.String() != "hoge" {
 		t.Fatalf("identifierTerm.Value is not hoge,got = %s", identifierTerm.Value)
 	}
 }

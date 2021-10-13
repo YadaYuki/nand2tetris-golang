@@ -446,7 +446,7 @@ func (ce *CompilationEngine) parseIntegerConstTerm() ast.Term {
 	return &ast.IntergerConstTerm{Token: ce.curToken, Value: value}
 }
 
-func (ce *CompilationEngine) parseIdentifierTerm() ast.Term {
+func (ce *CompilationEngine) parseIdentifierTerm() *ast.IdentifierTerm {
 	return &ast.IdentifierTerm{Token: ce.curToken, Value: ce.curToken.Literal}
 }
 
