@@ -246,7 +246,6 @@ func (ce *CompilationEngine) parseVarDecStatement() *ast.VarDecStatement {
 func (ce *CompilationEngine) parseClassVarDecStatement() *ast.ClassVarDecStatement {
 	stmt := &ast.ClassVarDecStatement{Token: ce.curToken, Identifiers: []token.Token{}}
 	ce.advanceToken()
-
 	if token.KeyWord(ce.curToken.Literal) != token.INT && token.KeyWord(ce.curToken.Literal) != token.BOOLEAN && token.KeyWord(ce.curToken.Literal) != token.CHAR && !ce.curTokenIs(token.IDENTIFIER) {
 		return nil
 	}
@@ -388,22 +387,27 @@ func (ce *CompilationEngine) parseParameterStatement() *ast.ParameterStatement {
 func (ce *CompilationEngine) parseExpression() ast.Expression {
 	expressionToken := ce.curToken
 	prefixTerm := ce.parseTerm()
-	if token.Symbol(ce.nextToken.Literal) != token.ASSIGN &&
-		token.Symbol(ce.nextToken.Literal) != token.PLUS &&
-		token.Symbol(ce.nextToken.Literal) != token.MINUS &&
-		token.Symbol(ce.nextToken.Literal) != token.ASTERISK &&
-		token.Symbol(ce.nextToken.Literal) != token.SLASH &&
-		token.Symbol(ce.nextToken.Literal) != token.LT &&
-		token.Symbol(ce.nextToken.Literal) != token.GT &&
-		token.Symbol(ce.nextToken.Literal) != token.EQ &&
-		token.Symbol(ce.nextToken.Literal) != token.NOT_EQ {
-		return &ast.SingleExpression{Token: expressionToken, Value: prefixTerm}
-	} else {
+	InfixSymbol := map[token.Symbol]token.Symbol{ // 中置演算子となりうるSymbol
+		token.ASSIGN:   token.ASSIGN,
+		token.PLUS:     token.PLUS,
+		token.MINUS:    token.MINUS,
+		token.ASTERISK: token.ASTERISK,
+		token.SLASH:    token.SLASH,
+		token.LT:       token.LT,
+		token.GT:       token.GT,
+		token.EQ:       token.EQ,
+		token.NOT_EQ:   token.NOT_EQ,
+		token.OR:       token.OR,
+		token.AMP:      token.AMP,
+	}
+	if _, ok := InfixSymbol[token.Symbol(ce.nextToken.Literal)]; ok {
 		ce.advanceToken()
 		operator := ce.curToken
 		ce.advanceToken()
 		suffixTerm := ce.parseTerm()
 		return &ast.InfixExpression{Left: prefixTerm, Operator: operator, Right: suffixTerm}
+	} else {
+		return &ast.SingleExpression{Token: expressionToken, Value: prefixTerm}
 	}
 }
 
@@ -454,7 +458,7 @@ func (ce *CompilationEngine) parseStringConstTerm() *ast.StringConstTerm {
 	return &ast.StringConstTerm{Token: ce.curToken, Value: ce.curToken.Literal}
 }
 
-func (ce *CompilationEngine) parseKeyWordConstTerm() ast.Term {
+func (ce *CompilationEngine) parseKeyWordConstTerm() *ast.KeywordConstTerm {
 	if token.KeyWord(ce.curToken.Literal) != token.NULL && token.KeyWord(ce.curToken.Literal) != (token.TRUE) && token.KeyWord(ce.curToken.Literal) != token.FALSE && token.KeyWord(ce.curToken.Literal) != token.THIS {
 		panic(fmt.Sprintf("could not parse %s as keywordConst", ce.curToken.Literal))
 	}

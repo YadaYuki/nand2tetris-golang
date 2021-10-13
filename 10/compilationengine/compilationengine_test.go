@@ -242,6 +242,26 @@ func TestParseIntegerConstTerm(t *testing.T) {
 	}
 }
 
+func TestParseKeyWordConstTerm(t *testing.T) {
+	testCases := []struct {
+		input           string
+		expectedKeyWord token.KeyWord
+	}{
+		{"true", token.TRUE},
+		{"false", token.FALSE},
+		{"null", token.NULL},
+		{"this", token.THIS},
+	}
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		keyWordConstTerm := ce.parseKeyWordConstTerm()
+		if keyWordConstTerm.KeyWord != tt.expectedKeyWord {
+			t.Fatalf("keyWordConstTerm.KeyWord is not %s,got = %s", tt.expectedKeyWord, keyWordConstTerm.KeyWord)
+		}
+	}
+}
+
 func TestParseIfStatement(t *testing.T) {
 	testCases := []struct {
 		input                   string
