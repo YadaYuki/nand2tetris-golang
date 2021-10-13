@@ -316,7 +316,7 @@ func TestParseExpressionListStatement(t *testing.T) {
 	}
 }
 
-func TestParseSubroutineCallTermExpression(t *testing.T) {
+func TestParseSubroutineCallTerm(t *testing.T) {
 	input := `hoge.fuga(a,b,c,d,e,f)`
 	jt := tokenizer.New(input)
 	ce := New(jt)
@@ -340,7 +340,7 @@ func TestParseSubroutineCallTermExpression(t *testing.T) {
 	}
 }
 
-func TestParseArrayElementExpression(t *testing.T) {
+func TestParseArrayElementTerm(t *testing.T) {
 	testCases := []struct {
 		input             string
 		expectedArrayName string
@@ -363,7 +363,7 @@ func TestParseArrayElementExpression(t *testing.T) {
 		}
 	}
 }
-func TestParsePrefixExpression(t *testing.T) {
+func TestParsePrefixTerm(t *testing.T) {
 	testCases := []struct {
 		input               string
 		expectedPrefix      token.Symbol
@@ -385,30 +385,21 @@ func TestParsePrefixExpression(t *testing.T) {
 	}
 }
 
-func TestParseBracketExpression(t *testing.T) {
-	input := `(4)`
-	jt := tokenizer.New(input)
-	ce := New(jt)
-	expression := ce.parseExpression()
-	singleExpression, ok := expression.(*ast.SingleExpression)
-	if !ok {
-		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
+func TestParseBracketTerm(t *testing.T) {
+	testCases := []struct {
+		input               string
+		expectedValueString string
+	}{
+		{"(4)", "4"},
+		{"(-1)", "-1"},
 	}
-	bracketTerm, ok := singleExpression.Value.(*ast.BracketTerm)
-	if !ok {
-		t.Fatalf("bracketTerm is not ast.BracketTerm,got = %T", bracketTerm)
-	}
-	// t.Log(bracketTerm.Value.TokenLiteral())
-	value, ok := bracketTerm.Value.(*ast.SingleExpression)
-	if !ok {
-		t.Fatalf("bracketTerm.Value is not ast.*ast.SingleExpression,got = %T", bracketTerm.Value)
-	}
-	intergerConstTerm, ok := value.Value.(*ast.IntergerConstTerm)
-	if !ok {
-		t.Fatalf("intergerConstTerm.Value is not ast.*ast.IntergerConstTerm,got = %T", bracketTerm.Value)
-	}
-	if intergerConstTerm.Value != 4 {
-		t.Fatalf("value.Value is not 4,got = %d", value.Value)
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		bracketTerm := ce.parseBracketTerm()
+		if bracketTerm.Value.String() != tt.expectedValueString {
+			t.Fatalf("value.Value is not %s,got %s", tt.expectedValueString, bracketTerm.Value.String())
+		}
 	}
 }
 

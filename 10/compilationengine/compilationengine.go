@@ -502,7 +502,7 @@ func (ce *CompilationEngine) parsePrefixTerm() *ast.PrefixTerm {
 	return prefixTerm
 }
 
-func (ce *CompilationEngine) parseBracketTerm() ast.Term {
+func (ce *CompilationEngine) parseBracketTerm() *ast.BracketTerm {
 	bracketTerm := &ast.BracketTerm{Token: ce.curToken}
 	ce.advanceToken()
 	expression := ce.parseExpression()
