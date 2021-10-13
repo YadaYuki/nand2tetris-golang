@@ -438,7 +438,7 @@ func (ce *CompilationEngine) parseTerm() ast.Term {
 	return nil
 }
 
-func (ce *CompilationEngine) parseIntegerConstTerm() ast.Term {
+func (ce *CompilationEngine) parseIntegerConstTerm() *ast.IntergerConstTerm {
 	value, err := strconv.ParseInt(ce.curToken.Literal, 0, 64)
 	if err != nil {
 		panic(fmt.Sprintf("could not parse %q as integer", ce.curToken.Literal))

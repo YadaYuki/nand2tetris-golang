@@ -223,12 +223,22 @@ func TestParseIdentifierTerm(t *testing.T) {
 }
 
 func TestParseStringConstTerm(t *testing.T) {
-	input := `"hoge"`
+	input := `"hoge hoge hoge"`
 	jt := tokenizer.New(input)
 	ce := New(jt)
 	stringConstTerm := ce.parseStringConstTerm()
-	if stringConstTerm.Value != "hoge" {
-		t.Fatalf("stringConstTerm.Value is not hoge,got = %s", stringConstTerm.Value)
+	if stringConstTerm.Value != "hoge hoge hoge" {
+		t.Fatalf("stringConstTerm.Value is not %s,got = %s", "hoge hoge hoge", stringConstTerm.Value)
+	}
+}
+
+func TestParseIntegerConstTerm(t *testing.T) {
+	input := `1234`
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	intergerConstTerm := ce.parseIntegerConstTerm()
+	if intergerConstTerm.Value != 1234 {
+		t.Fatalf("intergerConstTerm.Value is not %d,got = %d", 1234, intergerConstTerm.Value)
 	}
 }
 
