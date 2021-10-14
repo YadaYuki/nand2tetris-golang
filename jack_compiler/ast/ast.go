@@ -1,5 +1,7 @@
 package ast
 
+// TODO: Xml() function to encoding/xml package. https://pkg.go.dev/encoding/xml
+
 import (
 	"bytes"
 	"jack_compiler/token"
@@ -51,6 +53,7 @@ func (p *Program) String() string {
 	}
 	return out.String()
 }
+
 func (p *Program) Xml() string {
 	var out bytes.Buffer
 	for _, stmt := range p.Statements {
@@ -87,7 +90,7 @@ func (cs *ClassStatement) String() string {
 
 func (cs *ClassStatement) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<class> ")
+	out.WriteString("<class>")
 	out.WriteString(cs.Token.Xml())
 	out.WriteString(cs.Name.Xml())
 	out.WriteString(symbolXml("{"))
@@ -98,12 +101,12 @@ func (cs *ClassStatement) Xml() string {
 		out.WriteString(subroutineDec.Xml())
 	}
 	out.WriteString(symbolXml("}"))
-	out.WriteString(" </class>")
+	out.WriteString("</class>")
 	return out.String()
 }
 
 type SubroutineDecStatement struct {
-	Token          token.Token // KEYWORD:"class"
+	Token          token.Token // KEYWORD:"constructor" or "method" or "function"
 	ReturnType     token.Token // KEYWORD:"void" or IDENTIFIER
 	Name           token.Token // IDENTIFIER
 	ParameterList  *ParameterListStatement
@@ -126,20 +129,20 @@ func (sds *SubroutineDecStatement) String() string {
 
 func (sds *SubroutineDecStatement) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<subroutineDec> ")
+	out.WriteString("<subroutineDec>")
 	out.WriteString(sds.Token.Xml())
 	out.WriteString(sds.ReturnType.Xml())
 	out.WriteString(identifierXml(sds.Name.Literal))
 	out.WriteString(sds.ParameterList.Xml())
 	out.WriteString(sds.SubroutineBody.Xml())
-	out.WriteString(" </subroutineDec>")
+	out.WriteString("</subroutineDec>")
 	return out.String()
 }
 
 type SubroutineBodyStatement struct {
-	Token      token.Token // SYMBOL:"{"
+	Token      token.Token // "{"
 	VarDecList []VarDecStatement
-	Statements *BlockStatement
+	Statements []Statement
 }
 
 func (sbs *SubroutineBodyStatement) statementNode() {}
@@ -152,22 +155,27 @@ func (sbs *SubroutineBodyStatement) String() string {
 	for _, varDec := range sbs.VarDecList {
 		out.WriteString(varDec.String())
 	}
-	out.WriteString(sbs.Statements.String())
+	for _, stmt := range sbs.Statements {
+		out.WriteString(stmt.String())
+	}
 	out.WriteString("}")
 	return out.String()
 }
 
 func (sbs *SubroutineBodyStatement) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<subroutineBody> ")
+	out.WriteString("<subroutineBody>")
 	out.WriteString(symbolXml("{"))
 	for _, varDec := range sbs.VarDecList {
 		out.WriteString(varDec.Xml())
 	}
-
-	out.WriteString(sbs.Statements.Xml())
+	out.WriteString("<statements>")
+	for _, stmt := range sbs.Statements {
+		out.WriteString(stmt.Xml())
+	}
+	out.WriteString("</statements>")
 	out.WriteString(symbolXml("}"))
-	out.WriteString(" </subroutineBody>")
+	out.WriteString("</subroutineBody>")
 	return out.String()
 }
 
@@ -201,8 +209,8 @@ func (ls *LetStatement) String() string {
 
 func (ls *LetStatement) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<letStatement> ")
-	out.WriteString(keywordXml(ls.TokenLiteral()))
+	out.WriteString("<letStatement>")
+	out.WriteString(ls.Token.Xml())
 	out.WriteString(identifierXml(ls.Name.Literal))
 	if ls.Idx != nil {
 		out.WriteString(symbolXml("[") + ls.Idx.Xml() + symbolXml("]"))
@@ -212,7 +220,7 @@ func (ls *LetStatement) Xml() string {
 		out.WriteString(ls.Value.Xml())
 	}
 	out.WriteString(symbolXml(";"))
-	out.WriteString(" </letStatement>")
+	out.WriteString("</letStatement>")
 	return out.String()
 }
 
@@ -238,20 +246,20 @@ func (rs *ReturnStatement) String() string {
 
 func (rs *ReturnStatement) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<returnStatement> ")
-	out.WriteString(keywordXml(rs.TokenLiteral()))
+	out.WriteString("<returnStatement>")
+	out.WriteString(rs.Token.Xml())
 	if rs.Value != nil {
 		out.WriteString(rs.Value.Xml())
 	}
 	out.WriteString(symbolXml(";"))
-	out.WriteString(" </returnStatement>")
+	out.WriteString("</returnStatement>")
 	return out.String()
 }
 
 type DoStatement struct {
 	Token              token.Token // Keyword:"do"
 	ClassName          token.Token
-	VarName            token.Token
+	SubroutineName     token.Token
 	ExpressionListStmt *ExpressionListStatement
 }
 
@@ -265,7 +273,7 @@ func (ds *DoStatement) String() string {
 	if ds.ClassName.Literal != "" {
 		out.WriteString(ds.ClassName.Literal + ".")
 	}
-	out.WriteString(ds.VarName.Literal)
+	out.WriteString(ds.SubroutineName.Literal)
 	out.WriteString(ds.ExpressionListStmt.String())
 	out.WriteString(";")
 	return out.String()
@@ -274,11 +282,11 @@ func (ds *DoStatement) String() string {
 func (ds *DoStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<doStatement>")
-	out.WriteString(keywordXml(ds.TokenLiteral()))
+	out.WriteString(ds.Token.Xml())
 	if ds.ClassName.Literal != "" {
 		out.WriteString(identifierXml(ds.ClassName.Literal) + symbolXml("."))
 	}
-	out.WriteString(identifierXml(ds.VarName.Literal))
+	out.WriteString(identifierXml(ds.SubroutineName.Literal))
 	out.WriteString(ds.ExpressionListStmt.Xml())
 	out.WriteString(symbolXml(";"))
 	out.WriteString("</doStatement>")
@@ -347,8 +355,8 @@ func (cvds *ClassVarDecStatement) String() string {
 func (cvds *ClassVarDecStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString("<classVarDec>")
-	out.WriteString(keywordXml(cvds.TokenLiteral()))
-	out.WriteString(keywordXml(cvds.ValueType.Literal))
+	out.WriteString(cvds.Token.Xml())
+	out.WriteString(cvds.ValueType.Xml())
 	identifiersStringXml := []string{}
 	for _, identifier := range cvds.Identifiers {
 		identifiersStringXml = append(identifiersStringXml, identifierXml(identifier.Literal))
@@ -385,13 +393,21 @@ func (ifs *IfStatement) String() string {
 
 func (ifs *IfStatement) Xml() string {
 	var out bytes.Buffer
+	out.WriteString("<ifStatement>")
 	out.WriteString(keywordXml("if"))
+	out.WriteString(symbolXml("("))
 	out.WriteString(ifs.Condition.Xml())
+	out.WriteString(symbolXml(")"))
+	out.WriteString(symbolXml("{"))
 	out.WriteString(ifs.Consequence.Xml())
+	out.WriteString(symbolXml("}"))
 	if ifs.Alternative != nil {
 		out.WriteString(keywordXml("else"))
+		out.WriteString(symbolXml("{"))
 		out.WriteString(ifs.Alternative.Xml())
+		out.WriteString(symbolXml("}"))
 	}
+	out.WriteString("</ifStatement>")
 	return out.String()
 }
 
@@ -418,7 +434,7 @@ func (ws *WhileStatement) String() string {
 
 func (ws *WhileStatement) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<whileStatement> ")
+	out.WriteString("<whileStatement>")
 	out.WriteString(keywordXml("while"))
 	out.WriteString(symbolXml("("))
 	out.WriteString(ws.Condition.Xml())
@@ -426,7 +442,7 @@ func (ws *WhileStatement) Xml() string {
 	out.WriteString(symbolXml("{"))
 	out.WriteString(ws.Statements.Xml())
 	out.WriteString(symbolXml("}"))
-	out.WriteString(" </whileStatement>")
+	out.WriteString("</whileStatement>")
 	return out.String()
 }
 
@@ -449,11 +465,11 @@ func (bs *BlockStatement) String() string {
 
 func (bs *BlockStatement) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<statements> ")
+	out.WriteString("<statements>")
 	for _, s := range bs.Statements {
 		out.WriteString(s.Xml())
 	}
-	out.WriteString(" </statements>")
+	out.WriteString("</statements>")
 	return out.String()
 }
 
@@ -482,17 +498,18 @@ func (els *ExpressionListStatement) Xml() string {
 	var out bytes.Buffer
 	// TODO: Fix from "(" to token.LPAWN. others as well
 	out.WriteString(symbolXml("("))
-	out.WriteString("<expressionList> ")
+	out.WriteString("<expressionList>")
 	expressionListXmls := []string{}
 	for _, s := range els.ExpressionList {
 		expressionListXmls = append(expressionListXmls, s.Xml())
 	}
 	out.WriteString(strings.Join(expressionListXmls, symbolXml((","))))
-	out.WriteString(" </expressionList>")
+	out.WriteString("</expressionList>")
 	out.WriteString(symbolXml(")"))
 	return out.String()
 }
 
+//関数定義時の引数リスト
 type ParameterListStatement struct {
 	Token         token.Token // symbol,(
 	ParameterList []ParameterStatement
@@ -516,21 +533,21 @@ func (pls *ParameterListStatement) String() string {
 func (pls *ParameterListStatement) Xml() string {
 	var out bytes.Buffer
 	out.WriteString(symbolXml("("))
-	out.WriteString("<parameterList> ")
+	out.WriteString("<parameterList>")
 	parameterListXml := []string{}
 	for _, s := range pls.ParameterList {
 		parameterListXml = append(parameterListXml, s.Xml())
 	}
 	out.WriteString(strings.Join(parameterListXml, symbolXml(",")))
-	out.WriteString(" </parameterList>")
+	out.WriteString("</parameterList>")
 	out.WriteString(symbolXml(")"))
 	return out.String()
 }
 
 type ParameterStatement struct {
-	Token token.Token // 式の最初のトークン
-	Type  token.KeyWord
-	Name  string
+	Token     token.Token // 式の最初のトークン
+	ValueType token.Token // "int","char","boolean",{class name}
+	Name      string
 }
 
 func (ps *ParameterStatement) statementNode() {}
@@ -538,11 +555,11 @@ func (ps *ParameterStatement) statementNode() {}
 func (ps *ParameterStatement) TokenLiteral() string { return ps.Token.Literal }
 
 func (ps *ParameterStatement) String() string {
-	return string(ps.Type) + " " + ps.Name
+	return ps.ValueType.String() + " " + ps.Name
 }
 
 func (ps *ParameterStatement) Xml() string {
-	return keywordXml(string(ps.Type)) + identifierXml(ps.Name)
+	return ps.ValueType.Xml() + identifierXml(ps.Name)
 }
 
 type SingleExpression struct {
@@ -583,20 +600,20 @@ func (ie *InfixExpression) String() string {
 
 func (ie *InfixExpression) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<expression> ")
+	out.WriteString("<expression>")
 	out.WriteString(ie.Left.Xml())
 	switch token.Symbol(ie.Operator.String()) {
 	case token.LT:
-		out.WriteString("<symbol> &lt; </symbol>")
+		out.WriteString(symbolXml("&lt;"))
 	case token.GT:
-		out.WriteString("<symbol> &gt; </symbol>")
+		out.WriteString(symbolXml("&gt;"))
 	case token.AMP:
-		out.WriteString("<symbol> &amp; </symbol>")
+		out.WriteString(symbolXml("&amp;"))
 	default:
-		out.WriteString("<symbol> " + ie.Operator.Literal + " </symbol>")
+		out.WriteString(symbolXml(ie.Operator.Literal))
 	}
 	out.WriteString(ie.Right.Xml())
-	out.WriteString(" </expression>")
+	out.WriteString("</expression>")
 	return out.String()
 }
 
@@ -613,11 +630,7 @@ func (ict *IntergerConstTerm) String() string {
 	return strconv.FormatInt(ict.Value, 10)
 }
 func (ict *IntergerConstTerm) Xml() string {
-	var out bytes.Buffer
-	out.WriteString("<term> ")
-	out.WriteString(ict.Token.Xml())
-	out.WriteString(" </term>")
-	return out.String()
+	return termXml(ict.Token.Xml())
 }
 
 type StringConstTerm struct {
@@ -633,11 +646,7 @@ func (sct *StringConstTerm) String() string {
 	return `"` + sct.Value + `"`
 }
 func (sct *StringConstTerm) Xml() string {
-	var out bytes.Buffer
-	out.WriteString("<term>")
-	out.WriteString(sct.Token.Xml())
-	out.WriteString("</term>")
-	return out.String()
+	return termXml(sct.Token.Xml())
 }
 
 type IdentifierTerm struct {
@@ -653,11 +662,7 @@ func (ict *IdentifierTerm) String() string {
 	return ict.Value
 }
 func (ict *IdentifierTerm) Xml() string {
-	var out bytes.Buffer
-	out.WriteString("<term>")
-	out.WriteString(identifierXml(ict.String()))
-	out.WriteString("</term>")
-	return out.String()
+	return termXml(identifierXml(ict.String()))
 }
 
 type KeywordConstTerm struct {
@@ -665,26 +670,22 @@ type KeywordConstTerm struct {
 	KeyWord token.KeyWord
 }
 
-func (ict *KeywordConstTerm) termNode() {}
+func (kct *KeywordConstTerm) termNode() {}
 
-func (ict *KeywordConstTerm) TokenLiteral() string { return ict.Token.Literal }
+func (kct *KeywordConstTerm) TokenLiteral() string { return kct.Token.Literal }
 
-func (ict *KeywordConstTerm) String() string {
-	return string(ict.KeyWord)
+func (kct *KeywordConstTerm) String() string {
+	return string(kct.KeyWord)
 }
 
-func (ict *KeywordConstTerm) Xml() string {
-	var out bytes.Buffer
-	out.WriteString("<term>")
-	out.WriteString(keywordXml(ict.String()))
-	out.WriteString("</term>")
-	return out.String()
+func (kct *KeywordConstTerm) Xml() string {
+	return termXml(kct.Token.Xml())
 }
 
 type SubroutineCallTerm struct {
 	Token              token.Token // FunctionName
 	ClassName          token.Token
-	VarName            token.Token
+	SubroutineName     token.Token
 	ExpressionListStmt *ExpressionListStatement
 }
 
@@ -697,21 +698,19 @@ func (sct *SubroutineCallTerm) String() string {
 	if sct.ClassName.Literal != "" {
 		out.WriteString(sct.ClassName.Literal + ".")
 	}
-	out.WriteString(sct.VarName.Literal)
+	out.WriteString(sct.SubroutineName.Literal)
 	out.WriteString(sct.ExpressionListStmt.String())
 	return out.String()
 }
 
 func (sct *SubroutineCallTerm) Xml() string {
 	var out bytes.Buffer
-	out.WriteString("<term> ")
 	if sct.ClassName.Literal != "" {
 		out.WriteString(sct.ClassName.Xml() + symbolXml("."))
 	}
-	out.WriteString(sct.VarName.Xml())
+	out.WriteString(sct.SubroutineName.Xml())
 	out.WriteString(sct.ExpressionListStmt.Xml())
-	out.WriteString(" </term>")
-	return out.String()
+	return termXml(out.String())
 }
 
 type ArrayElementTerm struct {
@@ -737,7 +736,7 @@ func (aet *ArrayElementTerm) Xml() string {
 	out.WriteString(symbolXml("["))
 	out.WriteString(aet.Idx.Xml())
 	out.WriteString(symbolXml("]"))
-	return "<term> " + out.String() + " </term>"
+	return termXml(out.String())
 }
 
 type PrefixTerm struct {
@@ -755,7 +754,7 @@ func (pt *PrefixTerm) String() string {
 }
 
 func (pt *PrefixTerm) Xml() string {
-	return "<term> " + symbolXml(string(pt.Prefix)) + pt.Value.Xml() + " </term>"
+	return termXml(symbolXml(string(pt.Prefix)) + pt.Value.Xml())
 }
 
 type BracketTerm struct {
@@ -772,9 +771,10 @@ func (bt *BracketTerm) String() string {
 }
 
 func (bt *BracketTerm) Xml() string {
-	return "<term> " + symbolXml("(") + bt.Value.Xml() + symbolXml(")") + " </term>"
+	return termXml(symbolXml("(") + bt.Value.Xml() + symbolXml(")"))
 }
 
 func keywordXml(keyword string) string       { return "<keyword> " + keyword + " </keyword>" }
 func symbolXml(symbol string) string         { return "<symbol> " + symbol + " </symbol>" }
 func identifierXml(identifier string) string { return "<identifier> " + identifier + " </identifier>" }
+func termXml(term string) string             { return "<term>" + term + "</term>" }

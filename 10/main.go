@@ -8,35 +8,66 @@ import (
 
 func main() {
 	jt := tokenizer.New(`
-	class Main {
-    static boolean test;   
-                           
-    function void main() {
-      var SquareGame game;
-      let game = SquareGame.new();
-      do game.run();
-      do game.dispose();
+    
+class SquareGame {
+    field Square square; 
+    field int direction; 
+                         
+ 
+ 
+    constructor SquareGame new() {
+       let square = Square.new(0, 0, 30);
+       let direction = 0;  
+       return this;
+    }
+    method void dispose() {
+       do square.dispose();
+       do Memory.deAlloc(this);
+       return;
+    }
+ 
+    method void moveSquare() {
+       if (direction = 1) { do square.moveUp(); }
+       if (direction = 2) { do square.moveDown(); }
+       if (direction = 3) { do square.moveLeft(); }
+       if (direction = 4) { do square.moveRight(); }
+       do Sys.wait(5);  
+       return;
+    }
+ 
+ 
+    method void run() {
+       var char key;
+       var boolean exit;
+       let exit = false;
+       
+       while (~exit) {
+         
+          while (key = 0) {
+             let key = Keyboard.keyPressed();
+             do moveSquare();
+          }
+          if (key = 81)  { let exit = true; }    
+          if (key = 90)  { do square.decSize(); }
+          if (key = 88)  { do square.incSize(); }
+          if (key = 131) { let direction = 1; }  
+          if (key = 133) { let direction = 2; }  
+          if (key = 130) { let direction = 3; }  
+          if (key = 132) { let direction = 4; }  
+ 
+          while (~(key = 0)) {
+             let key = Keyboard.keyPressed();
+             do moveSquare();
+          }
+      } 
       return;
     }
-
-    function void more() { 
-        var int i, j;      
-        var String s;
-        var Array a;
-        if (false) {
-            let s = "string constant";
-            let s = null;
-            let a[1] = a[2];
-        }
-        else {           
-            let i = i * (-j);
-            let j = j / (-2);   
-            let i = i | j;
-        }
-        return;
-    }
-} 
-
+ }
+ 
+ 
+ 
+ 
+     
 `)
 	ce := compilationengine.New(jt)
 	fmt.Println(ce.ParseProgram().Xml())

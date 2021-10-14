@@ -8,534 +8,527 @@ import (
 	"strconv"
 )
 
-// Parser is struct
-type Parser struct {
+// CompilationEngine is struct
+type CompilationEngine struct {
 	jt        *tokenizer.JackTokenizer
 	curToken  token.Token
 	nextToken token.Token
 }
 
 // New is initializer of compilation engine
-func New(jt *tokenizer.JackTokenizer) *Parser {
-	p := &Parser{jt: jt}
-	p.advanceToken()
-	p.advanceToken()
-	return p
+func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
+	ce := &CompilationEngine{jt: jt}
+	ce.advanceToken()
+	ce.advanceToken()
+	return ce
 }
 
-// ParseProgram is Parser for all program
-func (p *Parser) ParseProgram() *ast.Program {
+// ParseProgram is parser for all program
+func (ce *CompilationEngine) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
-	for p.curToken.Type != token.EOF {
-		stmt := p.ParseStatement()
+	for ce.curToken.Type != token.EOF {
+		stmt := ce.parseStatement()
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
-		p.advanceToken()
+		ce.advanceToken()
 	}
 	return program
 }
 
-func (p *Parser) advanceToken() {
-	p.curToken = p.nextToken
-	p.nextToken, _ = p.jt.Advance()
+func (ce *CompilationEngine) advanceToken() {
+	ce.curToken = ce.nextToken
+	ce.nextToken, _ = ce.jt.Advance()
 }
 
-func (p *Parser) ParseStatement() ast.Statement {
-	if p.curToken.Type != token.KEYWORD {
-		panic(fmt.Sprintf("Initial Token Type should be KEYWORD. got %s ", p.curToken.Type))
+func (ce *CompilationEngine) parseStatement() ast.Statement {
+	if ce.curToken.Type != token.KEYWORD {
+		panic(fmt.Sprintf("Initial Token Type should be KEYWORD. got %s(%s) ", ce.curToken.Type, ce.curToken.String()))
 	}
-	return p.ParseKeyWord()
+	return ce.parseKeyWord()
 }
 
-func (p *Parser) ParseKeyWord() ast.Statement {
-	keyWord, _ := tokenizer.KeyWord(p.curToken)
+func (ce *CompilationEngine) parseKeyWord() ast.Statement {
+	keyWord, _ := tokenizer.KeyWord(ce.curToken)
 	switch keyWord {
 	case token.LET:
-		return p.ParseLetStatement()
+		return ce.parseLetStatement()
 	case token.RETURN:
-		return p.ParseReturnStatement()
+		return ce.parseReturnStatement()
 	case token.DO:
-		return p.ParseDoStatement()
+		return ce.parseDoStatement()
 	case token.VAR:
-		return p.ParseVarDecStatement()
+		return ce.parseVarDecStatement()
 	case token.STATIC:
-		return p.ParseClassVarDecStatement()
+		return ce.parseClassVarDecStatement()
 	case token.FIELD:
-		return p.ParseClassVarDecStatement()
+		return ce.parseClassVarDecStatement()
 	case token.IF:
-		return p.ParseIfStatement()
+		return ce.parseIfStatement()
 	case token.WHILE:
-		return p.ParseWhileStatement()
+		return ce.parseWhileStatement()
 	case token.CLASS:
-		return p.ParseClassStatement()
+		return ce.parseClassStatement()
 	case token.METHOD:
-		return p.ParseSubroutineDecStatement()
+		return ce.parseSubroutineDecStatement()
 	case token.CONSTRUCTOR:
-		return p.ParseSubroutineDecStatement()
+		return ce.parseSubroutineDecStatement()
 	case token.FUNCTION:
-		return p.ParseSubroutineDecStatement()
+		return ce.parseSubroutineDecStatement()
 	default:
 		return nil
 	}
 }
 
-func (p *Parser) ParseClassStatement() *ast.ClassStatement {
-	stmt := &ast.ClassStatement{Token: p.curToken}
-	if !p.expectNext(token.IDENTIFIER) {
+func (ce *CompilationEngine) parseClassStatement() *ast.ClassStatement {
+	stmt := &ast.ClassStatement{Token: ce.curToken}
+	if !ce.expectNext(token.IDENTIFIER) {
 		return nil
 	}
-	stmt.Name = p.curToken
-	p.advanceToken()
-	if token.Symbol(p.curToken.Literal) != token.LBRACE {
+	stmt.Name = ce.curToken
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.LBRACE {
 		return nil
 	}
-	p.advanceToken()
+	ce.advanceToken()
 	stmt.ClassVarDecList = []ast.ClassVarDecStatement{}
-	for token.KeyWord(p.curToken.Literal) == token.STATIC || token.KeyWord(p.curToken.Literal) == token.FIELD {
+	for token.KeyWord(ce.curToken.Literal) == token.STATIC || token.KeyWord(ce.curToken.Literal) == token.FIELD {
 
-		classVarDec := p.ParseClassVarDecStatement()
+		classVarDec := ce.parseClassVarDecStatement()
 		stmt.ClassVarDecList = append(stmt.ClassVarDecList, *classVarDec)
-		p.advanceToken()
+		ce.advanceToken()
 	}
 	stmt.SubroutineDecList = []ast.SubroutineDecStatement{}
-	for token.KeyWord(p.curToken.Literal) == token.CONSTRUCTOR || token.KeyWord(p.curToken.Literal) == token.FUNCTION || token.KeyWord(p.curToken.Literal) == token.METHOD {
-		subroutineDec := p.ParseSubroutineDecStatement()
+	for token.KeyWord(ce.curToken.Literal) == token.CONSTRUCTOR || token.KeyWord(ce.curToken.Literal) == token.FUNCTION || token.KeyWord(ce.curToken.Literal) == token.METHOD {
+		subroutineDec := ce.parseSubroutineDecStatement()
 		stmt.SubroutineDecList = append(stmt.SubroutineDecList, *subroutineDec)
-		p.advanceToken()
+		ce.advanceToken()
 	}
-	if token.Symbol(p.curToken.Literal) != token.RBRACE {
+	if token.Symbol(ce.curToken.Literal) != token.RBRACE {
 		return nil
 	}
 	return stmt
 }
 
-func (p *Parser) ParseSubroutineDecStatement() *ast.SubroutineDecStatement {
-	stmt := &ast.SubroutineDecStatement{Token: p.curToken}
-	if !p.nextTokenIs(token.IDENTIFIER) && !p.nextTokenIs(token.KEYWORD) {
+func (ce *CompilationEngine) parseSubroutineDecStatement() *ast.SubroutineDecStatement {
+	stmt := &ast.SubroutineDecStatement{Token: ce.curToken}
+	if !ce.nextTokenIs(token.IDENTIFIER) && !ce.nextTokenIs(token.KEYWORD) {
 		return nil
 	}
-	p.advanceToken()
-	stmt.ReturnType = p.curToken
-	if !p.expectNext(token.IDENTIFIER) {
+	ce.advanceToken()
+	stmt.ReturnType = ce.curToken
+	if !ce.expectNext(token.IDENTIFIER) {
 		return nil
 	}
-	stmt.Name = p.curToken
-	p.advanceToken()
-	if token.Symbol(p.curToken.Literal) != token.LPAREN {
+	stmt.Name = ce.curToken
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
 		return nil
 	}
-	stmt.ParameterList = p.ParseParameterListStatement()
-	if token.Symbol(p.curToken.Literal) != token.RPAREN {
+	stmt.ParameterList = ce.parseParameterListStatement()
+	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		return nil
 	}
-	p.advanceToken()
-	stmt.SubroutineBody = p.ParseSubroutineBodyStatement()
+	ce.advanceToken()
+	stmt.SubroutineBody = ce.parseSubroutineBodyStatement()
 	return stmt
 }
 
-func (p *Parser) ParseSubroutineBodyStatement() *ast.SubroutineBodyStatement {
-	stmt := &ast.SubroutineBodyStatement{Token: p.curToken}
-	if token.Symbol(p.curToken.Literal) != token.LBRACE {
+func (ce *CompilationEngine) parseSubroutineBodyStatement() *ast.SubroutineBodyStatement {
+	stmt := &ast.SubroutineBodyStatement{Token: ce.curToken}
+	if token.Symbol(ce.curToken.Literal) != token.LBRACE {
 		return nil
 	}
-	p.advanceToken()
+	ce.advanceToken()
 	stmt.VarDecList = []ast.VarDecStatement{}
-	for token.KeyWord(p.curToken.Literal) == token.VAR {
-		varDec := p.ParseVarDecStatement()
+	for token.KeyWord(ce.curToken.Literal) == token.VAR {
+		varDec := ce.parseVarDecStatement()
 		stmt.VarDecList = append(stmt.VarDecList, *varDec)
-		p.advanceToken()
+		ce.advanceToken()
 	}
-	// NOTE: originally, should call ParseBlockStatement.
-	// But, the block statement in subroutine body does not start "{".
-	// so, implement original Parser here.
-	stmt.Statements = &ast.BlockStatement{}
-	stmt.Statements.Statements = []ast.Statement{}
-	for token.Symbol(p.curToken.Literal) != token.RBRACE && !p.curTokenIs(token.EOF) {
-		statement := p.ParseStatement()
+	stmt.Statements = []ast.Statement{}
+	for token.Symbol(ce.curToken.Literal) != token.RBRACE && !ce.curTokenIs(token.EOF) {
+		statement := ce.parseStatement()
 		if statement != nil {
-			stmt.Statements.Statements = append(stmt.Statements.Statements, statement)
+			stmt.Statements = append(stmt.Statements, statement)
 		}
-		p.advanceToken()
+		ce.advanceToken()
 	}
 	return stmt
 }
 
-// TODO:Add Error Handling
-func (p *Parser) ParseLetStatement() *ast.LetStatement {
-	stmt := &ast.LetStatement{Token: p.curToken}
-	if !p.expectNext(token.IDENTIFIER) {
+func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
+	stmt := &ast.LetStatement{Token: ce.curToken}
+	if !ce.expectNext(token.IDENTIFIER) {
 		return nil
 	}
-	stmt.Name = p.curToken
-	p.advanceToken()
+	stmt.Name = ce.curToken
+	ce.advanceToken()
 
-	if token.Symbol(p.curToken.Literal) == token.LBRACKET {
-		p.advanceToken()
-
-		stmt.Idx = p.ParseExpression()
-		p.advanceToken()
-
-		if token.Symbol(p.curToken.Literal) != token.RBRACKET {
+	if token.Symbol(ce.curToken.Literal) == token.LBRACKET {
+		ce.advanceToken()
+		stmt.Idx = ce.parseExpression()
+		ce.advanceToken()
+		if token.Symbol(ce.curToken.Literal) != token.RBRACKET {
 			return nil
 		}
-		p.advanceToken()
+		ce.advanceToken()
 	}
 
-	if token.Symbol(p.curToken.Literal) != token.ASSIGN {
+	if token.Symbol(ce.curToken.Literal) != token.ASSIGN {
 		return nil
 	}
 
-	stmt.Symbol = p.curToken
-	p.advanceToken()
-	stmt.Value = p.ParseExpression()
-	p.advanceToken()
-	if token.Symbol(p.curToken.Literal) != token.SEMICOLON {
+	stmt.Symbol = ce.curToken
+	ce.advanceToken()
+	stmt.Value = ce.parseExpression()
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		return nil
 	}
 	return stmt
 }
 
-func (p *Parser) ParseReturnStatement() *ast.ReturnStatement {
-	stmt := &ast.ReturnStatement{Token: p.curToken}
-	p.advanceToken()
-	if token.Symbol(p.curToken.Literal) == token.SEMICOLON {
+func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement {
+	stmt := &ast.ReturnStatement{Token: ce.curToken}
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) == token.SEMICOLON {
 		return stmt
 	}
-	stmt.Value = p.ParseExpression()
-	p.advanceToken()
-	if token.Symbol(p.curToken.Literal) != token.SEMICOLON {
+	stmt.Value = ce.parseExpression()
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		return nil
 	}
 	return stmt
 }
 
-func (p *Parser) ParseDoStatement() *ast.DoStatement {
-	stmt := &ast.DoStatement{Token: p.curToken}
-	p.advanceToken()
+func (ce *CompilationEngine) parseDoStatement() *ast.DoStatement {
+	stmt := &ast.DoStatement{Token: ce.curToken}
+	ce.advanceToken()
 
-	if token.Symbol(p.nextToken.Literal) == token.DOT {
-		stmt.ClassName = p.curToken
-		p.advanceToken() // className
-		p.advanceToken() // token.DOT
+	if token.Symbol(ce.nextToken.Literal) == token.DOT {
+		stmt.ClassName = ce.curToken
+		ce.advanceToken() // className
+		ce.advanceToken() // token.DOT
 	}
-	stmt.VarName = p.curToken
-	p.advanceToken()
-
-	if token.Symbol(p.curToken.Literal) != token.LPAREN {
+	stmt.SubroutineName = ce.curToken
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
 		return nil
 	}
-
-	stmt.ExpressionListStmt = p.ParseExpressionListStatement()
-	p.advanceToken()
-	if token.Symbol(p.curToken.Literal) != token.SEMICOLON {
+	stmt.ExpressionListStmt = ce.parseExpressionListStatement()
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		return nil
 	}
 
 	return stmt
 }
 
-func (p *Parser) ParseVarDecStatement() *ast.VarDecStatement {
-	stmt := &ast.VarDecStatement{Token: p.curToken, Identifiers: []token.Token{}}
-	if token.KeyWord(p.nextToken.Literal) != token.INT && token.KeyWord(p.nextToken.Literal) != token.BOOLEAN && token.KeyWord(p.nextToken.Literal) != token.CHAR && !p.nextTokenIs(token.IDENTIFIER) {
+func (ce *CompilationEngine) parseVarDecStatement() *ast.VarDecStatement {
+	stmt := &ast.VarDecStatement{Token: ce.curToken, Identifiers: []token.Token{}}
+	if token.KeyWord(ce.nextToken.Literal) != token.INT && token.KeyWord(ce.nextToken.Literal) != token.BOOLEAN && token.KeyWord(ce.nextToken.Literal) != token.CHAR && !ce.nextTokenIs(token.IDENTIFIER) {
 		return nil
 	}
-	p.advanceToken()
-	stmt.ValueType = p.curToken
-	for token.Symbol(p.curToken.Literal) != token.SEMICOLON {
-		p.advanceToken()
-		identifier := p.curToken
+	ce.advanceToken()
+	stmt.ValueType = ce.curToken
+	for token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
+		ce.advanceToken()
+		identifier := ce.curToken
 		stmt.Identifiers = append(stmt.Identifiers, identifier)
-		p.advanceToken() //
+		ce.advanceToken() //
 	}
 	return stmt
 }
 
-func (p *Parser) ParseClassVarDecStatement() *ast.ClassVarDecStatement {
-	stmt := &ast.ClassVarDecStatement{Token: p.curToken, Identifiers: []token.Token{}}
-	p.advanceToken()
-
-	if token.KeyWord(p.curToken.Literal) != token.INT && token.KeyWord(p.curToken.Literal) != token.BOOLEAN && token.KeyWord(p.curToken.Literal) != token.CHAR && !p.curTokenIs(token.IDENTIFIER) {
+func (ce *CompilationEngine) parseClassVarDecStatement() *ast.ClassVarDecStatement {
+	stmt := &ast.ClassVarDecStatement{Token: ce.curToken, Identifiers: []token.Token{}}
+	ce.advanceToken()
+	if token.KeyWord(ce.curToken.Literal) != token.INT && token.KeyWord(ce.curToken.Literal) != token.BOOLEAN && token.KeyWord(ce.curToken.Literal) != token.CHAR && !ce.curTokenIs(token.IDENTIFIER) {
 		return nil
 	}
-	stmt.ValueType = p.curToken
-	p.advanceToken()
+	stmt.ValueType = ce.curToken
+	ce.advanceToken()
 
 	for {
-		identifier := p.curToken
+		identifier := ce.curToken
 		stmt.Identifiers = append(stmt.Identifiers, identifier)
-		p.advanceToken()
+		ce.advanceToken()
 		// TODO:refactoring
-		if token.Symbol(p.curToken.Literal) == token.COMMA {
-			p.advanceToken()
+		if token.Symbol(ce.curToken.Literal) == token.COMMA {
+			ce.advanceToken()
 			continue
-		} else if token.Symbol(p.curToken.Literal) == token.SEMICOLON {
+		} else if token.Symbol(ce.curToken.Literal) == token.SEMICOLON {
 			break
 		} else {
 			return nil
 		}
 	}
-	if token.Symbol(p.curToken.Literal) != token.SEMICOLON {
+	if token.Symbol(ce.curToken.Literal) != token.SEMICOLON {
 		return nil
 	}
 	return stmt
 }
 
-func (p *Parser) ParseIfStatement() *ast.IfStatement {
-	stmt := &ast.IfStatement{Token: p.curToken}
-	if p.expectNext(token.SYMBOL) {
-		if token.Symbol(p.curToken.Literal) != token.LPAREN {
-			return nil
-		}
-	}
-	stmt.Condition = p.ParseExpression()
-	p.advanceToken()
-
-	if token.Symbol(p.curToken.Literal) != token.RPAREN {
+func (ce *CompilationEngine) parseIfStatement() *ast.IfStatement {
+	stmt := &ast.IfStatement{Token: ce.curToken}
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
 		return nil
 	}
-	p.advanceToken()
+	ce.advanceToken()
+	stmt.Condition = ce.parseExpression()
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
+		return nil
+	}
+	ce.advanceToken()
 
-	stmt.Consequence = p.ParseBlockStatement()
-	p.advanceToken()
-	if token.KeyWord(p.curToken.Literal) == token.ELSE {
-		p.advanceToken()
-		if p.expectNext(token.SYMBOL) {
+	stmt.Consequence = ce.parseBlockStatement()
+	if token.KeyWord(ce.nextToken.Literal) == token.ELSE {
+		ce.advanceToken() // advance "}" of "if(x){}"
+		ce.advanceToken() // advance "else"
+		if token.Symbol(ce.curToken.Literal) != token.LBRACE {
 			return nil
 		}
-		stmt.Alternative = p.ParseBlockStatement()
+		stmt.Alternative = ce.parseBlockStatement()
 	}
 	return stmt
 }
 
-func (p *Parser) ParseWhileStatement() *ast.WhileStatement {
-	stmt := &ast.WhileStatement{Token: p.curToken}
-	if p.expectNext(token.SYMBOL) {
-		if token.Symbol(p.curToken.Literal) != token.LPAREN {
+func (ce *CompilationEngine) parseWhileStatement() *ast.WhileStatement {
+	stmt := &ast.WhileStatement{Token: ce.curToken}
+	if ce.expectNext(token.SYMBOL) {
+		if token.Symbol(ce.curToken.Literal) != token.LPAREN {
 			return nil
 		}
 	}
-	p.advanceToken()
-	stmt.Condition = p.ParseExpression()
-	p.advanceToken()
-
-	if token.Symbol(p.curToken.Literal) != token.RPAREN {
+	ce.advanceToken()
+	stmt.Condition = ce.parseExpression()
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		return nil
 	}
-	p.advanceToken()
-	stmt.Statements = p.ParseBlockStatement()
+	ce.advanceToken()
+	stmt.Statements = ce.parseBlockStatement()
 	return stmt
 }
 
-func (p *Parser) ParseBlockStatement() *ast.BlockStatement {
-	block := &ast.BlockStatement{Token: p.curToken}
-	p.advanceToken()
+func (ce *CompilationEngine) parseBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{Token: ce.curToken}
+	ce.advanceToken()
 	block.Statements = []ast.Statement{}
-	for token.Symbol(p.curToken.Literal) != token.RBRACE && !p.curTokenIs(token.EOF) {
-		stmt := p.ParseStatement()
+	for token.Symbol(ce.curToken.Literal) != token.RBRACE && !ce.curTokenIs(token.EOF) {
+		stmt := ce.parseStatement()
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
 		}
-		p.advanceToken()
+		ce.advanceToken()
 	}
 	return block
 }
 
-func (p *Parser) ParseExpressionListStatement() *ast.ExpressionListStatement {
-	expressionListStmt := &ast.ExpressionListStatement{Token: p.curToken}
-	p.advanceToken()
+func (ce *CompilationEngine) parseExpressionListStatement() *ast.ExpressionListStatement {
+	expressionListStmt := &ast.ExpressionListStatement{Token: ce.curToken}
+	ce.advanceToken()
 	expressionListStmt.ExpressionList = []ast.Expression{}
-	for token.Symbol(p.curToken.Literal) != token.RPAREN {
-		expression := p.ParseExpression()
+	for token.Symbol(ce.curToken.Literal) != token.RPAREN {
+		expression := ce.parseExpression()
 		if expression != nil {
 			expressionListStmt.ExpressionList = append(expressionListStmt.ExpressionList, expression)
 		}
-		p.advanceToken()
-		if token.Symbol(p.curToken.Literal) == token.RPAREN {
+		ce.advanceToken()
+		if token.Symbol(ce.curToken.Literal) == token.RPAREN { // ")"の場合はparseを終了
 			break
-		} else if token.Symbol(p.curToken.Literal) == token.COMMA {
-			p.advanceToken()
-		} else {
+		} else if token.Symbol(ce.curToken.Literal) == token.COMMA { // ","の場合はまだ式が存在する
+			ce.advanceToken()
+		} else { // TODO: 例外
 			return nil
 		}
 	}
 	return expressionListStmt
 }
 
-func (p *Parser) ParseParameterListStatement() *ast.ParameterListStatement {
-	parameterListStmt := &ast.ParameterListStatement{Token: p.curToken}
-	p.advanceToken()
+func (ce *CompilationEngine) parseParameterListStatement() *ast.ParameterListStatement {
+	parameterListStmt := &ast.ParameterListStatement{Token: ce.curToken}
+	ce.advanceToken()
 	parameterListStmt.ParameterList = []ast.ParameterStatement{}
-	for token.Symbol(p.curToken.Literal) != token.RPAREN {
-		parameterStmt := p.ParseParameterStatement()
+	for token.Symbol(ce.curToken.Literal) != token.RPAREN {
+		parameterStmt := ce.parseParameterStatement()
 		if parameterStmt == nil {
 			return nil
 		}
 		parameterListStmt.ParameterList = append(parameterListStmt.ParameterList, *parameterStmt)
-		p.advanceToken()
-		if token.Symbol(p.curToken.Literal) == token.RPAREN {
+		ce.advanceToken()
+		if token.Symbol(ce.curToken.Literal) == token.RPAREN {
 			break
 		}
-		p.advanceToken()
+		ce.advanceToken()
 	}
 	return parameterListStmt
 }
 
-func (p *Parser) ParseParameterStatement() *ast.ParameterStatement {
-	parameterStmt := &ast.ParameterStatement{Token: p.curToken}
-	if p.curToken.Type != token.KEYWORD {
+func (ce *CompilationEngine) parseParameterStatement() *ast.ParameterStatement {
+	parameterStmt := &ast.ParameterStatement{Token: ce.curToken}
+	if ce.curToken.Type != token.KEYWORD && ce.curToken.Type != token.IDENTIFIER {
 		return nil
 	}
-	parameterStmt.Type = token.KeyWord(p.curToken.Literal)
-	p.advanceToken()
-	if p.curToken.Type != token.IDENTIFIER {
+	parameterStmt.ValueType = token.Token{Type: ce.curToken.Type, Literal: ce.curToken.Literal}
+	ce.advanceToken()
+	if ce.curToken.Type != token.IDENTIFIER {
 		return nil
 	}
-	parameterStmt.Name = p.curToken.Literal
+	parameterStmt.Name = ce.curToken.Literal
 	return parameterStmt
 }
 
-func (p *Parser) ParseExpression() ast.Expression {
-	expressionToken := p.curToken
-	prefixTerm := p.ParseTerm()
-	if token.Symbol(p.nextToken.Literal) != token.ASSIGN &&
-		token.Symbol(p.nextToken.Literal) != token.PLUS &&
-		token.Symbol(p.nextToken.Literal) != token.MINUS &&
-		token.Symbol(p.nextToken.Literal) != token.ASTERISK &&
-		token.Symbol(p.nextToken.Literal) != token.SLASH &&
-		token.Symbol(p.nextToken.Literal) != token.LT &&
-		token.Symbol(p.nextToken.Literal) != token.GT &&
-		token.Symbol(p.nextToken.Literal) != token.EQ &&
-		token.Symbol(p.nextToken.Literal) != token.NOT_EQ {
-		return &ast.SingleExpression{Token: expressionToken, Value: prefixTerm}
-	} else {
-		p.advanceToken()
-		operator := p.curToken
-		p.advanceToken()
-		suffixTerm := p.ParseTerm()
+func (ce *CompilationEngine) parseExpression() ast.Expression {
+	expressionToken := ce.curToken
+	prefixTerm := ce.parseTerm()
+	InfixSymbol := map[token.Symbol]token.Symbol{ // 中置演算子となりうるSymbol
+		token.ASSIGN:   token.ASSIGN,
+		token.PLUS:     token.PLUS,
+		token.MINUS:    token.MINUS,
+		token.ASTERISK: token.ASTERISK,
+		token.SLASH:    token.SLASH,
+		token.LT:       token.LT,
+		token.GT:       token.GT,
+		// token.EQ:       token.EQ,
+		// token.NOT_EQ: token.NOT_EQ,
+		token.OR:  token.OR,
+		token.AMP: token.AMP,
+	}
+	if _, ok := InfixSymbol[token.Symbol(ce.nextToken.Literal)]; ok {
+		ce.advanceToken()
+		operator := ce.curToken
+		ce.advanceToken()
+		suffixTerm := ce.parseTerm()
 		return &ast.InfixExpression{Left: prefixTerm, Operator: operator, Right: suffixTerm}
+	} else {
+		return &ast.SingleExpression{Token: expressionToken, Value: prefixTerm}
 	}
 }
 
-func (p *Parser) ParseTerm() ast.Term {
-	switch p.curToken.Type {
+func (ce *CompilationEngine) parseTerm() ast.Term {
+	switch ce.curToken.Type {
 	case token.INTCONST:
-		return p.ParseIntegerConstTerm()
+		return ce.parseIntegerConstTerm()
 	case token.IDENTIFIER:
-		if token.Symbol(p.nextToken.Literal) == token.LPAREN {
-			return p.ParseSubroutineCallTerm()
+		if token.Symbol(ce.nextToken.Literal) == token.LPAREN {
+			return ce.parseSubroutineCallTerm()
 		}
-		if token.Symbol(p.nextToken.Literal) == token.DOT {
-			return p.ParseSubroutineCallTerm()
+		if token.Symbol(ce.nextToken.Literal) == token.DOT {
+			return ce.parseSubroutineCallTerm()
 		}
-		if token.Symbol(p.nextToken.Literal) == token.LBRACKET {
-			return p.ParseArrayElementTerm()
+		if token.Symbol(ce.nextToken.Literal) == token.LBRACKET {
+			return ce.parseArrayElementTerm()
 		}
-		return p.ParseIdentifierTerm()
+		return ce.parseIdentifierTerm()
 	case token.STARTINGCONST:
-		return p.ParseStringConstTerm()
+		return ce.parseStringConstTerm()
 	case token.SYMBOL:
-		if token.Symbol(p.curToken.Literal) == token.LPAREN {
-			return p.ParseBracketTerm()
+		if token.Symbol(ce.curToken.Literal) == token.LPAREN {
+			return ce.parseBracketTerm()
 		}
-		if token.Symbol(p.curToken.Literal) == token.MINUS || token.Symbol(p.curToken.Literal) == token.BANG {
-			return p.ParsePrefixTerm()
+		if token.Symbol(ce.curToken.Literal) == token.MINUS || token.Symbol(ce.curToken.Literal) == token.BANG {
+			return ce.parsePrefixTerm()
 		}
 	case token.KEYWORD:
-		return p.ParseKeyWordConstTerm()
+		return ce.parseKeyWordConstTerm()
 	}
 
 	return nil
 }
 
-func (p *Parser) ParseIntegerConstTerm() ast.Term {
-	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+func (ce *CompilationEngine) parseIntegerConstTerm() *ast.IntergerConstTerm {
+	value, err := strconv.ParseInt(ce.curToken.Literal, 0, 64)
 	if err != nil {
-		panic(fmt.Sprintf("could not Parse %q as integer", p.curToken.Literal))
+		panic(fmt.Sprintf("could not parse %q as integer", ce.curToken.Literal))
 	}
-	return &ast.IntergerConstTerm{Token: p.curToken, Value: value}
+	return &ast.IntergerConstTerm{Token: ce.curToken, Value: value}
 }
 
-func (p *Parser) ParseIdentifierTerm() ast.Term {
-	return &ast.IdentifierTerm{Token: p.curToken, Value: p.curToken.Literal}
+func (ce *CompilationEngine) parseIdentifierTerm() *ast.IdentifierTerm {
+	return &ast.IdentifierTerm{Token: ce.curToken, Value: ce.curToken.Literal}
 }
 
-func (p *Parser) ParseStringConstTerm() ast.Term {
-	return &ast.StringConstTerm{Token: p.curToken, Value: p.curToken.Literal}
+func (ce *CompilationEngine) parseStringConstTerm() *ast.StringConstTerm {
+	return &ast.StringConstTerm{Token: ce.curToken, Value: ce.curToken.Literal}
 }
 
-func (p *Parser) ParseKeyWordConstTerm() ast.Term {
-	if token.KeyWord(p.curToken.Literal) != token.NULL && token.KeyWord(p.curToken.Literal) != (token.TRUE) && token.KeyWord(p.curToken.Literal) != token.FALSE && token.KeyWord(p.curToken.Literal) != token.THIS {
-		panic(fmt.Sprintf("could not Parse %s as keywordConst", p.curToken.Literal))
+func (ce *CompilationEngine) parseKeyWordConstTerm() *ast.KeywordConstTerm {
+	if token.KeyWord(ce.curToken.Literal) != token.NULL && token.KeyWord(ce.curToken.Literal) != (token.TRUE) && token.KeyWord(ce.curToken.Literal) != token.FALSE && token.KeyWord(ce.curToken.Literal) != token.THIS {
+		panic(fmt.Sprintf("could not parse %s as keywordConst", ce.curToken.Literal))
 	}
-	return &ast.KeywordConstTerm{Token: p.curToken, KeyWord: token.KeyWord(p.curToken.Literal)}
+	return &ast.KeywordConstTerm{Token: ce.curToken, KeyWord: token.KeyWord(ce.curToken.Literal)}
 }
 
-func (p *Parser) ParseSubroutineCallTerm() ast.Term {
-	subroutineCallTerm := &ast.SubroutineCallTerm{Token: p.curToken}
-	if token.Symbol(p.nextToken.Literal) == token.DOT {
-		subroutineCallTerm.ClassName = p.curToken
-		p.advanceToken() // className
-		p.advanceToken() // token.DOT
+func (ce *CompilationEngine) parseSubroutineCallTerm() *ast.SubroutineCallTerm {
+	subroutineCallTerm := &ast.SubroutineCallTerm{Token: ce.curToken}
+	if token.Symbol(ce.nextToken.Literal) == token.DOT {
+		subroutineCallTerm.ClassName = ce.curToken
+		ce.advanceToken() // className
+		ce.advanceToken() // token.DOT
 	}
-	subroutineCallTerm.VarName = p.curToken
-	p.advanceToken()
+	subroutineCallTerm.SubroutineName = ce.curToken
+	ce.advanceToken()
 
-	if token.Symbol(p.curToken.Literal) != token.LPAREN {
+	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
 		return nil
 	}
 
-	subroutineCallTerm.ExpressionListStmt = p.ParseExpressionListStatement()
+	subroutineCallTerm.ExpressionListStmt = ce.parseExpressionListStatement()
 	return subroutineCallTerm
 }
 
-func (p *Parser) ParseArrayElementTerm() ast.Term {
-	arrayElementTerm := &ast.ArrayElementTerm{Token: p.curToken, ArrayName: p.curToken}
-	p.advanceToken()
-	if token.Symbol(p.curToken.Literal) != token.LBRACKET {
+func (ce *CompilationEngine) parseArrayElementTerm() *ast.ArrayElementTerm {
+	arrayElementTerm := &ast.ArrayElementTerm{Token: ce.curToken, ArrayName: ce.curToken}
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.LBRACKET {
 		return nil
 	}
-	p.advanceToken()
-	idx := p.ParseExpression()
+	ce.advanceToken()
+	idx := ce.parseExpression()
 	arrayElementTerm.Idx = idx
-	p.advanceToken()
-	if token.Symbol(p.curToken.Literal) != token.RBRACKET {
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.RBRACKET {
 		return nil
 	}
 	return arrayElementTerm
 }
 
-func (p *Parser) ParsePrefixTerm() ast.Term {
-	prefixTerm := &ast.PrefixTerm{Token: p.curToken, Prefix: token.Symbol(p.curToken.Literal)}
-	p.advanceToken()
-	prefixTerm.Value = p.ParseTerm()
+func (ce *CompilationEngine) parsePrefixTerm() *ast.PrefixTerm {
+	prefixTerm := &ast.PrefixTerm{Token: ce.curToken, Prefix: token.Symbol(ce.curToken.Literal)}
+	ce.advanceToken()
+	prefixTerm.Value = ce.parseTerm()
 	return prefixTerm
 }
 
-func (p *Parser) ParseBracketTerm() ast.Term {
-	bracketTerm := &ast.BracketTerm{Token: p.curToken}
-	p.advanceToken()
-	expression := p.ParseExpression()
+func (ce *CompilationEngine) parseBracketTerm() *ast.BracketTerm {
+	bracketTerm := &ast.BracketTerm{Token: ce.curToken}
+	ce.advanceToken()
+	expression := ce.parseExpression()
 	bracketTerm.Value = expression
-	p.advanceToken()
-	if token.Symbol(p.curToken.Literal) != token.RPAREN {
+	ce.advanceToken()
+	if token.Symbol(ce.curToken.Literal) != token.RPAREN {
 		return nil
 	}
 	return bracketTerm
 }
 
-func (p *Parser) curTokenIs(t token.TokenType) bool {
-	return p.curToken.Type == t
+func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
+	return ce.curToken.Type == t
 }
 
-func (p *Parser) nextTokenIs(t token.TokenType) bool {
-	return p.nextToken.Type == t
+func (ce *CompilationEngine) nextTokenIs(t token.TokenType) bool {
+	return ce.nextToken.Type == t
 }
 
-func (p *Parser) expectNext(t token.TokenType) bool {
-	if p.nextTokenIs(t) {
-		p.advanceToken()
+func (ce *CompilationEngine) expectNext(t token.TokenType) bool {
+	if ce.nextTokenIs(t) {
+		ce.advanceToken()
 		return true
 	}
 	return false
