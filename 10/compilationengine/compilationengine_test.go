@@ -608,7 +608,6 @@ func TestParseTerm(t *testing.T) {
 }
 
 func TestParseSingleExpression(t *testing.T) {
-
 	input := "1"
 	jt := tokenizer.New(input)
 	ce := New(jt)
@@ -620,5 +619,33 @@ func TestParseSingleExpression(t *testing.T) {
 	if singleExpression.String() != "1" {
 		t.Fatalf("term.String() should be 1. got %s", singleExpression.String())
 	}
+}
 
+func TestParseInfixExpression(t *testing.T) {
+	testCases := []struct {
+		input          string
+		expectedString string
+	}{
+		{"1+1", "1+1"},
+		{"1-1", "1-1"},
+		{"1*1", "1*1"},
+		{"1/1", "1/1"},
+		{"1&1", "1&1"},
+		{"1|1", "1|1"},
+		{"1<1", "1<1"},
+		{"1>1", "1>1"},
+		{"1=1", "1=1"},
+	}
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		expression := ce.parseExpression()
+		infixExpression, ok := expression.(*ast.InfixExpression)
+		if !ok {
+			t.Fatalf("expression should be *ast.InfixExpression. got %T", expression)
+		}
+		if infixExpression.String() != tt.expectedString {
+			t.Fatalf("infixExpression.String() should be %s. got %s", tt.expectedString, infixExpression.String())
+		}
+	}
 }

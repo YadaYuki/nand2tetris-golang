@@ -395,10 +395,10 @@ func (ce *CompilationEngine) parseExpression() ast.Expression {
 		token.SLASH:    token.SLASH,
 		token.LT:       token.LT,
 		token.GT:       token.GT,
-		token.EQ:       token.EQ,
-		token.NOT_EQ:   token.NOT_EQ,
-		token.OR:       token.OR,
-		token.AMP:      token.AMP,
+		// token.EQ:       token.EQ,
+		// token.NOT_EQ: token.NOT_EQ,
+		token.OR:  token.OR,
+		token.AMP: token.AMP,
 	}
 	if _, ok := InfixSymbol[token.Symbol(ce.nextToken.Literal)]; ok {
 		ce.advanceToken()
