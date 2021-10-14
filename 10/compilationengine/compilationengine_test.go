@@ -606,3 +606,19 @@ func TestParseTerm(t *testing.T) {
 		}
 	}
 }
+
+func TestParseSingleExpression(t *testing.T) {
+
+	input := "1"
+	jt := tokenizer.New(input)
+	ce := New(jt)
+	expression := ce.parseExpression()
+	singleExpression, ok := expression.(*ast.SingleExpression)
+	if !ok {
+		t.Fatalf("expression should be *ast.SingleExpression. got %T", expression)
+	}
+	if singleExpression.String() != "1" {
+		t.Fatalf("term.String() should be 1. got %s", singleExpression.String())
+	}
+
+}
