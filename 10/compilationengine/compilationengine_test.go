@@ -580,5 +580,29 @@ func TestParseSubroutineDecStatement(t *testing.T) {
 			t.Fatalf("subroutineDecStmt.Name.Literal should be %s ,got = %s", tt.expectedName, subroutineDecStmt.Name.Literal)
 		}
 	}
+}
 
+func TestParseTerm(t *testing.T) {
+	testCases := []struct {
+		input          string
+		expectedString string
+	}{
+		{"1", "1"},
+		{`"abcde"`, `"abcde"`},
+		{"abcde", "abcde"},
+		{"null", "null"},
+		{"arr[1]", "arr[1]"},
+		{"hogeFunc()", "hogeFunc()"},
+		{"hogeClass.hogeFunc()", "hogeClass.hogeFunc()"},
+		{"(1+1)", "(1+1)"},
+		{"-1", "-1"},
+	}
+	for _, tt := range testCases {
+		jt := tokenizer.New(tt.input)
+		ce := New(jt)
+		term := ce.parseTerm()
+		if term.String() != tt.expectedString {
+			t.Fatalf("term.String() should be %s. got %s", tt.expectedString, term.String())
+		}
+	}
 }
