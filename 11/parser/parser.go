@@ -8,23 +8,23 @@ import (
 	"strconv"
 )
 
-// CompilationEngine is struct
-type CompilationEngine struct {
+// Parser is struct
+type Parser struct {
 	jt        *tokenizer.JackTokenizer
 	curToken  token.Token
 	nextToken token.Token
 }
 
 // New is initializer of compilation engine
-func New(jt *tokenizer.JackTokenizer) *CompilationEngine {
-	ce := &CompilationEngine{jt: jt}
+func New(jt *tokenizer.JackTokenizer) *Parser {
+	ce := &Parser{jt: jt}
 	ce.advanceToken()
 	ce.advanceToken()
 	return ce
 }
 
 // ParseProgram is parser for all program
-func (ce *CompilationEngine) ParseProgram() *ast.Program {
+func (ce *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
 	for ce.curToken.Type != token.EOF {
@@ -37,19 +37,19 @@ func (ce *CompilationEngine) ParseProgram() *ast.Program {
 	return program
 }
 
-func (ce *CompilationEngine) advanceToken() {
+func (ce *Parser) advanceToken() {
 	ce.curToken = ce.nextToken
 	ce.nextToken, _ = ce.jt.Advance()
 }
 
-func (ce *CompilationEngine) parseStatement() ast.Statement {
+func (ce *Parser) parseStatement() ast.Statement {
 	if ce.curToken.Type != token.KEYWORD {
 		panic(fmt.Sprintf("Initial Token Type should be KEYWORD. got %s(%s) ", ce.curToken.Type, ce.curToken.String()))
 	}
 	return ce.parseKeyWord()
 }
 
-func (ce *CompilationEngine) parseKeyWord() ast.Statement {
+func (ce *Parser) parseKeyWord() ast.Statement {
 	keyWord, _ := tokenizer.KeyWord(ce.curToken)
 	switch keyWord {
 	case token.LET:
@@ -81,7 +81,7 @@ func (ce *CompilationEngine) parseKeyWord() ast.Statement {
 	}
 }
 
-func (ce *CompilationEngine) parseClassStatement() *ast.ClassStatement {
+func (ce *Parser) parseClassStatement() *ast.ClassStatement {
 	stmt := &ast.ClassStatement{Token: ce.curToken}
 	if !ce.expectNext(token.IDENTIFIER) {
 		return nil
@@ -111,7 +111,7 @@ func (ce *CompilationEngine) parseClassStatement() *ast.ClassStatement {
 	return stmt
 }
 
-func (ce *CompilationEngine) parseSubroutineDecStatement() *ast.SubroutineDecStatement {
+func (ce *Parser) parseSubroutineDecStatement() *ast.SubroutineDecStatement {
 	stmt := &ast.SubroutineDecStatement{Token: ce.curToken}
 	if !ce.nextTokenIs(token.IDENTIFIER) && !ce.nextTokenIs(token.KEYWORD) {
 		return nil
@@ -135,7 +135,7 @@ func (ce *CompilationEngine) parseSubroutineDecStatement() *ast.SubroutineDecSta
 	return stmt
 }
 
-func (ce *CompilationEngine) parseSubroutineBodyStatement() *ast.SubroutineBodyStatement {
+func (ce *Parser) parseSubroutineBodyStatement() *ast.SubroutineBodyStatement {
 	stmt := &ast.SubroutineBodyStatement{Token: ce.curToken}
 	if token.Symbol(ce.curToken.Literal) != token.LBRACE {
 		return nil
@@ -158,7 +158,7 @@ func (ce *CompilationEngine) parseSubroutineBodyStatement() *ast.SubroutineBodyS
 	return stmt
 }
 
-func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
+func (ce *Parser) parseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{Token: ce.curToken}
 	if !ce.expectNext(token.IDENTIFIER) {
 		return nil
@@ -190,7 +190,7 @@ func (ce *CompilationEngine) parseLetStatement() *ast.LetStatement {
 	return stmt
 }
 
-func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement {
+func (ce *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{Token: ce.curToken}
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) == token.SEMICOLON {
@@ -204,7 +204,7 @@ func (ce *CompilationEngine) parseReturnStatement() *ast.ReturnStatement {
 	return stmt
 }
 
-func (ce *CompilationEngine) parseDoStatement() *ast.DoStatement {
+func (ce *Parser) parseDoStatement() *ast.DoStatement {
 	stmt := &ast.DoStatement{Token: ce.curToken}
 	ce.advanceToken()
 
@@ -227,7 +227,7 @@ func (ce *CompilationEngine) parseDoStatement() *ast.DoStatement {
 	return stmt
 }
 
-func (ce *CompilationEngine) parseVarDecStatement() *ast.VarDecStatement {
+func (ce *Parser) parseVarDecStatement() *ast.VarDecStatement {
 	stmt := &ast.VarDecStatement{Token: ce.curToken, Identifiers: []token.Token{}}
 	if token.KeyWord(ce.nextToken.Literal) != token.INT && token.KeyWord(ce.nextToken.Literal) != token.BOOLEAN && token.KeyWord(ce.nextToken.Literal) != token.CHAR && !ce.nextTokenIs(token.IDENTIFIER) {
 		return nil
@@ -243,7 +243,7 @@ func (ce *CompilationEngine) parseVarDecStatement() *ast.VarDecStatement {
 	return stmt
 }
 
-func (ce *CompilationEngine) parseClassVarDecStatement() *ast.ClassVarDecStatement {
+func (ce *Parser) parseClassVarDecStatement() *ast.ClassVarDecStatement {
 	stmt := &ast.ClassVarDecStatement{Token: ce.curToken, Identifiers: []token.Token{}}
 	ce.advanceToken()
 	if token.KeyWord(ce.curToken.Literal) != token.INT && token.KeyWord(ce.curToken.Literal) != token.BOOLEAN && token.KeyWord(ce.curToken.Literal) != token.CHAR && !ce.curTokenIs(token.IDENTIFIER) {
@@ -272,7 +272,7 @@ func (ce *CompilationEngine) parseClassVarDecStatement() *ast.ClassVarDecStateme
 	return stmt
 }
 
-func (ce *CompilationEngine) parseIfStatement() *ast.IfStatement {
+func (ce *Parser) parseIfStatement() *ast.IfStatement {
 	stmt := &ast.IfStatement{Token: ce.curToken}
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.LPAREN {
@@ -298,7 +298,7 @@ func (ce *CompilationEngine) parseIfStatement() *ast.IfStatement {
 	return stmt
 }
 
-func (ce *CompilationEngine) parseWhileStatement() *ast.WhileStatement {
+func (ce *Parser) parseWhileStatement() *ast.WhileStatement {
 	stmt := &ast.WhileStatement{Token: ce.curToken}
 	if ce.expectNext(token.SYMBOL) {
 		if token.Symbol(ce.curToken.Literal) != token.LPAREN {
@@ -316,7 +316,7 @@ func (ce *CompilationEngine) parseWhileStatement() *ast.WhileStatement {
 	return stmt
 }
 
-func (ce *CompilationEngine) parseBlockStatement() *ast.BlockStatement {
+func (ce *Parser) parseBlockStatement() *ast.BlockStatement {
 	block := &ast.BlockStatement{Token: ce.curToken}
 	ce.advanceToken()
 	block.Statements = []ast.Statement{}
@@ -330,7 +330,7 @@ func (ce *CompilationEngine) parseBlockStatement() *ast.BlockStatement {
 	return block
 }
 
-func (ce *CompilationEngine) parseExpressionListStatement() *ast.ExpressionListStatement {
+func (ce *Parser) parseExpressionListStatement() *ast.ExpressionListStatement {
 	expressionListStmt := &ast.ExpressionListStatement{Token: ce.curToken}
 	ce.advanceToken()
 	expressionListStmt.ExpressionList = []ast.Expression{}
@@ -351,7 +351,7 @@ func (ce *CompilationEngine) parseExpressionListStatement() *ast.ExpressionListS
 	return expressionListStmt
 }
 
-func (ce *CompilationEngine) parseParameterListStatement() *ast.ParameterListStatement {
+func (ce *Parser) parseParameterListStatement() *ast.ParameterListStatement {
 	parameterListStmt := &ast.ParameterListStatement{Token: ce.curToken}
 	ce.advanceToken()
 	parameterListStmt.ParameterList = []ast.ParameterStatement{}
@@ -370,7 +370,7 @@ func (ce *CompilationEngine) parseParameterListStatement() *ast.ParameterListSta
 	return parameterListStmt
 }
 
-func (ce *CompilationEngine) parseParameterStatement() *ast.ParameterStatement {
+func (ce *Parser) parseParameterStatement() *ast.ParameterStatement {
 	parameterStmt := &ast.ParameterStatement{Token: ce.curToken}
 	if ce.curToken.Type != token.KEYWORD && ce.curToken.Type != token.IDENTIFIER {
 		return nil
@@ -384,7 +384,7 @@ func (ce *CompilationEngine) parseParameterStatement() *ast.ParameterStatement {
 	return parameterStmt
 }
 
-func (ce *CompilationEngine) parseExpression() ast.Expression {
+func (ce *Parser) parseExpression() ast.Expression {
 	expressionToken := ce.curToken
 	prefixTerm := ce.parseTerm()
 	InfixSymbol := map[token.Symbol]token.Symbol{ // 中置演算子となりうるSymbol
@@ -411,7 +411,7 @@ func (ce *CompilationEngine) parseExpression() ast.Expression {
 	}
 }
 
-func (ce *CompilationEngine) parseTerm() ast.Term {
+func (ce *Parser) parseTerm() ast.Term {
 	switch ce.curToken.Type {
 	case token.INTCONST:
 		return ce.parseIntegerConstTerm()
@@ -442,7 +442,7 @@ func (ce *CompilationEngine) parseTerm() ast.Term {
 	return nil
 }
 
-func (ce *CompilationEngine) parseIntegerConstTerm() *ast.IntergerConstTerm {
+func (ce *Parser) parseIntegerConstTerm() *ast.IntergerConstTerm {
 	value, err := strconv.ParseInt(ce.curToken.Literal, 0, 64)
 	if err != nil {
 		panic(fmt.Sprintf("could not parse %q as integer", ce.curToken.Literal))
@@ -450,22 +450,22 @@ func (ce *CompilationEngine) parseIntegerConstTerm() *ast.IntergerConstTerm {
 	return &ast.IntergerConstTerm{Token: ce.curToken, Value: value}
 }
 
-func (ce *CompilationEngine) parseIdentifierTerm() *ast.IdentifierTerm {
+func (ce *Parser) parseIdentifierTerm() *ast.IdentifierTerm {
 	return &ast.IdentifierTerm{Token: ce.curToken, Value: ce.curToken.Literal}
 }
 
-func (ce *CompilationEngine) parseStringConstTerm() *ast.StringConstTerm {
+func (ce *Parser) parseStringConstTerm() *ast.StringConstTerm {
 	return &ast.StringConstTerm{Token: ce.curToken, Value: ce.curToken.Literal}
 }
 
-func (ce *CompilationEngine) parseKeyWordConstTerm() *ast.KeywordConstTerm {
+func (ce *Parser) parseKeyWordConstTerm() *ast.KeywordConstTerm {
 	if token.KeyWord(ce.curToken.Literal) != token.NULL && token.KeyWord(ce.curToken.Literal) != (token.TRUE) && token.KeyWord(ce.curToken.Literal) != token.FALSE && token.KeyWord(ce.curToken.Literal) != token.THIS {
 		panic(fmt.Sprintf("could not parse %s as keywordConst", ce.curToken.Literal))
 	}
 	return &ast.KeywordConstTerm{Token: ce.curToken, KeyWord: token.KeyWord(ce.curToken.Literal)}
 }
 
-func (ce *CompilationEngine) parseSubroutineCallTerm() *ast.SubroutineCallTerm {
+func (ce *Parser) parseSubroutineCallTerm() *ast.SubroutineCallTerm {
 	subroutineCallTerm := &ast.SubroutineCallTerm{Token: ce.curToken}
 	if token.Symbol(ce.nextToken.Literal) == token.DOT {
 		subroutineCallTerm.ClassName = ce.curToken
@@ -483,7 +483,7 @@ func (ce *CompilationEngine) parseSubroutineCallTerm() *ast.SubroutineCallTerm {
 	return subroutineCallTerm
 }
 
-func (ce *CompilationEngine) parseArrayElementTerm() *ast.ArrayElementTerm {
+func (ce *Parser) parseArrayElementTerm() *ast.ArrayElementTerm {
 	arrayElementTerm := &ast.ArrayElementTerm{Token: ce.curToken, ArrayName: ce.curToken}
 	ce.advanceToken()
 	if token.Symbol(ce.curToken.Literal) != token.LBRACKET {
@@ -499,14 +499,14 @@ func (ce *CompilationEngine) parseArrayElementTerm() *ast.ArrayElementTerm {
 	return arrayElementTerm
 }
 
-func (ce *CompilationEngine) parsePrefixTerm() *ast.PrefixTerm {
+func (ce *Parser) parsePrefixTerm() *ast.PrefixTerm {
 	prefixTerm := &ast.PrefixTerm{Token: ce.curToken, Prefix: token.Symbol(ce.curToken.Literal)}
 	ce.advanceToken()
 	prefixTerm.Value = ce.parseTerm()
 	return prefixTerm
 }
 
-func (ce *CompilationEngine) parseBracketTerm() *ast.BracketTerm {
+func (ce *Parser) parseBracketTerm() *ast.BracketTerm {
 	bracketTerm := &ast.BracketTerm{Token: ce.curToken}
 	ce.advanceToken()
 	expression := ce.parseExpression()
@@ -518,15 +518,15 @@ func (ce *CompilationEngine) parseBracketTerm() *ast.BracketTerm {
 	return bracketTerm
 }
 
-func (ce *CompilationEngine) curTokenIs(t token.TokenType) bool {
+func (ce *Parser) curTokenIs(t token.TokenType) bool {
 	return ce.curToken.Type == t
 }
 
-func (ce *CompilationEngine) nextTokenIs(t token.TokenType) bool {
+func (ce *Parser) nextTokenIs(t token.TokenType) bool {
 	return ce.nextToken.Type == t
 }
 
-func (ce *CompilationEngine) expectNext(t token.TokenType) bool {
+func (ce *Parser) expectNext(t token.TokenType) bool {
 	if ce.nextTokenIs(t) {
 		ce.advanceToken()
 		return true
