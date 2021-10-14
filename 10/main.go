@@ -9,35 +9,33 @@ import (
 func main() {
 	jt := tokenizer.New(`
 	class Main {
+    static boolean test;   
+                           
     function void main() {
-        var Array a;
-        var int length;
-        var int i, sum;
-	
-	let length = Keyboard.readInt("HOW MANY NUMBERS? ");
-	let a = Array.new(length);
-	let i = 0;
-	
-	while (i < length) {
-	    let a[i] = Keyboard.readInt("ENTER THE NEXT NUMBER: ");
-	    let i = i + 1;
-	}
-	
-	let i = 0;
-	let sum = 0;
-	
-	while (i < length) {
-	    let sum = sum + a[i];
-	    let i = i + 1;
-	}
-	
-	do Output.printString("THE AVERAGE IS: ");
-	do Output.printInt(sum / length);
-	do Output.println();
-	
-	return;
+      var SquareGame game;
+      let game = SquareGame.new();
+      do game.run();
+      do game.dispose();
+      return;
     }
-}
+
+    function void more() { 
+        var int i, j;      
+        var String s;
+        var Array a;
+        if (false) {
+            let s = "string constant";
+            let s = null;
+            let a[1] = a[2];
+        }
+        else {           
+            let i = i * (-j);
+            let j = j / (-2);   
+            let i = i | j;
+        }
+        return;
+    }
+} 
 
 `)
 	ce := compilationengine.New(jt)

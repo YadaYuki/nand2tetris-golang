@@ -106,7 +106,7 @@ func (cs *ClassStatement) Xml() string {
 }
 
 type SubroutineDecStatement struct {
-	Token          token.Token // KEYWORD:"class"
+	Token          token.Token // KEYWORD:"constructor" or "method" or "function"
 	ReturnType     token.Token // KEYWORD:"void" or IDENTIFIER
 	Name           token.Token // IDENTIFIER
 	ParameterList  *ParameterListStatement
@@ -140,9 +140,9 @@ func (sds *SubroutineDecStatement) Xml() string {
 }
 
 type SubroutineBodyStatement struct {
-	Token      token.Token // SYMBOL:"{"
+	Token      token.Token // "{"
 	VarDecList []VarDecStatement
-	Statements *BlockStatement
+	Statements []Statement
 }
 
 func (sbs *SubroutineBodyStatement) statementNode() {}
@@ -155,7 +155,9 @@ func (sbs *SubroutineBodyStatement) String() string {
 	for _, varDec := range sbs.VarDecList {
 		out.WriteString(varDec.String())
 	}
-	out.WriteString(sbs.Statements.String())
+	for _, stmt := range sbs.Statements {
+		out.WriteString(stmt.String())
+	}
 	out.WriteString("}")
 	return out.String()
 }
@@ -167,8 +169,11 @@ func (sbs *SubroutineBodyStatement) Xml() string {
 	for _, varDec := range sbs.VarDecList {
 		out.WriteString(varDec.Xml())
 	}
-
-	out.WriteString(sbs.Statements.Xml())
+	out.WriteString("<statements>")
+	for _, stmt := range sbs.Statements {
+		out.WriteString(stmt.Xml())
+	}
+	out.WriteString("</statements>")
 	out.WriteString(symbolXml("}"))
 	out.WriteString("</subroutineBody>")
 	return out.String()
@@ -254,7 +259,7 @@ func (rs *ReturnStatement) Xml() string {
 type DoStatement struct {
 	Token              token.Token // Keyword:"do"
 	ClassName          token.Token
-	VarName            token.Token
+	SubroutineName     token.Token
 	ExpressionListStmt *ExpressionListStatement
 }
 
@@ -268,7 +273,7 @@ func (ds *DoStatement) String() string {
 	if ds.ClassName.Literal != "" {
 		out.WriteString(ds.ClassName.Literal + ".")
 	}
-	out.WriteString(ds.VarName.Literal)
+	out.WriteString(ds.SubroutineName.Literal)
 	out.WriteString(ds.ExpressionListStmt.String())
 	out.WriteString(";")
 	return out.String()
@@ -281,7 +286,7 @@ func (ds *DoStatement) Xml() string {
 	if ds.ClassName.Literal != "" {
 		out.WriteString(identifierXml(ds.ClassName.Literal) + symbolXml("."))
 	}
-	out.WriteString(identifierXml(ds.VarName.Literal))
+	out.WriteString(identifierXml(ds.SubroutineName.Literal))
 	out.WriteString(ds.ExpressionListStmt.Xml())
 	out.WriteString(symbolXml(";"))
 	out.WriteString("</doStatement>")
@@ -388,13 +393,21 @@ func (ifs *IfStatement) String() string {
 
 func (ifs *IfStatement) Xml() string {
 	var out bytes.Buffer
+	out.WriteString("<ifStatement>")
 	out.WriteString(keywordXml("if"))
+	out.WriteString(symbolXml("("))
 	out.WriteString(ifs.Condition.Xml())
+	out.WriteString(symbolXml(")"))
+	out.WriteString(symbolXml("{"))
 	out.WriteString(ifs.Consequence.Xml())
+	out.WriteString(symbolXml("}"))
 	if ifs.Alternative != nil {
 		out.WriteString(keywordXml("else"))
+		out.WriteString(symbolXml("{"))
 		out.WriteString(ifs.Alternative.Xml())
+		out.WriteString(symbolXml("}"))
 	}
+	out.WriteString("</ifStatement>")
 	return out.String()
 }
 
@@ -532,9 +545,9 @@ func (pls *ParameterListStatement) Xml() string {
 }
 
 type ParameterStatement struct {
-	Token token.Token // 式の最初のトークン
-	Type  token.KeyWord
-	Name  string
+	Token     token.Token // 式の最初のトークン
+	ValueType token.Token // "int","char","boolean",{class name}
+	Name      string
 }
 
 func (ps *ParameterStatement) statementNode() {}
@@ -542,11 +555,11 @@ func (ps *ParameterStatement) statementNode() {}
 func (ps *ParameterStatement) TokenLiteral() string { return ps.Token.Literal }
 
 func (ps *ParameterStatement) String() string {
-	return string(ps.Type) + " " + ps.Name
+	return ps.ValueType.String() + " " + ps.Name
 }
 
 func (ps *ParameterStatement) Xml() string {
-	return keywordXml(string(ps.Type)) + identifierXml(ps.Name)
+	return ps.ValueType.Xml() + identifierXml(ps.Name)
 }
 
 type SingleExpression struct {
@@ -672,7 +685,7 @@ func (kct *KeywordConstTerm) Xml() string {
 type SubroutineCallTerm struct {
 	Token              token.Token // FunctionName
 	ClassName          token.Token
-	VarName            token.Token
+	SubroutineName     token.Token
 	ExpressionListStmt *ExpressionListStatement
 }
 
@@ -685,7 +698,7 @@ func (sct *SubroutineCallTerm) String() string {
 	if sct.ClassName.Literal != "" {
 		out.WriteString(sct.ClassName.Literal + ".")
 	}
-	out.WriteString(sct.VarName.Literal)
+	out.WriteString(sct.SubroutineName.Literal)
 	out.WriteString(sct.ExpressionListStmt.String())
 	return out.String()
 }
@@ -695,7 +708,7 @@ func (sct *SubroutineCallTerm) Xml() string {
 	if sct.ClassName.Literal != "" {
 		out.WriteString(sct.ClassName.Xml() + symbolXml("."))
 	}
-	out.WriteString(sct.VarName.Xml())
+	out.WriteString(sct.SubroutineName.Xml())
 	out.WriteString(sct.ExpressionListStmt.Xml())
 	return termXml(out.String())
 }

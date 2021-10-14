@@ -7,8 +7,8 @@
 
 /** Initializes a new Square Dance game and starts running it. */
 class Main {
-    static boolean test;    // Added for testing -- there is no static keyword
-                            // in the Square files.
+    static boolean test;   
+                           
     function void main() {
       var SquareGame game;
       let game = SquareGame.new();
@@ -17,8 +17,8 @@ class Main {
       return;
     }
 
-    function void more() {  // Added to test Jack syntax that is not used in
-        var int i, j;       // the Square files.
+    function void more() { 
+        var int i, j;      
         var String s;
         var Array a;
         if (false) {
@@ -26,9 +26,9 @@ class Main {
             let s = null;
             let a[1] = a[2];
         }
-        else {              // There is no else keyword in the Square files.
+        else {           
             let i = i * (-j);
-            let j = j / (-2);   // note: unary negate constant 2
+            let j = j / (-2);   
             let i = i | j;
         }
         return;
