@@ -8,10 +8,10 @@ type SymbolTable struct {
 	ClassScopeSymbolTable  map[string]Symbol
 	MethodScopeSymbolTable map[string]Symbol
 	Scope                  Scope
-	CurrentStaticIdx       int
-	CurrentFieldIdx        int
-	CurrentArgumentIdx     int
-	CurrentVarIdx          int
+	currentStaticIdx       int
+	currentFieldIdx        int
+	currentArgumentIdx     int
+	currentVarIdx          int
 }
 
 type Symbol struct {
@@ -57,17 +57,17 @@ func (st *SymbolTable) Define(name string, varType string, varKind VarKind) erro
 
 	switch varKind {
 	case STATIC:
-		symbol.Idx = st.CurrentStaticIdx
-		st.CurrentStaticIdx++
+		symbol.Idx = st.currentStaticIdx
+		st.currentStaticIdx++
 	case FIELD:
-		symbol.Idx = st.CurrentFieldIdx
-		st.CurrentFieldIdx++
+		symbol.Idx = st.currentFieldIdx
+		st.currentFieldIdx++
 	case ARGUMENT:
-		symbol.Idx = st.CurrentArgumentIdx
-		st.CurrentArgumentIdx++
+		symbol.Idx = st.currentArgumentIdx
+		st.currentArgumentIdx++
 	case VAR:
-		symbol.Idx = st.CurrentVarIdx
-		st.CurrentVarIdx++
+		symbol.Idx = st.currentVarIdx
+		st.currentVarIdx++
 	default:
 		return errors.New("") // TODO: Add Error
 	}

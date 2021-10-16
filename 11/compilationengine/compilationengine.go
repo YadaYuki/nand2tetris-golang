@@ -78,7 +78,8 @@ func (ce *CompilationEngine) CompileClassStatement(statementAst *ast.ClassStatem
 
 func (ce *CompilationEngine) CompileSubroutineDecStatement(statementAst *ast.SubroutineDecStatement) error {
 	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, statementAst.Name.Literal), 0)
-	_, statements := statementAst.SubroutineBody.VarDecList, statementAst.SubroutineBody.Statements.Statements
+	// startSubroutine ??
+	_, statements := statementAst.SubroutineBody.VarDecList, statementAst.SubroutineBody.Statements
 	for _, stmt := range statements {
 		ce.CompileStatement(stmt)
 	}
@@ -154,7 +155,7 @@ func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) er
 	for i := range expressionListStmt.ExpressionList {
 		ce.CompileExpression(expressionListStmt.ExpressionList[i])
 	}
-	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.String(), doStatement.VarName.String()), len(expressionListStmt.ExpressionList))
+	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.String(), doStatement.SubroutineName.String()), len(expressionListStmt.ExpressionList))
 	ce.WritePop(vmwriter.TEMP, 0)
 	return nil
 }

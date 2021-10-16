@@ -21,9 +21,9 @@ func TestLetStatements(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		letStmt := ce.parseLetStatement()
+		letStmt := ce.ParseLetStatement()
 		if letStmt == nil {
-			t.Fatalf("parseLetStatement() returned nil")
+			t.Fatalf("ParseLetStatement() returned nil")
 		}
 		if letStmt.TokenLiteral() != "let" {
 			t.Errorf("s.TokenLiteral not 'let'. got %q", letStmt.TokenLiteral())
@@ -52,9 +52,9 @@ func TestLetArrayElemetStatements(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		letStmt := ce.parseLetStatement()
+		letStmt := ce.ParseLetStatement()
 		if letStmt == nil {
-			t.Fatalf("parseLetStatement() returned nil")
+			t.Fatalf("ParseLetStatement() returned nil")
 		}
 		if letStmt.TokenLiteral() != "let" {
 			t.Errorf("s.TokenLiteral not 'let'. got %q", letStmt.TokenLiteral())
@@ -84,9 +84,9 @@ func TestReturnStatements(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		returnStmt := ce.parseReturnStatement()
+		returnStmt := ce.ParseReturnStatement()
 		if returnStmt == nil {
-			t.Fatalf("parseReturnStatement() returned nil")
+			t.Fatalf("ParseReturnStatement() returned nil")
 		}
 		if returnStmt.TokenLiteral() != string(token.RETURN) {
 			t.Errorf("s.TokenLiteral not %s. got %q", token.RETURN, returnStmt.TokenLiteral())
@@ -116,7 +116,7 @@ func TestParseDoStatements(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		doStmt := ce.parseDoStatement()
+		doStmt := ce.ParseDoStatement()
 		if token.KeyWord(doStmt.TokenLiteral()) != token.DO {
 			t.Errorf("s.TokenLiteral not %s. got %q", token.DO, doStmt.TokenLiteral())
 		}
@@ -144,7 +144,7 @@ func TestVarDecStatements(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		varDecStmt := ce.parseVarDecStatement()
+		varDecStmt := ce.ParseVarDecStatement()
 		if varDecStmt.TokenLiteral() != string(token.VAR) {
 			t.Errorf("varDecStmt.TokenLiteral not %s. got %q", token.VAR, varDecStmt.TokenLiteral())
 		}
@@ -176,9 +176,9 @@ func TestClassVarDecStatements(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		classVarDecStmt := ce.parseClassVarDecStatement()
+		classVarDecStmt := ce.ParseClassVarDecStatement()
 		if classVarDecStmt == nil {
-			t.Fatalf("parseClassVarDecStatement() returned nil")
+			t.Fatalf("ParseClassVarDecStatement() returned nil")
 		}
 		if tt.expectedClassVarDecType != token.KeyWord(classVarDecStmt.Token.Literal) {
 			t.Fatalf("ClassVarDecType should be %s. got %s", tt.expectedClassVarDecType, classVarDecStmt.Token.Literal)
@@ -198,7 +198,7 @@ func TestParseIntConstTermExpression(t *testing.T) {
 	input := `33`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseExpression()
+	expression := ce.ParseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression is not ast.SingleExpression,got = %T", expression)
@@ -216,7 +216,7 @@ func TestParseIdentifierTerm(t *testing.T) {
 	input := `hoge`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	identifierTerm := ce.parseIdentifierTerm()
+	identifierTerm := ce.ParseIdentifierTerm()
 	if identifierTerm.String() != "hoge" {
 		t.Fatalf("identifierTerm.Value is not hoge,got = %s", identifierTerm.Value)
 	}
@@ -226,7 +226,7 @@ func TestParseStringConstTerm(t *testing.T) {
 	input := `"hoge hoge hoge"`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	stringConstTerm := ce.parseStringConstTerm()
+	stringConstTerm := ce.ParseStringConstTerm()
 	if stringConstTerm.Value != "hoge hoge hoge" {
 		t.Fatalf("stringConstTerm.Value is not %s,got = %s", "hoge hoge hoge", stringConstTerm.Value)
 	}
@@ -236,7 +236,7 @@ func TestParseIntegerConstTerm(t *testing.T) {
 	input := `1234`
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	intergerConstTerm := ce.parseIntegerConstTerm()
+	intergerConstTerm := ce.ParseIntegerConstTerm()
 	if intergerConstTerm.Value != 1234 {
 		t.Fatalf("intergerConstTerm.Value is not %d,got = %d", 1234, intergerConstTerm.Value)
 	}
@@ -255,7 +255,7 @@ func TestParseKeyWordConstTerm(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		keyWordConstTerm := ce.parseKeyWordConstTerm()
+		keyWordConstTerm := ce.ParseKeyWordConstTerm()
 		if keyWordConstTerm.KeyWord != tt.expectedKeyWord {
 			t.Fatalf("keyWordConstTerm.KeyWord is not %s,got = %s", tt.expectedKeyWord, keyWordConstTerm.KeyWord)
 		}
@@ -274,9 +274,9 @@ func TestParseIfStatement(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		ifStmt := ce.parseIfStatement()
+		ifStmt := ce.ParseIfStatement()
 		if ifStmt == nil {
-			t.Fatalf("parseIfStatement() returned nil")
+			t.Fatalf("ParseIfStatement() returned nil")
 		}
 		if ifStmt.Condition.String() != tt.expectedConditionString {
 			t.Fatalf("ifStmt.Condition.String() should be %s,got = %s", tt.expectedConditionString, ifStmt.Condition.String())
@@ -301,7 +301,7 @@ func TestParseWhileStatement(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		whileStmt := ce.parseWhileStatement()
+		whileStmt := ce.ParseWhileStatement()
 		if whileStmt.Condition.String() != tt.expectedConditionString {
 			t.Fatalf("whileStmt.Condition.String() should be %s,got = %s", tt.expectedConditionString, whileStmt.Condition.String())
 		}
@@ -323,7 +323,7 @@ func TestParseExpressionListStatement(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		expressionListStmt := ce.parseExpressionListStatement()
+		expressionListStmt := ce.ParseExpressionListStatement()
 		if len(expressionListStmt.ExpressionList) != tt.expectedExpressionCount {
 			t.Fatalf("len(program.Statements) should be %d,got = %d", tt.expectedExpressionCount, len(expressionListStmt.ExpressionList))
 		}
@@ -342,7 +342,7 @@ func TestParseSubroutineCallTerm(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		subroutineCallTerm := ce.parseSubroutineCallTerm()
+		subroutineCallTerm := ce.ParseSubroutineCallTerm()
 		if subroutineCallTerm.ClassName.Literal != tt.expectedClassName {
 			t.Fatalf("subroutineCallTerm.ClassName.Literal is not %s ,got = %s", tt.expectedClassName, subroutineCallTerm.ClassName.Literal)
 		}
@@ -366,7 +366,7 @@ func TestParseArrayElementTerm(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		arrayElemTerm := ce.parseArrayElementTerm()
+		arrayElemTerm := ce.ParseArrayElementTerm()
 		if arrayElemTerm.ArrayName.Literal != tt.expectedArrayName {
 			t.Fatalf("arrayElemTerm.ArrayName.Literal is not %s,got = %s", tt.expectedArrayName, arrayElemTerm.ArrayName.Literal)
 		}
@@ -387,7 +387,7 @@ func TestParsePrefixTerm(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		prefixTerm := ce.parsePrefixTerm()
+		prefixTerm := ce.ParsePrefixTerm()
 		if prefixTerm.Value.String() != tt.expectedValueString {
 			t.Fatalf("prefixTerm.Value.String() is not %s ,got = %s", tt.expectedValueString, prefixTerm.Value.String())
 		}
@@ -408,7 +408,7 @@ func TestParseBracketTerm(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		bracketTerm := ce.parseBracketTerm()
+		bracketTerm := ce.ParseBracketTerm()
 		if bracketTerm.Value.String() != tt.expectedValueString {
 			t.Fatalf("value.Value is not %s,got %s", tt.expectedValueString, bracketTerm.Value.String())
 		}
@@ -430,9 +430,9 @@ func TestParseParameterStatement(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		parameterStmt := ce.parseParameterStatement()
+		parameterStmt := ce.ParseParameterStatement()
 		if parameterStmt == nil {
-			t.Fatalf("parse '%s' returned nil ", tt.input)
+			t.Fatalf("Parse '%s' returned nil ", tt.input)
 		}
 		if parameterStmt.ValueType.Literal != tt.expectedTypeString {
 			t.Fatalf("stmt.Type is not %s ,got = %s", tt.expectedTypeString, parameterStmt.ValueType.Literal)
@@ -464,7 +464,7 @@ func TestParseParameterListStatement(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		parameterListStmt := ce.parseParameterListStatement()
+		parameterListStmt := ce.ParseParameterListStatement()
 		for idx, testCase := range tt.expectedParameters {
 			if parameterListStmt.ParameterList[idx].Name != testCase.expectedIdentifier {
 				t.Fatalf("stmt.ParameterList[%d].Name is not %s,got %s", idx, testCase.expectedIdentifier, parameterListStmt.ParameterList[idx].Name)
@@ -487,9 +487,9 @@ func TestParseBlockStatement(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		blockStmt := ce.parseBlockStatement()
+		blockStmt := ce.ParseBlockStatement()
 		if blockStmt == nil {
-			t.Fatalf("parseBlockStatement() returned nil")
+			t.Fatalf("ParseBlockStatement() returned nil")
 		}
 		if tt.expectedStatementCount != len(blockStmt.Statements) {
 			t.Fatalf("StatementCount should be %d. got %d", tt.expectedStatementCount, len(blockStmt.Statements))
@@ -512,7 +512,7 @@ func TestParseClassStatement(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		stmt := ce.parseClassStatement()
+		stmt := ce.ParseClassStatement()
 		if stmt.Name.Literal != tt.expectedClassName {
 			t.Fatalf("ClassName is not  %s,got = %s", tt.expectedClassName, stmt.Name.Literal)
 		}
@@ -541,7 +541,7 @@ func TestParseSubroutineBodyStatement(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		subroutineBodyStmt := ce.parseSubroutineBodyStatement()
+		subroutineBodyStmt := ce.ParseSubroutineBodyStatement()
 		if len(subroutineBodyStmt.VarDecList) != tt.expectedVarDecCount {
 			t.Fatalf("len(subroutineBodyStmt.VarDecList) should be %d ,got = %d", len(subroutineBodyStmt.VarDecList), tt.expectedVarDecCount)
 		}
@@ -569,7 +569,7 @@ func TestParseSubroutineDecStatement(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		subroutineDecStmt := ce.parseSubroutineDecStatement()
+		subroutineDecStmt := ce.ParseSubroutineDecStatement()
 		if token.KeyWord(subroutineDecStmt.Token.Literal) != tt.expectedSubroutineType {
 			t.Fatalf("subroutineDecStmt.Token.Literal is not %s ,got = %s", subroutineDecStmt.Token.Literal, tt.expectedSubroutineType)
 		}
@@ -600,7 +600,7 @@ func TestParseTerm(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		term := ce.parseTerm()
+		term := ce.ParseTerm()
 		if term.String() != tt.expectedString {
 			t.Fatalf("term.String() should be %s. got %s", tt.expectedString, term.String())
 		}
@@ -611,7 +611,7 @@ func TestParseSingleExpression(t *testing.T) {
 	input := "1"
 	jt := tokenizer.New(input)
 	ce := New(jt)
-	expression := ce.parseExpression()
+	expression := ce.ParseExpression()
 	singleExpression, ok := expression.(*ast.SingleExpression)
 	if !ok {
 		t.Fatalf("expression should be *ast.SingleExpression. got %T", expression)
@@ -639,7 +639,7 @@ func TestParseInfixExpression(t *testing.T) {
 	for _, tt := range testCases {
 		jt := tokenizer.New(tt.input)
 		ce := New(jt)
-		expression := ce.parseExpression()
+		expression := ce.ParseExpression()
 		infixExpression, ok := expression.(*ast.InfixExpression)
 		if !ok {
 			t.Fatalf("expression should be *ast.InfixExpression. got %T", expression)

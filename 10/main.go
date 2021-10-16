@@ -9,60 +9,90 @@ import (
 func main() {
 	jt := tokenizer.New(`
     
-class SquareGame {
-    field Square square; 
-    field int direction; 
-                         
- 
- 
-    constructor SquareGame new() {
-       let square = Square.new(0, 0, 30);
-       let direction = 0;  
-       return this;
-    }
-    method void dispose() {
-       do square.dispose();
-       do Memory.deAlloc(this);
-       return;
-    }
- 
-    method void moveSquare() {
-       if (direction = 1) { do square.moveUp(); }
-       if (direction = 2) { do square.moveDown(); }
-       if (direction = 3) { do square.moveLeft(); }
-       if (direction = 4) { do square.moveRight(); }
-       do Sys.wait(5);  
-       return;
-    }
- 
- 
-    method void run() {
-       var char key;
-       var boolean exit;
-       let exit = false;
-       
-       while (~exit) {
-         
-          while (key = 0) {
-             let key = Keyboard.keyPressed();
-             do moveSquare();
+   class Bat {
+
+      field int x, y;          
+      field int width, height; 
+      field int direction;     
+  
+      constructor Bat new(int Ax, int Ay, int Awidth, int Aheight) {
+          let x = Ax;
+          let y = Ay;
+          let width = Awidth;
+          let height = Aheight;
+          let direction = 2;
+          do show();
+          return this;
+      }
+  
+      method void dispose() {
+          do Memory.deAlloc(this);
+          return;
+      }
+  
+      method void show() {
+          do Screen.setColor(true);
+          do draw();
+          return;
+      }
+  
+      
+      method void hide() {
+          do Screen.setColor(false);
+          do draw();
+          return;
+      }
+  
+      method void draw() {
+          do Screen.drawRectangle(x, y, x + width, y + height);
+          return;
+      }
+  
+      
+      method void setDirection(int Adirection) {
+          let direction = Adirection;
+          return;
+      }
+  
+      
+      method int getLeft() {
+          return x;
+      }
+  
+      
+      method int getRight() {
+          return x + width;
+      }
+  
+      
+      method void setWidth(int Awidth) {
+          do hide();
+          let width = Awidth;
+          do show();
+          return;
+      }
+  
+      method void move() {
+         if (direction = 1) {
+              let x = x - 4;
+              if (x < 0) { let x = 0; }
+              do Screen.setColor(false);
+              do Screen.drawRectangle((x + width) + 1, y, (x + width) + 4, y + height);
+              do Screen.setColor(true);
+              do Screen.drawRectangle(x, y, x + 3, y + height);
           }
-          if (key = 81)  { let exit = true; }    
-          if (key = 90)  { do square.decSize(); }
-          if (key = 88)  { do square.incSize(); }
-          if (key = 131) { let direction = 1; }  
-          if (key = 133) { let direction = 2; }  
-          if (key = 130) { let direction = 3; }  
-          if (key = 132) { let direction = 4; }  
- 
-          while (~(key = 0)) {
-             let key = Keyboard.keyPressed();
-             do moveSquare();
+          else {
+              let x = x + 4;
+              if ((x + width) > 511) { let x = 511 - width; }
+              do Screen.setColor(false);
+              do Screen.drawRectangle(x - 4, y, x - 1, y + height);
+              do Screen.setColor(true);
+              do Screen.drawRectangle((x + width) - 3, y, x + width, y + height);
           }
-      } 
-      return;
-    }
- }
+          return;
+      }
+  }
+  
  
  
  
