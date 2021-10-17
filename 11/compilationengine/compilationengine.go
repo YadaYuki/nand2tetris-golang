@@ -109,6 +109,14 @@ func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.Infi
 			ce.WriteArithmetic(vmwriter.ADD)
 			return nil
 		}
+	case token.MINUS:
+		{
+			ce.WriteArithmetic(vmwriter.SUB)
+		}
+	case token.EQ:
+		{
+			ce.WriteArithmetic(vmwriter.EQ)
+		}
 	case token.ASTERISK:
 		{
 			ce.WriteCall("Math.multiply", 2)

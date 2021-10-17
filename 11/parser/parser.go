@@ -176,7 +176,7 @@ func (p *Parser) ParseLetStatement() *ast.LetStatement {
 		p.advanceToken()
 	}
 
-	if token.Symbol(p.curToken.Literal) != token.ASSIGN {
+	if token.Symbol(p.curToken.Literal) != token.EQ {
 		return nil
 	}
 
@@ -388,17 +388,15 @@ func (p *Parser) ParseExpression() ast.Expression {
 	expressionToken := p.curToken
 	prefixTerm := p.ParseTerm()
 	InfixSymbol := map[token.Symbol]token.Symbol{ // 中置演算子となりうるSymbol
-		token.ASSIGN:   token.ASSIGN,
+		token.EQ:       token.EQ,
 		token.PLUS:     token.PLUS,
 		token.MINUS:    token.MINUS,
 		token.ASTERISK: token.ASTERISK,
 		token.SLASH:    token.SLASH,
 		token.LT:       token.LT,
 		token.GT:       token.GT,
-		// token.EQ:       token.EQ,
-		// token.NOT_EQ: token.NOT_EQ,
-		token.OR:  token.OR,
-		token.AMP: token.AMP,
+		token.OR:       token.OR,
+		token.AMP:      token.AMP,
 	}
 	if _, ok := InfixSymbol[token.Symbol(p.nextToken.Literal)]; ok {
 		p.advanceToken()
