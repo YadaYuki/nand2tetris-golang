@@ -51,6 +51,25 @@ func TestExpression(t *testing.T) {
 	}
 }
 
+func TestCompilePrefixTerm(t *testing.T) {
+	testCases := []struct {
+		expressionInput string
+		vmCode          string
+	}{
+		{"-7", "push constant 7" + value.NEW_LINE + "neg" + value.NEW_LINE},
+		{"~4", "push constant 4" + value.NEW_LINE + "not" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.expressionInput)
+		prefixTermAst := p.ParsePrefixTerm()
+		ce := newCompilationEngine("Main")
+		ce.CompilePrefixTerm(prefixTermAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("prefixTermAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestStringConstTerm(t *testing.T) {
 	testCases := []struct {
 		expressionInput string

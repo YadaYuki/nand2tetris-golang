@@ -119,7 +119,6 @@ func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.Infi
 			ce.WriteArithmetic(vmwriter.EQ)
 			return nil
 		}
-
 	case token.AMP:
 		{
 			ce.WriteArithmetic(vmwriter.AND)
@@ -145,7 +144,6 @@ func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.Infi
 			ce.WriteCall("Math.multiply", 2)
 			return nil
 		}
-
 	case token.SLASH:
 		{
 			ce.WriteCall("Math.divide", 2)
@@ -184,6 +182,19 @@ func (ce *CompilationEngine) CompileStringConstTerm(stringConstTerm *ast.StringC
 		ce.WriteCall("String.appendChar", 2)
 	}
 	return nil
+}
+
+func (ce *CompilationEngine) CompilePrefixTerm(prefixTerm *ast.PrefixTerm) error {
+	ce.CompileTerm(prefixTerm.Value)
+	switch prefixTerm.Prefix {
+	case token.MINUS:
+		ce.WriteArithmetic(vmwriter.NEG)
+		return nil
+	case token.BANG:
+		ce.WriteArithmetic(vmwriter.NOT)
+		return nil
+	}
+	return fmt.Errorf("prefixTerm.Prefix should be '-' or '~'. But got %s", prefixTerm.Prefix)
 }
 
 func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) error {
