@@ -30,11 +30,14 @@ func TestExpression(t *testing.T) {
 	}{
 		{"7", "push constant 7" + value.NEW_LINE},
 		{"7 + 8", "push constant 7" + value.NEW_LINE + "push constant 8" + value.NEW_LINE + "add" + value.NEW_LINE},
-		{"2 * 2", "push constant 2" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Math.multiply 2" + value.NEW_LINE},
-		{"4 * 3", "push constant 4" + value.NEW_LINE + "push constant 3" + value.NEW_LINE + "call Math.multiply 2" + value.NEW_LINE},
 		{"4 - 2", "push constant 4" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "sub" + value.NEW_LINE},
 		{"4 = 2", "push constant 4" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "eq" + value.NEW_LINE},
 		{"4 & 2", "push constant 4" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "and" + value.NEW_LINE},
+		{"4 | 2", "push constant 4" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "or" + value.NEW_LINE},
+		{"4 > 2", "push constant 4" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "gt" + value.NEW_LINE},
+		{"4 < 2", "push constant 4" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "lt" + value.NEW_LINE},
+		{"4 / 2", "push constant 4" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Math.divide 2" + value.NEW_LINE},
+		{"4 * 3", "push constant 4" + value.NEW_LINE + "push constant 3" + value.NEW_LINE + "call Math.multiply 2" + value.NEW_LINE},
 		{"(2+3)*(5+4)", "push constant 2" + value.NEW_LINE + "push constant 3" + value.NEW_LINE + "add" + value.NEW_LINE + "push constant 5" + value.NEW_LINE + "push constant 4" + value.NEW_LINE + "add" + value.NEW_LINE + "call Math.multiply 2" + value.NEW_LINE},
 	}
 	for _, tt := range testCases {

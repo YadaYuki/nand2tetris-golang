@@ -112,19 +112,43 @@ func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.Infi
 	case token.MINUS:
 		{
 			ce.WriteArithmetic(vmwriter.SUB)
+			return nil
 		}
 	case token.EQ:
 		{
 			ce.WriteArithmetic(vmwriter.EQ)
+			return nil
 		}
 
 	case token.AMP:
 		{
 			ce.WriteArithmetic(vmwriter.AND)
+			return nil
+		}
+	case token.OR:
+		{
+			ce.WriteArithmetic(vmwriter.OR)
+			return nil
+		}
+	case token.GT:
+		{
+			ce.WriteArithmetic(vmwriter.GT)
+			return nil
+		}
+	case token.LT:
+		{
+			ce.WriteArithmetic(vmwriter.LT)
+			return nil
 		}
 	case token.ASTERISK:
 		{
 			ce.WriteCall("Math.multiply", 2)
+			return nil
+		}
+
+	case token.SLASH:
+		{
+			ce.WriteCall("Math.divide", 2)
 			return nil
 		}
 	}
