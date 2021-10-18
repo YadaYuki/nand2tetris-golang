@@ -23,12 +23,12 @@ func New(jt *tokenizer.JackTokenizer) *Parser {
 	return p
 }
 
-// ParseProgram is parser for all program
+// ParseProgram is Parser for all program
 func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
 	for p.curToken.Type != token.EOF {
-		stmt := p.parseStatement()
+		stmt := p.ParseStatement()
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
@@ -42,46 +42,46 @@ func (p *Parser) advanceToken() {
 	p.nextToken, _ = p.jt.Advance()
 }
 
-func (p *Parser) parseStatement() ast.Statement {
+func (p *Parser) ParseStatement() ast.Statement {
 	if p.curToken.Type != token.KEYWORD {
 		panic(fmt.Sprintf("Initial Token Type should be KEYWORD. got %s(%s) ", p.curToken.Type, p.curToken.String()))
 	}
-	return p.parseKeyWord()
+	return p.ParseKeyWord()
 }
 
-func (p *Parser) parseKeyWord() ast.Statement {
+func (p *Parser) ParseKeyWord() ast.Statement {
 	keyWord, _ := tokenizer.KeyWord(p.curToken)
 	switch keyWord {
 	case token.LET:
-		return p.parseLetStatement()
+		return p.ParseLetStatement()
 	case token.RETURN:
-		return p.parseReturnStatement()
+		return p.ParseReturnStatement()
 	case token.DO:
-		return p.parseDoStatement()
+		return p.ParseDoStatement()
 	case token.VAR:
-		return p.parseVarDecStatement()
+		return p.ParseVarDecStatement()
 	case token.STATIC:
-		return p.parseClassVarDecStatement()
+		return p.ParseClassVarDecStatement()
 	case token.FIELD:
-		return p.parseClassVarDecStatement()
+		return p.ParseClassVarDecStatement()
 	case token.IF:
-		return p.parseIfStatement()
+		return p.ParseIfStatement()
 	case token.WHILE:
-		return p.parseWhileStatement()
+		return p.ParseWhileStatement()
 	case token.CLASS:
-		return p.parseClassStatement()
+		return p.ParseClassStatement()
 	case token.METHOD:
-		return p.parseSubroutineDecStatement()
+		return p.ParseSubroutineDecStatement()
 	case token.CONSTRUCTOR:
-		return p.parseSubroutineDecStatement()
+		return p.ParseSubroutineDecStatement()
 	case token.FUNCTION:
-		return p.parseSubroutineDecStatement()
+		return p.ParseSubroutineDecStatement()
 	default:
 		return nil
 	}
 }
 
-func (p *Parser) parseClassStatement() *ast.ClassStatement {
+func (p *Parser) ParseClassStatement() *ast.ClassStatement {
 	stmt := &ast.ClassStatement{Token: p.curToken}
 	if !p.expectNext(token.IDENTIFIER) {
 		return nil
@@ -95,13 +95,13 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 	stmt.ClassVarDecList = []ast.ClassVarDecStatement{}
 	for token.KeyWord(p.curToken.Literal) == token.STATIC || token.KeyWord(p.curToken.Literal) == token.FIELD {
 
-		classVarDec := p.parseClassVarDecStatement()
+		classVarDec := p.ParseClassVarDecStatement()
 		stmt.ClassVarDecList = append(stmt.ClassVarDecList, *classVarDec)
 		p.advanceToken()
 	}
 	stmt.SubroutineDecList = []ast.SubroutineDecStatement{}
 	for token.KeyWord(p.curToken.Literal) == token.CONSTRUCTOR || token.KeyWord(p.curToken.Literal) == token.FUNCTION || token.KeyWord(p.curToken.Literal) == token.METHOD {
-		subroutineDec := p.parseSubroutineDecStatement()
+		subroutineDec := p.ParseSubroutineDecStatement()
 		stmt.SubroutineDecList = append(stmt.SubroutineDecList, *subroutineDec)
 		p.advanceToken()
 	}
@@ -111,7 +111,7 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 	return stmt
 }
 
-func (p *Parser) parseSubroutineDecStatement() *ast.SubroutineDecStatement {
+func (p *Parser) ParseSubroutineDecStatement() *ast.SubroutineDecStatement {
 	stmt := &ast.SubroutineDecStatement{Token: p.curToken}
 	if !p.nextTokenIs(token.IDENTIFIER) && !p.nextTokenIs(token.KEYWORD) {
 		return nil
@@ -126,16 +126,16 @@ func (p *Parser) parseSubroutineDecStatement() *ast.SubroutineDecStatement {
 	if token.Symbol(p.curToken.Literal) != token.LPAREN {
 		return nil
 	}
-	stmt.ParameterList = p.parseParameterListStatement()
+	stmt.ParameterList = p.ParseParameterListStatement()
 	if token.Symbol(p.curToken.Literal) != token.RPAREN {
 		return nil
 	}
 	p.advanceToken()
-	stmt.SubroutineBody = p.parseSubroutineBodyStatement()
+	stmt.SubroutineBody = p.ParseSubroutineBodyStatement()
 	return stmt
 }
 
-func (p *Parser) parseSubroutineBodyStatement() *ast.SubroutineBodyStatement {
+func (p *Parser) ParseSubroutineBodyStatement() *ast.SubroutineBodyStatement {
 	stmt := &ast.SubroutineBodyStatement{Token: p.curToken}
 	if token.Symbol(p.curToken.Literal) != token.LBRACE {
 		return nil
@@ -143,13 +143,13 @@ func (p *Parser) parseSubroutineBodyStatement() *ast.SubroutineBodyStatement {
 	p.advanceToken()
 	stmt.VarDecList = []ast.VarDecStatement{}
 	for token.KeyWord(p.curToken.Literal) == token.VAR {
-		varDec := p.parseVarDecStatement()
+		varDec := p.ParseVarDecStatement()
 		stmt.VarDecList = append(stmt.VarDecList, *varDec)
 		p.advanceToken()
 	}
 	stmt.Statements = []ast.Statement{}
 	for token.Symbol(p.curToken.Literal) != token.RBRACE && !p.curTokenIs(token.EOF) {
-		statement := p.parseStatement()
+		statement := p.ParseStatement()
 		if statement != nil {
 			stmt.Statements = append(stmt.Statements, statement)
 		}
@@ -158,7 +158,7 @@ func (p *Parser) parseSubroutineBodyStatement() *ast.SubroutineBodyStatement {
 	return stmt
 }
 
-func (p *Parser) parseLetStatement() *ast.LetStatement {
+func (p *Parser) ParseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{Token: p.curToken}
 	if !p.expectNext(token.IDENTIFIER) {
 		return nil
@@ -168,7 +168,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	if token.Symbol(p.curToken.Literal) == token.LBRACKET {
 		p.advanceToken()
-		stmt.Idx = p.parseExpression()
+		stmt.Idx = p.ParseExpression()
 		p.advanceToken()
 		if token.Symbol(p.curToken.Literal) != token.RBRACKET {
 			return nil
@@ -176,13 +176,13 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		p.advanceToken()
 	}
 
-	if token.Symbol(p.curToken.Literal) != token.ASSIGN {
+	if token.Symbol(p.curToken.Literal) != token.EQ {
 		return nil
 	}
 
 	stmt.Symbol = p.curToken
 	p.advanceToken()
-	stmt.Value = p.parseExpression()
+	stmt.Value = p.ParseExpression()
 	p.advanceToken()
 	if token.Symbol(p.curToken.Literal) != token.SEMICOLON {
 		return nil
@@ -190,13 +190,13 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	return stmt
 }
 
-func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+func (p *Parser) ParseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{Token: p.curToken}
 	p.advanceToken()
 	if token.Symbol(p.curToken.Literal) == token.SEMICOLON {
 		return stmt
 	}
-	stmt.Value = p.parseExpression()
+	stmt.Value = p.ParseExpression()
 	p.advanceToken()
 	if token.Symbol(p.curToken.Literal) != token.SEMICOLON {
 		return nil
@@ -204,7 +204,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	return stmt
 }
 
-func (p *Parser) parseDoStatement() *ast.DoStatement {
+func (p *Parser) ParseDoStatement() *ast.DoStatement {
 	stmt := &ast.DoStatement{Token: p.curToken}
 	p.advanceToken()
 
@@ -218,7 +218,7 @@ func (p *Parser) parseDoStatement() *ast.DoStatement {
 	if token.Symbol(p.curToken.Literal) != token.LPAREN {
 		return nil
 	}
-	stmt.ExpressionListStmt = p.parseExpressionListStatement()
+	stmt.ExpressionListStmt = p.ParseExpressionListStatement()
 	p.advanceToken()
 	if token.Symbol(p.curToken.Literal) != token.SEMICOLON {
 		return nil
@@ -227,7 +227,7 @@ func (p *Parser) parseDoStatement() *ast.DoStatement {
 	return stmt
 }
 
-func (p *Parser) parseVarDecStatement() *ast.VarDecStatement {
+func (p *Parser) ParseVarDecStatement() *ast.VarDecStatement {
 	stmt := &ast.VarDecStatement{Token: p.curToken, Identifiers: []token.Token{}}
 	if token.KeyWord(p.nextToken.Literal) != token.INT && token.KeyWord(p.nextToken.Literal) != token.BOOLEAN && token.KeyWord(p.nextToken.Literal) != token.CHAR && !p.nextTokenIs(token.IDENTIFIER) {
 		return nil
@@ -243,7 +243,7 @@ func (p *Parser) parseVarDecStatement() *ast.VarDecStatement {
 	return stmt
 }
 
-func (p *Parser) parseClassVarDecStatement() *ast.ClassVarDecStatement {
+func (p *Parser) ParseClassVarDecStatement() *ast.ClassVarDecStatement {
 	stmt := &ast.ClassVarDecStatement{Token: p.curToken, Identifiers: []token.Token{}}
 	p.advanceToken()
 	if token.KeyWord(p.curToken.Literal) != token.INT && token.KeyWord(p.curToken.Literal) != token.BOOLEAN && token.KeyWord(p.curToken.Literal) != token.CHAR && !p.curTokenIs(token.IDENTIFIER) {
@@ -272,33 +272,33 @@ func (p *Parser) parseClassVarDecStatement() *ast.ClassVarDecStatement {
 	return stmt
 }
 
-func (p *Parser) parseIfStatement() *ast.IfStatement {
+func (p *Parser) ParseIfStatement() *ast.IfStatement {
 	stmt := &ast.IfStatement{Token: p.curToken}
 	p.advanceToken()
 	if token.Symbol(p.curToken.Literal) != token.LPAREN {
 		return nil
 	}
 	p.advanceToken()
-	stmt.Condition = p.parseExpression()
+	stmt.Condition = p.ParseExpression()
 	p.advanceToken()
 	if token.Symbol(p.curToken.Literal) != token.RPAREN {
 		return nil
 	}
 	p.advanceToken()
 
-	stmt.Consequence = p.parseBlockStatement()
+	stmt.Consequence = p.ParseBlockStatement()
 	if token.KeyWord(p.nextToken.Literal) == token.ELSE {
 		p.advanceToken() // advance "}" of "if(x){}"
 		p.advanceToken() // advance "else"
 		if token.Symbol(p.curToken.Literal) != token.LBRACE {
 			return nil
 		}
-		stmt.Alternative = p.parseBlockStatement()
+		stmt.Alternative = p.ParseBlockStatement()
 	}
 	return stmt
 }
 
-func (p *Parser) parseWhileStatement() *ast.WhileStatement {
+func (p *Parser) ParseWhileStatement() *ast.WhileStatement {
 	stmt := &ast.WhileStatement{Token: p.curToken}
 	if p.expectNext(token.SYMBOL) {
 		if token.Symbol(p.curToken.Literal) != token.LPAREN {
@@ -306,22 +306,22 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 		}
 	}
 	p.advanceToken()
-	stmt.Condition = p.parseExpression()
+	stmt.Condition = p.ParseExpression()
 	p.advanceToken()
 	if token.Symbol(p.curToken.Literal) != token.RPAREN {
 		return nil
 	}
 	p.advanceToken()
-	stmt.Statements = p.parseBlockStatement()
+	stmt.Statements = p.ParseBlockStatement()
 	return stmt
 }
 
-func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+func (p *Parser) ParseBlockStatement() *ast.BlockStatement {
 	block := &ast.BlockStatement{Token: p.curToken}
 	p.advanceToken()
 	block.Statements = []ast.Statement{}
 	for token.Symbol(p.curToken.Literal) != token.RBRACE && !p.curTokenIs(token.EOF) {
-		stmt := p.parseStatement()
+		stmt := p.ParseStatement()
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
 		}
@@ -330,17 +330,17 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	return block
 }
 
-func (p *Parser) parseExpressionListStatement() *ast.ExpressionListStatement {
+func (p *Parser) ParseExpressionListStatement() *ast.ExpressionListStatement {
 	expressionListStmt := &ast.ExpressionListStatement{Token: p.curToken}
 	p.advanceToken()
 	expressionListStmt.ExpressionList = []ast.Expression{}
 	for token.Symbol(p.curToken.Literal) != token.RPAREN {
-		expression := p.parseExpression()
+		expression := p.ParseExpression()
 		if expression != nil {
 			expressionListStmt.ExpressionList = append(expressionListStmt.ExpressionList, expression)
 		}
 		p.advanceToken()
-		if token.Symbol(p.curToken.Literal) == token.RPAREN { // ")"の場合はparseを終了
+		if token.Symbol(p.curToken.Literal) == token.RPAREN { // ")"の場合はParseを終了
 			break
 		} else if token.Symbol(p.curToken.Literal) == token.COMMA { // ","の場合はまだ式が存在する
 			p.advanceToken()
@@ -351,12 +351,12 @@ func (p *Parser) parseExpressionListStatement() *ast.ExpressionListStatement {
 	return expressionListStmt
 }
 
-func (p *Parser) parseParameterListStatement() *ast.ParameterListStatement {
+func (p *Parser) ParseParameterListStatement() *ast.ParameterListStatement {
 	parameterListStmt := &ast.ParameterListStatement{Token: p.curToken}
 	p.advanceToken()
 	parameterListStmt.ParameterList = []ast.ParameterStatement{}
 	for token.Symbol(p.curToken.Literal) != token.RPAREN {
-		parameterStmt := p.parseParameterStatement()
+		parameterStmt := p.ParseParameterStatement()
 		if parameterStmt == nil {
 			return nil
 		}
@@ -370,7 +370,7 @@ func (p *Parser) parseParameterListStatement() *ast.ParameterListStatement {
 	return parameterListStmt
 }
 
-func (p *Parser) parseParameterStatement() *ast.ParameterStatement {
+func (p *Parser) ParseParameterStatement() *ast.ParameterStatement {
 	parameterStmt := &ast.ParameterStatement{Token: p.curToken}
 	if p.curToken.Type != token.KEYWORD && p.curToken.Type != token.IDENTIFIER {
 		return nil
@@ -384,88 +384,86 @@ func (p *Parser) parseParameterStatement() *ast.ParameterStatement {
 	return parameterStmt
 }
 
-func (p *Parser) parseExpression() ast.Expression {
+func (p *Parser) ParseExpression() ast.Expression {
 	expressionToken := p.curToken
-	prefixTerm := p.parseTerm()
+	prefixTerm := p.ParseTerm()
 	InfixSymbol := map[token.Symbol]token.Symbol{ // 中置演算子となりうるSymbol
-		token.ASSIGN:   token.ASSIGN,
+		token.EQ:       token.EQ,
 		token.PLUS:     token.PLUS,
 		token.MINUS:    token.MINUS,
 		token.ASTERISK: token.ASTERISK,
 		token.SLASH:    token.SLASH,
 		token.LT:       token.LT,
 		token.GT:       token.GT,
-		// token.EQ:       token.EQ,
-		// token.NOT_EQ: token.NOT_EQ,
-		token.OR:  token.OR,
-		token.AMP: token.AMP,
+		token.OR:       token.OR,
+		token.AMP:      token.AMP,
 	}
 	if _, ok := InfixSymbol[token.Symbol(p.nextToken.Literal)]; ok {
 		p.advanceToken()
 		operator := p.curToken
 		p.advanceToken()
-		suffixTerm := p.parseTerm()
+		suffixTerm := p.ParseTerm()
 		return &ast.InfixExpression{Left: prefixTerm, Operator: operator, Right: suffixTerm}
 	} else {
 		return &ast.SingleExpression{Token: expressionToken, Value: prefixTerm}
 	}
 }
 
-func (p *Parser) parseTerm() ast.Term {
+func (p *Parser) ParseTerm() ast.Term {
 	switch p.curToken.Type {
 	case token.INTCONST:
-		return p.parseIntegerConstTerm()
+		return p.ParseIntegerConstTerm()
 	case token.IDENTIFIER:
 		if token.Symbol(p.nextToken.Literal) == token.LPAREN {
-			return p.parseSubroutineCallTerm()
+			return p.ParseSubroutineCallTerm()
 		}
 		if token.Symbol(p.nextToken.Literal) == token.DOT {
-			return p.parseSubroutineCallTerm()
+			return p.ParseSubroutineCallTerm()
 		}
 		if token.Symbol(p.nextToken.Literal) == token.LBRACKET {
-			return p.parseArrayElementTerm()
+			return p.ParseArrayElementTerm()
 		}
-		return p.parseIdentifierTerm()
+		return p.ParseIdentifierTerm()
 	case token.STARTINGCONST:
-		return p.parseStringConstTerm()
+		return p.ParseStringConstTerm()
 	case token.SYMBOL:
 		if token.Symbol(p.curToken.Literal) == token.LPAREN {
-			return p.parseBracketTerm()
+			return p.ParseBracketTerm()
 		}
 		if token.Symbol(p.curToken.Literal) == token.MINUS || token.Symbol(p.curToken.Literal) == token.BANG {
-			return p.parsePrefixTerm()
+			return p.ParsePrefixTerm()
 		}
 	case token.KEYWORD:
-		return p.parseKeyWordConstTerm()
+		return p.ParseKeyWordConstTerm()
 	}
 
 	return nil
 }
 
-func (p *Parser) parseIntegerConstTerm() *ast.IntergerConstTerm {
+func (p *Parser) ParseIntegerConstTerm() *ast.IntergerConstTerm {
 	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
 	if err != nil {
-		panic(fmt.Sprintf("could not parse %q as integer", p.curToken.Literal))
+		panic(fmt.Sprintf("could not Parse %q as integer", p.curToken.Literal))
 	}
 	return &ast.IntergerConstTerm{Token: p.curToken, Value: value}
 }
 
-func (p *Parser) parseIdentifierTerm() *ast.IdentifierTerm {
+func (p *Parser) ParseIdentifierTerm() *ast.IdentifierTerm {
 	return &ast.IdentifierTerm{Token: p.curToken, Value: p.curToken.Literal}
 }
 
-func (p *Parser) parseStringConstTerm() *ast.StringConstTerm {
+func (p *Parser) ParseStringConstTerm() *ast.StringConstTerm {
 	return &ast.StringConstTerm{Token: p.curToken, Value: p.curToken.Literal}
 }
 
-func (p *Parser) parseKeyWordConstTerm() *ast.KeywordConstTerm {
+func (p *Parser) ParseKeyWordConstTerm() *ast.KeywordConstTerm {
 	if token.KeyWord(p.curToken.Literal) != token.NULL && token.KeyWord(p.curToken.Literal) != (token.TRUE) && token.KeyWord(p.curToken.Literal) != token.FALSE && token.KeyWord(p.curToken.Literal) != token.THIS {
-		panic(fmt.Sprintf("could not parse %s as keywordConst", p.curToken.Literal))
+		panic(fmt.Sprintf("could not Parse %s as keywordConst", p.curToken.Literal))
 	}
 	return &ast.KeywordConstTerm{Token: p.curToken, KeyWord: token.KeyWord(p.curToken.Literal)}
 }
 
-func (p *Parser) parseSubroutineCallTerm() *ast.SubroutineCallTerm {
+func (p *Parser) ParseSubroutineCallTerm() *ast.SubroutineCallTerm {
 	subroutineCallTerm := &ast.SubroutineCallTerm{Token: p.curToken}
 	if token.Symbol(p.nextToken.Literal) == token.DOT {
 		subroutineCallTerm.ClassName = p.curToken
@@ -479,18 +477,18 @@ func (p *Parser) parseSubroutineCallTerm() *ast.SubroutineCallTerm {
 		return nil
 	}
 
-	subroutineCallTerm.ExpressionListStmt = p.parseExpressionListStatement()
+	subroutineCallTerm.ExpressionListStmt = p.ParseExpressionListStatement()
 	return subroutineCallTerm
 }
 
-func (p *Parser) parseArrayElementTerm() *ast.ArrayElementTerm {
+func (p *Parser) ParseArrayElementTerm() *ast.ArrayElementTerm {
 	arrayElementTerm := &ast.ArrayElementTerm{Token: p.curToken, ArrayName: p.curToken}
 	p.advanceToken()
 	if token.Symbol(p.curToken.Literal) != token.LBRACKET {
 		return nil
 	}
 	p.advanceToken()
-	idx := p.parseExpression()
+	idx := p.ParseExpression()
 	arrayElementTerm.Idx = idx
 	p.advanceToken()
 	if token.Symbol(p.curToken.Literal) != token.RBRACKET {
@@ -499,17 +497,17 @@ func (p *Parser) parseArrayElementTerm() *ast.ArrayElementTerm {
 	return arrayElementTerm
 }
 
-func (p *Parser) parsePrefixTerm() *ast.PrefixTerm {
+func (p *Parser) ParsePrefixTerm() *ast.PrefixTerm {
 	prefixTerm := &ast.PrefixTerm{Token: p.curToken, Prefix: token.Symbol(p.curToken.Literal)}
 	p.advanceToken()
-	prefixTerm.Value = p.parseTerm()
+	prefixTerm.Value = p.ParseTerm()
 	return prefixTerm
 }
 
-func (p *Parser) parseBracketTerm() *ast.BracketTerm {
+func (p *Parser) ParseBracketTerm() *ast.BracketTerm {
 	bracketTerm := &ast.BracketTerm{Token: p.curToken}
 	p.advanceToken()
-	expression := p.parseExpression()
+	expression := p.ParseExpression()
 	bracketTerm.Value = expression
 	p.advanceToken()
 	if token.Symbol(p.curToken.Literal) != token.RPAREN {

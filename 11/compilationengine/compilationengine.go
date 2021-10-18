@@ -78,7 +78,8 @@ func (ce *CompilationEngine) CompileClassStatement(statementAst *ast.ClassStatem
 
 func (ce *CompilationEngine) CompileSubroutineDecStatement(statementAst *ast.SubroutineDecStatement) error {
 	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, statementAst.Name.Literal), 0)
-	_, statements := statementAst.SubroutineBody.VarDecList, statementAst.SubroutineBody.Statements.Statements
+	// startSubroutine ??
+	_, statements := statementAst.SubroutineBody.VarDecList, statementAst.SubroutineBody.Statements
 	for _, stmt := range statements {
 		ce.CompileStatement(stmt)
 	}
@@ -108,9 +109,44 @@ func (ce *CompilationEngine) CompileInfixExpression(infixExpressionAst *ast.Infi
 			ce.WriteArithmetic(vmwriter.ADD)
 			return nil
 		}
+	case token.MINUS:
+		{
+			ce.WriteArithmetic(vmwriter.SUB)
+			return nil
+		}
+	case token.EQ:
+		{
+			ce.WriteArithmetic(vmwriter.EQ)
+			return nil
+		}
+	case token.AMP:
+		{
+			ce.WriteArithmetic(vmwriter.AND)
+			return nil
+		}
+	case token.OR:
+		{
+			ce.WriteArithmetic(vmwriter.OR)
+			return nil
+		}
+	case token.GT:
+		{
+			ce.WriteArithmetic(vmwriter.GT)
+			return nil
+		}
+	case token.LT:
+		{
+			ce.WriteArithmetic(vmwriter.LT)
+			return nil
+		}
 	case token.ASTERISK:
 		{
 			ce.WriteCall("Math.multiply", 2)
+			return nil
+		}
+	case token.SLASH:
+		{
+			ce.WriteCall("Math.divide", 2)
 			return nil
 		}
 	}
@@ -148,13 +184,26 @@ func (ce *CompilationEngine) CompileStringConstTerm(stringConstTerm *ast.StringC
 	return nil
 }
 
+func (ce *CompilationEngine) CompilePrefixTerm(prefixTerm *ast.PrefixTerm) error {
+	ce.CompileTerm(prefixTerm.Value)
+	switch prefixTerm.Prefix {
+	case token.MINUS:
+		ce.WriteArithmetic(vmwriter.NEG)
+		return nil
+	case token.BANG:
+		ce.WriteArithmetic(vmwriter.NOT)
+		return nil
+	}
+	return fmt.Errorf("prefixTerm.Prefix should be '-' or '~'. But got %s", prefixTerm.Prefix)
+}
+
 func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) error {
 
 	expressionListStmt := doStatement.ExpressionListStmt
 	for i := range expressionListStmt.ExpressionList {
 		ce.CompileExpression(expressionListStmt.ExpressionList[i])
 	}
-	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.String(), doStatement.VarName.String()), len(expressionListStmt.ExpressionList))
+	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.String(), doStatement.SubroutineName.String()), len(expressionListStmt.ExpressionList))
 	ce.WritePop(vmwriter.TEMP, 0)
 	return nil
 }
