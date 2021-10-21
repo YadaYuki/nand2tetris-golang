@@ -178,6 +178,8 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 		return ce.CompileBracketTerm(c)
 	case *ast.StringConstTerm:
 		return ce.CompileStringConstTerm(c)
+	case *ast.IdentifierTerm:
+		return ce.CompileIdentifierTerm(c)
 	}
 	return nil
 }
@@ -189,6 +191,26 @@ func (ce *CompilationEngine) CompileIntergerConstTerm(intergerConstTerm *ast.Int
 
 func (ce *CompilationEngine) CompileBracketTerm(bracketTerm *ast.BracketTerm) error {
 	return ce.CompileExpression(bracketTerm.Value)
+}
+
+func (ce *CompilationEngine) CompileIdentifierTerm(identifierTerm *ast.IdentifierTerm) error {
+	varKind := ce.KindOf(identifierTerm.TokenLiteral())
+	indexOf := ce.IndexOf(identifierTerm.TokenLiteral())
+	switch varKind {
+	case symboltable.ARGUMENT:
+		ce.WritePush(vmwriter.ARG, indexOf)
+		return nil
+	case symboltable.STATIC:
+		ce.WritePush(vmwriter.STATIC, indexOf)
+		return nil
+	case symboltable.FIELD:
+		ce.WritePush(vmwriter.THIS, indexOf)
+		return nil
+	case symboltable.VAR:
+		ce.WritePush(vmwriter.LOCAL, indexOf)
+		return nil
+	}
+	return nil // TODO:Error,fmt.Errorf("Identifier ...")
 }
 
 func (ce *CompilationEngine) CompileStringConstTerm(stringConstTerm *ast.StringConstTerm) error {

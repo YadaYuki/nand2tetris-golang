@@ -70,6 +70,30 @@ func TestCompilePrefixTerm(t *testing.T) {
 	}
 }
 
+func TestCompileIdentifierTerm(t *testing.T) {
+	testCases := []struct {
+		identifierTermInput string
+		varKindInput        symboltable.VarKind
+		vmCode              string
+	}{
+		{"a", symboltable.ARGUMENT, "push argument 0" + value.NEW_LINE},
+		{"b", symboltable.VAR, "push local 0" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.identifierTermInput)
+		identifierTermAst := p.ParseIdentifierTerm()
+		ce := newCompilationEngine("Main")
+		// 関数スコープで変数をシンボルテーブルに登録する。
+		ce.StartSubroutine()
+		ce.Define(tt.identifierTermInput, "int", tt.varKindInput)
+
+		ce.CompileIdentifierTerm(identifierTermAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("identifierTermAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestStringConstTerm(t *testing.T) {
 	testCases := []struct {
 		expressionInput string
