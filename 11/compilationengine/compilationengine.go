@@ -76,12 +76,29 @@ func (ce *CompilationEngine) CompileClassStatement(statementAst *ast.ClassStatem
 	return nil
 }
 
-func (ce *CompilationEngine) CompileSubroutineDecStatement(statementAst *ast.SubroutineDecStatement) error {
-	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, statementAst.Name.Literal), 0)
-	// startSubroutine ??
-	_, statements := statementAst.SubroutineBody.VarDecList, statementAst.SubroutineBody.Statements
-	for _, stmt := range statements {
+func (ce *CompilationEngine) CompileSubroutineDecStatement(subroutineDecStmtAst *ast.SubroutineDecStatement) error {
+	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, subroutineDecStmtAst.Name.Literal), 0)
+	ce.StartSubroutine()
+	ce.CompileParameterListStatement(subroutineDecStmtAst.ParameterList)
+	ce.CompileSubroutineBodyStatement(subroutineDecStmtAst.SubroutineBody)
+	return nil
+}
+
+func (ce *CompilationEngine) CompileSubroutineBodyStatement(subroutineBodyStmt *ast.SubroutineBodyStatement) {
+
+	// for _, varDecStmt := range subroutineBodyStmt.VarDecList {
+	// 	ce.Define(varDecStmt.Token.Literal, varDecStmt.ValueType.Literal, symboltable.VAR)
+	// 	// TODO: add CompileSubroutineBody
+	// }
+	for _, stmt := range subroutineBodyStmt.Statements {
 		ce.CompileStatement(stmt)
+	}
+}
+
+func (ce *CompilationEngine) CompileParameterListStatement(parameterListStmtAst *ast.ParameterListStatement) error {
+	for _, stmt := range parameterListStmtAst.ParameterList {
+		// シンボルテーブルにArgumentを登録。
+		ce.Define(stmt.Name, stmt.ValueType.Literal, symboltable.ARGUMENT)
 	}
 	return nil
 }
