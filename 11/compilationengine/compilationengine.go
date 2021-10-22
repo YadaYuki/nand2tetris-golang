@@ -85,11 +85,11 @@ func (ce *CompilationEngine) CompileSubroutineDecStatement(subroutineDecStmtAst 
 }
 
 func (ce *CompilationEngine) CompileSubroutineBodyStatement(subroutineBodyStmt *ast.SubroutineBodyStatement) {
-
-	// for _, varDecStmt := range subroutineBodyStmt.VarDecList {
-	// 	ce.Define(varDecStmt.Token.Literal, varDecStmt.ValueType.Literal, symboltable.VAR)
-	// 	// TODO: add CompileSubroutineBody
-	// }
+	for _, varDecStmt := range subroutineBodyStmt.VarDecList {
+		for _, identifier := range varDecStmt.Identifiers {
+			ce.Define(identifier.Literal, varDecStmt.ValueType.Literal, symboltable.VAR)
+		}
+	}
 	for _, stmt := range subroutineBodyStmt.Statements {
 		ce.CompileStatement(stmt)
 	}

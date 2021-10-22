@@ -192,6 +192,36 @@ func TestSubroutineDecStatement(t *testing.T) {
 	}
 }
 
+func TestVarDecStatement(t *testing.T) { // SubroutineDecをコンパイルした後、シンボルテーブル内にVAR型の変数が正しく登録されているかどうかをテストする。
+	input := `
+	function void add (){var int a,b,c; var char d;var HogeClass hoge;}
+	`
+	expectedVarDecList := []struct {
+		name    string
+		varKind symboltable.VarKind
+		varType string
+	}{
+		{"a", symboltable.VAR, "int"},
+		{"b", symboltable.VAR, "int"},
+		{"c", symboltable.VAR, "int"},
+		{"d", symboltable.VAR, "char"},
+		{"hoge", symboltable.VAR, "HogeClass"},
+	}
+	p := newParser(input)
+	ast := p.ParseSubroutineDecStatement()
+	ce := newCompilationEngine("Main")
+	ce.CompileSubroutineDecStatement(ast)
+	for _, varDec := range expectedVarDecList {
+		if ce.TypeOf(varDec.name) != varDec.varType {
+			t.Fatalf("ce.TypeOf(varDec.name) should be %s, got %s", varDec.varType, ce.TypeOf(varDec.name))
+		}
+		if ce.KindOf(varDec.name) != varDec.varKind {
+			t.Fatalf("ce.KindOf(varDec.name) should be %s, got %s", varDec.varKind, ce.KindOf(varDec.name))
+		}
+	}
+
+}
+
 func TestClassStatement(t *testing.T) {
 	testCases := []struct {
 		expressionInput string
