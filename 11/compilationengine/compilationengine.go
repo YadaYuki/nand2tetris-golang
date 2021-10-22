@@ -30,14 +30,14 @@ func (ce *CompilationEngine) CompileProgram(programAst *ast.Program) {
 
 func (ce *CompilationEngine) CompileStatement(statementAst ast.Statement) error {
 	switch statementAst := statementAst.(type) {
-	case *ast.VarDecStatement:
-		return ce.CompileVarDec(statementAst)
 	case *ast.DoStatement:
 		return ce.CompileDoStatement(statementAst)
 	case *ast.ReturnStatement:
 		return ce.CompileReturnStatement(statementAst)
 	case *ast.ClassStatement:
 		return ce.CompileClassStatement(statementAst)
+	case *ast.LetStatement:
+		return ce.CompileLetStatement(statementAst)
 	default:
 		return errors.New("statementAst type: %T is not valid")
 	}
@@ -50,10 +50,6 @@ func (ce *CompilationEngine) CompileInit() {
 	for i := range jackBasicLibraries {
 		ce.WriteCall(fmt.Sprintf("%s.init", jackBasicLibraries[i]), 0)
 	}
-}
-
-func (ce *CompilationEngine) CompileVarDec(varDecAst *ast.VarDecStatement) error {
-	return nil
 }
 
 func (ce *CompilationEngine) CompileReturnStatement(statementAst *ast.ReturnStatement) error {
@@ -76,14 +72,58 @@ func (ce *CompilationEngine) CompileClassStatement(statementAst *ast.ClassStatem
 	return nil
 }
 
-func (ce *CompilationEngine) CompileSubroutineDecStatement(statementAst *ast.SubroutineDecStatement) error {
-	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, statementAst.Name.Literal), 0)
-	// startSubroutine ??
-	_, statements := statementAst.SubroutineBody.VarDecList, statementAst.SubroutineBody.Statements
-	for _, stmt := range statements {
+func (ce *CompilationEngine) CompileSubroutineDecStatement(subroutineDecStmtAst *ast.SubroutineDecStatement) error {
+	// ローカル変数の数を計算する
+	localVarCount := 0
+	for _, varDec := range subroutineDecStmtAst.SubroutineBody.VarDecList {
+		localVarCount += len(varDec.Identifiers)
+	}
+	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, subroutineDecStmtAst.Name.Literal), localVarCount)
+	ce.StartSubroutine()
+	ce.CompileParameterListStatement(subroutineDecStmtAst.ParameterList)
+	ce.CompileSubroutineBodyStatement(subroutineDecStmtAst.SubroutineBody)
+	return nil
+}
+
+func (ce *CompilationEngine) CompileSubroutineBodyStatement(subroutineBodyStmt *ast.SubroutineBodyStatement) {
+	for _, varDecStmt := range subroutineBodyStmt.VarDecList {
+		for _, identifier := range varDecStmt.Identifiers {
+			ce.Define(identifier.Literal, varDecStmt.ValueType.Literal, symboltable.VAR)
+		}
+	}
+	for _, stmt := range subroutineBodyStmt.Statements {
 		ce.CompileStatement(stmt)
 	}
+}
+
+func (ce *CompilationEngine) CompileParameterListStatement(parameterListStmtAst *ast.ParameterListStatement) error {
+	for _, stmt := range parameterListStmtAst.ParameterList {
+		// シンボルテーブルにArgumentを登録。
+		ce.Define(stmt.Name, stmt.ValueType.Literal, symboltable.ARGUMENT)
+	}
 	return nil
+}
+
+func (ce *CompilationEngine) CompileLetStatement(letStatement *ast.LetStatement) error {
+	ce.CompileExpression(letStatement.Value)
+
+	varKind := ce.KindOf(letStatement.Name.Literal)
+	indexOf := ce.IndexOf(letStatement.Name.Literal)
+	switch varKind {
+	case symboltable.ARGUMENT:
+		ce.WritePop(vmwriter.ARG, indexOf)
+		return nil
+	case symboltable.STATIC:
+		ce.WritePop(vmwriter.STATIC, indexOf)
+		return nil
+	case symboltable.FIELD:
+		ce.WritePop(vmwriter.THIS, indexOf)
+		return nil
+	case symboltable.VAR:
+		ce.WritePop(vmwriter.LOCAL, indexOf)
+		return nil
+	}
+	return nil // TODO:Error,fmt.Errorf("Identifier ...")
 }
 
 func (ce *CompilationEngine) CompileExpression(expressionAst ast.Expression) error {
@@ -161,6 +201,10 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 		return ce.CompileBracketTerm(c)
 	case *ast.StringConstTerm:
 		return ce.CompileStringConstTerm(c)
+	case *ast.IdentifierTerm:
+		return ce.CompileIdentifierTerm(c)
+	case *ast.SubroutineCallTerm:
+		return ce.CompileSubroutineCallTerm(c)
 	}
 	return nil
 }
@@ -168,10 +212,36 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 func (ce *CompilationEngine) CompileIntergerConstTerm(intergerConstTerm *ast.IntergerConstTerm) error {
 	ce.WritePush(vmwriter.CONST, int(intergerConstTerm.Value))
 	return nil
+
+}
+func (ce *CompilationEngine) CompileSubroutineCallTerm(subroutineCallTerm *ast.SubroutineCallTerm) error {
+	ce.CompileExpressionListStatement(subroutineCallTerm.ExpressionListStmt)
+	ce.WriteCall(fmt.Sprintf("%s.%s", subroutineCallTerm.ClassName.String(), subroutineCallTerm.SubroutineName.String()), len(subroutineCallTerm.ExpressionListStmt.ExpressionList))
+	return nil
 }
 
 func (ce *CompilationEngine) CompileBracketTerm(bracketTerm *ast.BracketTerm) error {
 	return ce.CompileExpression(bracketTerm.Value)
+}
+
+func (ce *CompilationEngine) CompileIdentifierTerm(identifierTerm *ast.IdentifierTerm) error {
+	varKind := ce.KindOf(identifierTerm.TokenLiteral())
+	indexOf := ce.IndexOf(identifierTerm.TokenLiteral())
+	switch varKind {
+	case symboltable.ARGUMENT:
+		ce.WritePush(vmwriter.ARG, indexOf)
+		return nil
+	case symboltable.STATIC:
+		ce.WritePush(vmwriter.STATIC, indexOf)
+		return nil
+	case symboltable.FIELD:
+		ce.WritePush(vmwriter.THIS, indexOf)
+		return nil
+	case symboltable.VAR:
+		ce.WritePush(vmwriter.LOCAL, indexOf)
+		return nil
+	}
+	return nil // TODO:Error,fmt.Errorf("Identifier ...")
 }
 
 func (ce *CompilationEngine) CompileStringConstTerm(stringConstTerm *ast.StringConstTerm) error {
@@ -198,12 +268,15 @@ func (ce *CompilationEngine) CompilePrefixTerm(prefixTerm *ast.PrefixTerm) error
 }
 
 func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) error {
+	ce.CompileExpressionListStatement(doStatement.ExpressionListStmt)
+	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.String(), doStatement.SubroutineName.String()), len(doStatement.ExpressionListStmt.ExpressionList))
+	ce.WritePop(vmwriter.TEMP, 0)
+	return nil
+}
 
-	expressionListStmt := doStatement.ExpressionListStmt
+func (ce *CompilationEngine) CompileExpressionListStatement(expressionListStmt *ast.ExpressionListStatement) error {
 	for i := range expressionListStmt.ExpressionList {
 		ce.CompileExpression(expressionListStmt.ExpressionList[i])
 	}
-	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.String(), doStatement.SubroutineName.String()), len(expressionListStmt.ExpressionList))
-	ce.WritePop(vmwriter.TEMP, 0)
 	return nil
 }

@@ -70,6 +70,49 @@ func TestCompilePrefixTerm(t *testing.T) {
 	}
 }
 
+func TestCompileIdentifierTerm(t *testing.T) {
+	testCases := []struct {
+		identifierTermInput string
+		varKindInput        symboltable.VarKind
+		vmCode              string
+	}{
+		{"a", symboltable.ARGUMENT, "push argument 0" + value.NEW_LINE},
+		{"b", symboltable.VAR, "push local 0" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.identifierTermInput)
+		identifierTermAst := p.ParseIdentifierTerm()
+		ce := newCompilationEngine("Main")
+		// 関数スコープで変数をシンボルテーブルに登録する。
+		ce.StartSubroutine()
+		ce.Define(tt.identifierTermInput, "int", tt.varKindInput)
+
+		ce.CompileIdentifierTerm(identifierTermAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("identifierTermAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
+func TestCompileSubroutineCallTerm(t *testing.T) {
+	testCases := []struct {
+		subroutineCallTermInput string
+		vmCode                  string
+	}{
+		{"Main.add()", "call Main.add 0" + value.NEW_LINE},
+		{"Main.add(1,2)", "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Main.add 2" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.subroutineCallTermInput)
+		subroutineCallTermAst := p.ParseSubroutineCallTerm()
+		ce := newCompilationEngine("Main")
+		ce.CompileSubroutineCallTerm(subroutineCallTermAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("identifierTermAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestStringConstTerm(t *testing.T) {
 	testCases := []struct {
 		expressionInput string
@@ -109,6 +152,29 @@ func TestDoStatement(t *testing.T) {
 	}
 }
 
+func TestLetStatement(t *testing.T) {
+	testCases := []struct {
+		input   string
+		varType string
+		varKind symboltable.VarKind
+		vmCode  string
+	}{
+		// TODO:配列の参照等についても対応する。
+		{"let a=1;", "int", symboltable.VAR, "push constant 1" + value.NEW_LINE + "pop local 0" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.input)
+		letStatementAst := p.ParseLetStatement()
+		ce := newCompilationEngine("Main")
+		ce.StartSubroutine()
+		ce.Define(letStatementAst.Name.Literal, tt.varType, tt.varKind)
+		ce.CompileLetStatement(letStatementAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("LetStatementAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestReturnStatement(t *testing.T) {
 	testCases := []struct {
 		expressionInput string
@@ -137,6 +203,7 @@ func TestSubroutineDecStatement(t *testing.T) {
 		{"function void main (){}", "function Main.main 0" + value.NEW_LINE},
 		{"function void main (){do Output.printInt();}", "function Main.main 0" + value.NEW_LINE + "call Output.printInt 0" + value.NEW_LINE + "pop temp 0" + value.NEW_LINE},
 		{"function void main (){return;}", "function Main.main 0" + value.NEW_LINE + "push constant 0" + value.NEW_LINE + "return" + value.NEW_LINE},
+		{"function void main (){var int a,b,c,d;return;}", "function Main.main 4" + value.NEW_LINE + "push constant 0" + value.NEW_LINE + "return" + value.NEW_LINE},
 	}
 	for _, tt := range testCases {
 		p := newParser(tt.expressionInput)
@@ -145,6 +212,35 @@ func TestSubroutineDecStatement(t *testing.T) {
 		ce.CompileSubroutineDecStatement(ast)
 		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
 			t.Fatalf("subroutineDecStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
+func TestVarDecStatement(t *testing.T) { // SubroutineDecをコンパイルした後、シンボルテーブル内にVAR型の変数が正しく登録されているかどうかをテストする。
+	input := `
+	function void add (){var int a,b,c; var char d;var HogeClass hoge;}
+	`
+	expectedVarDecList := []struct {
+		name    string
+		varKind symboltable.VarKind
+		varType string
+	}{
+		{"a", symboltable.VAR, "int"},
+		{"b", symboltable.VAR, "int"},
+		{"c", symboltable.VAR, "int"},
+		{"d", symboltable.VAR, "char"},
+		{"hoge", symboltable.VAR, "HogeClass"},
+	}
+	p := newParser(input)
+	ast := p.ParseSubroutineDecStatement()
+	ce := newCompilationEngine("Main")
+	ce.CompileSubroutineDecStatement(ast)
+	for _, varDec := range expectedVarDecList {
+		if ce.TypeOf(varDec.name) != varDec.varType {
+			t.Fatalf("ce.TypeOf(varDec.name) should be %s, got %s", varDec.varType, ce.TypeOf(varDec.name))
+		}
+		if ce.KindOf(varDec.name) != varDec.varKind {
+			t.Fatalf("ce.KindOf(varDec.name) should be %s, got %s", varDec.varKind, ce.KindOf(varDec.name))
 		}
 	}
 }
