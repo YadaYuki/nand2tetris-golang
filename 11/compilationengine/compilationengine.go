@@ -30,14 +30,14 @@ func (ce *CompilationEngine) CompileProgram(programAst *ast.Program) {
 
 func (ce *CompilationEngine) CompileStatement(statementAst ast.Statement) error {
 	switch statementAst := statementAst.(type) {
-	case *ast.VarDecStatement:
-		return ce.CompileVarDec(statementAst)
 	case *ast.DoStatement:
 		return ce.CompileDoStatement(statementAst)
 	case *ast.ReturnStatement:
 		return ce.CompileReturnStatement(statementAst)
 	case *ast.ClassStatement:
 		return ce.CompileClassStatement(statementAst)
+	case *ast.LetStatement:
+		return ce.CompileLetStatement(statementAst)
 	default:
 		return errors.New("statementAst type: %T is not valid")
 	}
@@ -50,10 +50,6 @@ func (ce *CompilationEngine) CompileInit() {
 	for i := range jackBasicLibraries {
 		ce.WriteCall(fmt.Sprintf("%s.init", jackBasicLibraries[i]), 0)
 	}
-}
-
-func (ce *CompilationEngine) CompileVarDec(varDecAst *ast.VarDecStatement) error {
-	return nil
 }
 
 func (ce *CompilationEngine) CompileReturnStatement(statementAst *ast.ReturnStatement) error {
@@ -77,7 +73,12 @@ func (ce *CompilationEngine) CompileClassStatement(statementAst *ast.ClassStatem
 }
 
 func (ce *CompilationEngine) CompileSubroutineDecStatement(subroutineDecStmtAst *ast.SubroutineDecStatement) error {
-	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, subroutineDecStmtAst.Name.Literal), 0)
+	// ローカル変数の数を計算する
+	localVarCount := 0
+	for _, varDec := range subroutineDecStmtAst.SubroutineBody.VarDecList {
+		localVarCount += len(varDec.Identifiers)
+	}
+	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, subroutineDecStmtAst.Name.Literal), localVarCount)
 	ce.StartSubroutine()
 	ce.CompileParameterListStatement(subroutineDecStmtAst.ParameterList)
 	ce.CompileSubroutineBodyStatement(subroutineDecStmtAst.SubroutineBody)

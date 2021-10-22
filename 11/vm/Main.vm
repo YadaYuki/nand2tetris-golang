@@ -4,10 +4,12 @@ call Keyboard.init 0
 call Memory.init 0
 call Screen.init 0
 call Sys.init 0
-function Main.add 0
+function Main.add 1
 push argument 0
 push argument 1
 add
+pop local 0
+push local 0
 return
 function Main.main 0
 push constant 1

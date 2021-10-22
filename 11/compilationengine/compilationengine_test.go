@@ -203,6 +203,7 @@ func TestSubroutineDecStatement(t *testing.T) {
 		{"function void main (){}", "function Main.main 0" + value.NEW_LINE},
 		{"function void main (){do Output.printInt();}", "function Main.main 0" + value.NEW_LINE + "call Output.printInt 0" + value.NEW_LINE + "pop temp 0" + value.NEW_LINE},
 		{"function void main (){return;}", "function Main.main 0" + value.NEW_LINE + "push constant 0" + value.NEW_LINE + "return" + value.NEW_LINE},
+		{"function void main (){var int a,b,c,d;return;}", "function Main.main 4" + value.NEW_LINE + "push constant 0" + value.NEW_LINE + "return" + value.NEW_LINE},
 	}
 	for _, tt := range testCases {
 		p := newParser(tt.expressionInput)
