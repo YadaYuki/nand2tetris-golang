@@ -103,6 +103,28 @@ func (ce *CompilationEngine) CompileParameterListStatement(parameterListStmtAst 
 	return nil
 }
 
+func (ce *CompilationEngine) CompileLetStatement(letStatement *ast.LetStatement) error {
+	ce.CompileExpression(letStatement.Value)
+
+	varKind := ce.KindOf(letStatement.Name.Literal)
+	indexOf := ce.IndexOf(letStatement.Name.Literal)
+	switch varKind {
+	case symboltable.ARGUMENT:
+		ce.WritePop(vmwriter.ARG, indexOf)
+		return nil
+	case symboltable.STATIC:
+		ce.WritePop(vmwriter.STATIC, indexOf)
+		return nil
+	case symboltable.FIELD:
+		ce.WritePop(vmwriter.THIS, indexOf)
+		return nil
+	case symboltable.VAR:
+		ce.WritePop(vmwriter.LOCAL, indexOf)
+		return nil
+	}
+	return nil // TODO:Error,fmt.Errorf("Identifier ...")
+}
+
 func (ce *CompilationEngine) CompileExpression(expressionAst ast.Expression) error {
 	switch c := expressionAst.(type) {
 	case *ast.SingleExpression:

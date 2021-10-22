@@ -152,6 +152,29 @@ func TestDoStatement(t *testing.T) {
 	}
 }
 
+func TestLetStatement(t *testing.T) {
+	testCases := []struct {
+		input   string
+		varType string
+		varKind symboltable.VarKind
+		vmCode  string
+	}{
+		// TODO:配列の参照等についても対応する。
+		{"let a=1;", "int", symboltable.VAR, "push constant 1" + value.NEW_LINE + "pop local 0" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.input)
+		letStatementAst := p.ParseLetStatement()
+		ce := newCompilationEngine("Main")
+		ce.StartSubroutine()
+		ce.Define(letStatementAst.Name.Literal, tt.varType, tt.varKind)
+		ce.CompileLetStatement(letStatementAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("LetStatementAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestReturnStatement(t *testing.T) {
 	testCases := []struct {
 		expressionInput string
@@ -219,7 +242,6 @@ func TestVarDecStatement(t *testing.T) { // SubroutineDecをコンパイルし�
 			t.Fatalf("ce.KindOf(varDec.name) should be %s, got %s", varDec.varKind, ce.KindOf(varDec.name))
 		}
 	}
-
 }
 
 func TestClassStatement(t *testing.T) {
