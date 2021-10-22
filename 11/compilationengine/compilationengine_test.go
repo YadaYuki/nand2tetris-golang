@@ -94,6 +94,25 @@ func TestCompileIdentifierTerm(t *testing.T) {
 	}
 }
 
+func TestCompileSubroutineCallTerm(t *testing.T) {
+	testCases := []struct {
+		subroutineCallTermInput string
+		vmCode                  string
+	}{
+		{"Main.add()", "call Main.add 0" + value.NEW_LINE},
+		{"Main.add(1,2)", "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Main.add 2" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.subroutineCallTermInput)
+		subroutineCallTermAst := p.ParseSubroutineCallTerm()
+		ce := newCompilationEngine("Main")
+		ce.CompileSubroutineCallTerm(subroutineCallTermAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("identifierTermAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestStringConstTerm(t *testing.T) {
 	testCases := []struct {
 		expressionInput string

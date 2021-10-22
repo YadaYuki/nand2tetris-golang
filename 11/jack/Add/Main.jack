@@ -1,10 +1,8 @@
 class Main{
     function int add(int a, int b){
-        var int sum;
-        let sum = a + b;
-        return sum;
+        return a + b;
     }
     function void main() {
-        printInt(Main.add(Main.add(1,2),Main.add(3,4))); // 10を出力。
+        do Output.printInt(Main.add(Main.add(1,2),Main.add(3,4)));
     }
 }

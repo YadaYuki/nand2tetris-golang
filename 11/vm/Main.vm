@@ -13,4 +13,9 @@ function Main.main 0
 push constant 1
 push constant 2
 call Main.add 2
+push constant 3
+push constant 4
+call Main.add 2
+call Main.add 2
+call Output.printInt 1
 pop temp 0

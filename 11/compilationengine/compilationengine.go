@@ -180,12 +180,20 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 		return ce.CompileStringConstTerm(c)
 	case *ast.IdentifierTerm:
 		return ce.CompileIdentifierTerm(c)
+	case *ast.SubroutineCallTerm:
+		return ce.CompileSubroutineCallTerm(c)
 	}
 	return nil
 }
 
 func (ce *CompilationEngine) CompileIntergerConstTerm(intergerConstTerm *ast.IntergerConstTerm) error {
 	ce.WritePush(vmwriter.CONST, int(intergerConstTerm.Value))
+	return nil
+
+}
+func (ce *CompilationEngine) CompileSubroutineCallTerm(subroutineCallTerm *ast.SubroutineCallTerm) error {
+	ce.CompileExpressionListStatement(subroutineCallTerm.ExpressionListStmt)
+	ce.WriteCall(fmt.Sprintf("%s.%s", subroutineCallTerm.ClassName.String(), subroutineCallTerm.SubroutineName.String()), len(subroutineCallTerm.ExpressionListStmt.ExpressionList))
 	return nil
 }
 
@@ -237,12 +245,15 @@ func (ce *CompilationEngine) CompilePrefixTerm(prefixTerm *ast.PrefixTerm) error
 }
 
 func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) error {
+	ce.CompileExpressionListStatement(doStatement.ExpressionListStmt)
+	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.String(), doStatement.SubroutineName.String()), len(doStatement.ExpressionListStmt.ExpressionList))
+	ce.WritePop(vmwriter.TEMP, 0)
+	return nil
+}
 
-	expressionListStmt := doStatement.ExpressionListStmt
+func (ce *CompilationEngine) CompileExpressionListStatement(expressionListStmt *ast.ExpressionListStatement) error {
 	for i := range expressionListStmt.ExpressionList {
 		ce.CompileExpression(expressionListStmt.ExpressionList[i])
 	}
-	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.String(), doStatement.SubroutineName.String()), len(expressionListStmt.ExpressionList))
-	ce.WritePop(vmwriter.TEMP, 0)
 	return nil
 }
