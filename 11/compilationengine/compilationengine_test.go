@@ -94,6 +94,28 @@ func TestCompileIdentifierTerm(t *testing.T) {
 	}
 }
 
+func TestCompileArrayElementTerm(t *testing.T) {
+	testCases := []struct {
+		arrayElementTermInput string
+		varKindInput          symboltable.VarKind
+		vmCode                string
+	}{
+		{"b[1]", symboltable.VAR, "push local 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "add" + value.NEW_LINE + "pop pointer 1" + value.NEW_LINE + "push that 0" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.arrayElementTermInput)
+		arrayElementTermAst := p.ParseArrayElementTerm()
+		ce := newCompilationEngine("Main")
+		// 関数スコープで変数をシンボルテーブルに登録する。
+		ce.StartSubroutine()
+		ce.Define(arrayElementTermAst.ArrayName.Literal, "Array", tt.varKindInput)
+		ce.CompileArrayElementTerm(arrayElementTermAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("arrayElementTermAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestCompileSubroutineCallTerm(t *testing.T) {
 	testCases := []struct {
 		subroutineCallTermInput string
@@ -159,8 +181,8 @@ func TestLetStatement(t *testing.T) {
 		varKind symboltable.VarKind
 		vmCode  string
 	}{
-		// TODO:配列の参照等についても対応する。
 		{"let a=1;", "int", symboltable.VAR, "push constant 1" + value.NEW_LINE + "pop local 0" + value.NEW_LINE},
+		{"let a[1]=1;", "int", symboltable.VAR, "push local 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "add" + value.NEW_LINE + "pop pointer 1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "pop that 0" + value.NEW_LINE},
 	}
 	for _, tt := range testCases {
 		p := newParser(tt.input)
@@ -171,6 +193,28 @@ func TestLetStatement(t *testing.T) {
 		ce.CompileLetStatement(letStatementAst)
 		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
 			t.Fatalf("LetStatementAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
+func TestLetArrayElementStatement(t *testing.T) {
+	testCases := []struct {
+		input   string
+		varType string
+		varKind symboltable.VarKind
+		vmCode  string
+	}{
+		{"let a[1]=1;", "int", symboltable.VAR, "push local 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "add" + value.NEW_LINE + "pop pointer 1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "pop that 0" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.input)
+		letStatementAst := p.ParseLetStatement()
+		ce := newCompilationEngine("Main")
+		ce.StartSubroutine()
+		ce.Define(letStatementAst.Name.Literal, tt.varType, tt.varKind)
+		ce.CompileLetArrayElementStatement(letStatementAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("LetArrayElementStatementAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
 		}
 	}
 }
