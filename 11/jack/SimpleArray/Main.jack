@@ -5,6 +5,9 @@ class Main {
         let b = Array.new(5);
         let a[3] = 2;
         let a[4] = 8;
+        let b[a[3]] = 1;
+        do Output.printInt(b[2]);
+        do Output.printInt(a[4]);
         return;
     }
 }

@@ -94,6 +94,28 @@ func TestCompileIdentifierTerm(t *testing.T) {
 	}
 }
 
+func TestCompileArrayElementTerm(t *testing.T) {
+	testCases := []struct {
+		arrayElementTermInput string
+		varKindInput          symboltable.VarKind
+		vmCode                string
+	}{
+		{"b[1]", symboltable.VAR, "push local 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "add" + value.NEW_LINE + "pop pointer 1" + value.NEW_LINE + "push that 0" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.arrayElementTermInput)
+		arrayElementTermAst := p.ParseArrayElementTerm()
+		ce := newCompilationEngine("Main")
+		// 関数スコープで変数をシンボルテーブルに登録する。
+		ce.StartSubroutine()
+		ce.Define(arrayElementTermAst.ArrayName.Literal, "Array", tt.varKindInput)
+		ce.CompileArrayElementTerm(arrayElementTermAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("arrayElementTermAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestCompileSubroutineCallTerm(t *testing.T) {
 	testCases := []struct {
 		subroutineCallTermInput string

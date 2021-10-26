@@ -129,6 +129,7 @@ func (ce *CompilationEngine) CompileLetStatement(letStatement *ast.LetStatement)
 }
 
 func (ce *CompilationEngine) CompileLetArrayElementStatement(letStatement *ast.LetStatement) error {
+	// 配列の先頭アドレス(addr)をstackにpushする
 	varKind := ce.KindOf(letStatement.Name.Literal)
 	indexOf := ce.IndexOf(letStatement.Name.Literal)
 	switch varKind {
@@ -146,8 +147,10 @@ func (ce *CompilationEngine) CompileLetArrayElementStatement(letStatement *ast.L
 	default:
 		return nil // TODO:error
 	}
+	// (addr + idx)
 	ce.CompileExpression(letStatement.Idx)
 	ce.WriteArithmetic(vmwriter.ADD)
+
 	ce.WritePop(vmwriter.POINTER, 1)
 	ce.CompileExpression(letStatement.Value)
 	ce.WritePop(vmwriter.THAT, 0)
@@ -233,6 +236,8 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 		return ce.CompileIdentifierTerm(c)
 	case *ast.SubroutineCallTerm:
 		return ce.CompileSubroutineCallTerm(c)
+	case *ast.ArrayElementTerm:
+		return ce.CompileArrayElementTerm(c)
 	}
 	return nil
 }
@@ -250,6 +255,29 @@ func (ce *CompilationEngine) CompileSubroutineCallTerm(subroutineCallTerm *ast.S
 
 func (ce *CompilationEngine) CompileBracketTerm(bracketTerm *ast.BracketTerm) error {
 	return ce.CompileExpression(bracketTerm.Value)
+}
+
+func (ce *CompilationEngine) CompileArrayElementTerm(arrayElementTerm *ast.ArrayElementTerm) error {
+	varKind := ce.KindOf(arrayElementTerm.TokenLiteral())
+	indexOf := ce.IndexOf(arrayElementTerm.TokenLiteral())
+	switch varKind {
+	// case symboltable.ARGUMENT:
+	// 	ce.WritePush(vmwriter.ARG, indexOf)
+	// case symboltable.STATIC:
+	// 	ce.WritePush(vmwriter.STATIC, indexOf)
+	// case symboltable.FIELD:
+	// 	ce.WritePush(vmwriter.THIS, indexOf)
+	case symboltable.VAR:
+		ce.WritePush(vmwriter.LOCAL, indexOf)
+	default:
+		return nil // TODO:Error
+	}
+	ce.CompileExpression(arrayElementTerm.Idx)
+	ce.WriteArithmetic(vmwriter.ADD)
+	ce.WritePop(vmwriter.POINTER, 1)
+	ce.WritePush(vmwriter.THAT, 0)
+
+	return nil
 }
 
 func (ce *CompilationEngine) CompileIdentifierTerm(identifierTerm *ast.IdentifierTerm) error {

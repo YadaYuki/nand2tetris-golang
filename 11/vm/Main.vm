@@ -23,5 +23,29 @@ add
 pop pointer 1
 push constant 8
 pop that 0
+push local 1
+push local 0
+push constant 3
+add
+pop pointer 1
+push that 0
+add
+pop pointer 1
+push constant 1
+pop that 0
+push local 1
+push constant 2
+add
+pop pointer 1
+push that 0
+call Output.printInt 1
+pop temp 0
+push local 0
+push constant 4
+add
+pop pointer 1
+push that 0
+call Output.printInt 1
+pop temp 0
 push constant 0
 return
