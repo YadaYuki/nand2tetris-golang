@@ -105,8 +105,10 @@ func (ce *CompilationEngine) CompileParameterListStatement(parameterListStmtAst 
 }
 
 func (ce *CompilationEngine) CompileLetStatement(letStatement *ast.LetStatement) error {
+	if letStatement.Idx != nil { // 配列の要素に対する代入であった場合。
+		return ce.CompileLetArrayElementStatement(letStatement)
+	}
 	ce.CompileExpression(letStatement.Value)
-
 	varKind := ce.KindOf(letStatement.Name.Literal)
 	indexOf := ce.IndexOf(letStatement.Name.Literal)
 	switch varKind {
@@ -123,6 +125,32 @@ func (ce *CompilationEngine) CompileLetStatement(letStatement *ast.LetStatement)
 		ce.WritePop(vmwriter.LOCAL, indexOf)
 		return nil
 	}
+	return nil // TODO:Error,fmt.Errorf("Identifier ...")
+}
+
+func (ce *CompilationEngine) CompileLetArrayElementStatement(letStatement *ast.LetStatement) error {
+	varKind := ce.KindOf(letStatement.Name.Literal)
+	indexOf := ce.IndexOf(letStatement.Name.Literal)
+	switch varKind {
+	// case symboltable.ARGUMENT:
+	// 	ce.WritePush(vmwriter.ARG, indexOf)
+	// 	return nil
+	// case symboltable.STATIC:
+	// 	ce.WritePush(vmwriter.STATIC, indexOf)
+	// 	return nil
+	// case symboltable.FIELD:
+	// 	ce.WritePush(vmwriter.THIS, indexOf)
+	// 	return nil
+	case symboltable.VAR:
+		ce.WritePush(vmwriter.LOCAL, indexOf)
+	default:
+		return nil // TODO:error
+	}
+	ce.CompileExpression(letStatement.Idx)
+	ce.WriteArithmetic(vmwriter.ADD)
+	ce.WritePop(vmwriter.POINTER, 1)
+	ce.CompileExpression(letStatement.Value)
+	ce.WritePop(vmwriter.THAT, 0)
 	return nil // TODO:Error,fmt.Errorf("Identifier ...")
 }
 
