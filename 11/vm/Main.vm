@@ -4,47 +4,30 @@ call Keyboard.init 0
 call Memory.init 0
 call Screen.init 0
 call Sys.init 0
-function Main.main 2
+function Main.getVal 0
+push argument 0
 push constant 10
-call Array.new 1
-pop local 0
+lt
+not
+if-goto ELSE1
+push argument 0
+push constant 10
+call Math.multiply 2
+return
+goto ENDIF1
+label ELSE1
+push argument 0
+push constant 100
+call Math.multiply 2
+return
+label ENDIF1
+function Main.main 0
 push constant 5
-call Array.new 1
-pop local 1
-push local 0
-push constant 3
-add
-pop pointer 1
-push constant 2
-pop that 0
-push local 0
-push constant 4
-add
-pop pointer 1
-push constant 8
-pop that 0
-push local 1
-push local 0
-push constant 3
-add
-pop pointer 1
-push that 0
-add
-pop pointer 1
-push constant 1
-pop that 0
-push local 1
-push constant 2
-add
-pop pointer 1
-push that 0
+call Main.getVal 1
 call Output.printInt 1
 pop temp 0
-push local 0
-push constant 4
-add
-pop pointer 1
-push that 0
+push constant 100
+call Main.getVal 1
 call Output.printInt 1
 pop temp 0
 push constant 0
