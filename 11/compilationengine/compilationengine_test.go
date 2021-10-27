@@ -260,6 +260,25 @@ func TestSubroutineDecStatement(t *testing.T) {
 	}
 }
 
+func TestIfStatement(t *testing.T) {
+	testCases := []struct {
+		input  string
+		vmCode string
+	}{
+		{"if(1=1){return 1;}else{return 1;}", "push constant 1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "eq" + value.NEW_LINE + "not" + value.NEW_LINE + "if-goto ELSE1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "return" + value.NEW_LINE + "goto ENDIF1" + value.NEW_LINE + "label ELSE1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "return" + value.NEW_LINE + "label ENDIF1" + value.NEW_LINE},
+		{"if(1=1){return 1;}", "push constant 1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "eq" + value.NEW_LINE + "not" + value.NEW_LINE + "if-goto ENDIF1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "return" + value.NEW_LINE + "label ENDIF1" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.input)
+		ast := p.ParseIfStatement()
+		ce := newCompilationEngine("Main")
+		ce.CompileIfStatement(ast)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("IfStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestVarDecStatement(t *testing.T) { // SubroutineDecをコンパイルした後、シンボルテーブル内にVAR型の変数が正しく登録されているかどうかをテストする。
 	input := `
 	function void add (){var int a,b,c; var char d;var HogeClass hoge;}

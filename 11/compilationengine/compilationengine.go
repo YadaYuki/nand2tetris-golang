@@ -14,11 +14,12 @@ type CompilationEngine struct {
 	*vmwriter.VMWriter
 	*symboltable.SymbolTable
 	ClassName string
+	labelFlag int
 }
 
 // New is initializer of compilation engine
 func New(className string, vm *vmwriter.VMWriter, st *symboltable.SymbolTable) *CompilationEngine {
-	ce := &CompilationEngine{VMWriter: vm, SymbolTable: st, ClassName: className}
+	ce := &CompilationEngine{VMWriter: vm, SymbolTable: st, ClassName: className, labelFlag: 0}
 	return ce
 }
 
@@ -38,6 +39,8 @@ func (ce *CompilationEngine) CompileStatement(statementAst ast.Statement) error 
 		return ce.CompileClassStatement(statementAst)
 	case *ast.LetStatement:
 		return ce.CompileLetStatement(statementAst)
+	case *ast.IfStatement:
+		return ce.CompileIfStatement(statementAst)
 	default:
 		return errors.New("statementAst type: %T is not valid")
 	}
@@ -330,9 +333,41 @@ func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) er
 	return nil
 }
 
+func (ce *CompilationEngine) CompileIfStatement(ifStatement *ast.IfStatement) error {
+	ce.incrementLabelFlag()
+	ELSE_LABEL, ENDIF_LABEL := fmt.Sprintf("ELSE%d", ce.labelFlag), fmt.Sprintf("ENDIF%d", ce.labelFlag)
+	ce.CompileExpression(ifStatement.Condition)
+	ce.WriteArithmetic(vmwriter.NOT)
+
+	if ifStatement.Alternative == nil {
+		ce.WriteIf(ENDIF_LABEL) // 条件式がfalseであった場合は、ENDIFにjumpする
+		for _, stmt := range ifStatement.Consequence.Statements {
+			ce.CompileStatement(stmt)
+		}
+		ce.WriteLabel(ENDIF_LABEL)
+		return nil
+	}
+
+	ce.WriteIf(ELSE_LABEL) // 条件式がfalseであった場合は、ELSEにjumpする
+	for _, stmt := range ifStatement.Consequence.Statements {
+		ce.CompileStatement(stmt)
+	}
+	ce.WriteGoto(ENDIF_LABEL)
+	ce.WriteLabel(ELSE_LABEL)
+	for _, stmt := range ifStatement.Alternative.Statements {
+		ce.CompileStatement(stmt)
+	}
+	ce.WriteLabel(ENDIF_LABEL)
+	return nil
+}
+
 func (ce *CompilationEngine) CompileExpressionListStatement(expressionListStmt *ast.ExpressionListStatement) error {
 	for i := range expressionListStmt.ExpressionList {
 		ce.CompileExpression(expressionListStmt.ExpressionList[i])
 	}
 	return nil
+}
+
+func (ce *CompilationEngine) incrementLabelFlag() {
+	ce.labelFlag++
 }
