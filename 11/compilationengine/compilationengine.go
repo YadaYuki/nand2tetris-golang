@@ -41,6 +41,8 @@ func (ce *CompilationEngine) CompileStatement(statementAst ast.Statement) error 
 		return ce.CompileLetStatement(statementAst)
 	case *ast.IfStatement:
 		return ce.CompileIfStatement(statementAst)
+	case *ast.WhileStatement:
+		return ce.CompileWhileStatement(statementAst)
 	default:
 		return errors.New("statementAst type: %T is not valid")
 	}
@@ -358,6 +360,24 @@ func (ce *CompilationEngine) CompileIfStatement(ifStatement *ast.IfStatement) er
 		ce.CompileStatement(stmt)
 	}
 	ce.WriteLabel(ENDIF_LABEL)
+	return nil
+}
+
+func (ce *CompilationEngine) CompileWhileStatement(whileStatement *ast.WhileStatement) error {
+	ce.incrementLabelFlag()
+	WHILE_LOOP_LABEL, WHILE_END_LABEL := fmt.Sprintf("WHILELOOP%d", ce.labelFlag), fmt.Sprintf("WHILEEND%d", ce.labelFlag)
+	ce.WriteLabel(WHILE_LOOP_LABEL)
+	ce.CompileExpression(whileStatement.Condition)
+	ce.WriteArithmetic(vmwriter.NOT)
+	ce.WriteIf(WHILE_END_LABEL) // 条件式がfalseであった場合は、WHILE_END_LABELにjumpする
+
+	for _, stmt := range whileStatement.Statements.Statements {
+		ce.CompileStatement(stmt)
+	}
+
+	ce.WriteGoto(WHILE_LOOP_LABEL)
+	ce.WriteLabel(WHILE_END_LABEL)
+
 	return nil
 }
 
