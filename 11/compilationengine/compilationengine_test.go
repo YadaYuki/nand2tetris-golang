@@ -279,6 +279,24 @@ func TestIfStatement(t *testing.T) {
 	}
 }
 
+func TestWhileStatement(t *testing.T) {
+	testCases := []struct {
+		input  string
+		vmCode string
+	}{
+		{"while(1=1){return 1;}", "label WHILELOOP1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "eq" + value.NEW_LINE + "not" + value.NEW_LINE + "if-goto WHILEEND1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "return" + value.NEW_LINE + "goto WHILELOOP1" + value.NEW_LINE + "label WHILEEND1" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.input)
+		ast := p.ParseWhileStatement()
+		ce := newCompilationEngine("Main")
+		ce.CompileWhileStatement(ast)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("WhileStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestVarDecStatement(t *testing.T) { // SubroutineDecをコンパイルした後、シンボルテーブル内にVAR型の変数が正しく登録されているかどうかをテストする。
 	input := `
 	function void add (){var int a,b,c; var char d;var HogeClass hoge;}

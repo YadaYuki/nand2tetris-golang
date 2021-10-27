@@ -4,31 +4,28 @@ call Keyboard.init 0
 call Memory.init 0
 call Screen.init 0
 call Sys.init 0
-function Main.getVal 0
-push argument 0
-push constant 10
+function Main.printCount 1
+push constant 1
+pop local 0
+label WHILELOOP1
+push local 0
+push constant 11
 lt
 not
-if-goto ELSE1
-push argument 0
-push constant 10
-call Math.multiply 2
-return
-goto ENDIF1
-label ELSE1
-push argument 0
-push constant 100
-call Math.multiply 2
-return
-label ENDIF1
-function Main.main 0
-push constant 5
-call Main.getVal 1
+if-goto WHILEEND1
+push local 0
 call Output.printInt 1
 pop temp 0
-push constant 100
-call Main.getVal 1
-call Output.printInt 1
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILELOOP1
+label WHILEEND1
+push constant 0
+return
+function Main.main 0
+call Main.printCount 0
 pop temp 0
 push constant 0
 return
