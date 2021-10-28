@@ -70,6 +70,27 @@ func TestCompilePrefixTerm(t *testing.T) {
 	}
 }
 
+func TestCompileKeywordConstTerm(t *testing.T) {
+	testCases := []struct {
+		expressionInput string
+		vmCode          string
+	}{
+		{"false", "push constant 0" + value.NEW_LINE},
+		{"null", "push constant 0" + value.NEW_LINE},
+		{"true", "push constant 1" + value.NEW_LINE + "neg" + value.NEW_LINE},
+		// {"this", "push constant 1" + value.NEW_LINE + "neg" + value.NEW_LINE}, TODO: Implement this
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.expressionInput)
+		keywordConstTermAst := p.ParseKeyWordConstTerm()
+		ce := newCompilationEngine("Main")
+		ce.CompileKeywordConstTerm(keywordConstTermAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("keywordConstTermAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestCompileIdentifierTerm(t *testing.T) {
 	testCases := []struct {
 		identifierTermInput string

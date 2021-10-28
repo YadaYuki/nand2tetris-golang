@@ -243,6 +243,10 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 		return ce.CompileSubroutineCallTerm(c)
 	case *ast.ArrayElementTerm:
 		return ce.CompileArrayElementTerm(c)
+	case *ast.PrefixTerm:
+		return ce.CompilePrefixTerm(c)
+	case *ast.KeywordConstTerm:
+		return ce.CompileKeywordConstTerm(c)
 	}
 	return nil
 }
@@ -326,6 +330,21 @@ func (ce *CompilationEngine) CompilePrefixTerm(prefixTerm *ast.PrefixTerm) error
 		return nil
 	}
 	return fmt.Errorf("prefixTerm.Prefix should be '-' or '~'. But got %s", prefixTerm.Prefix)
+}
+
+func (ce *CompilationEngine) CompileKeywordConstTerm(keywordConstTerm *ast.KeywordConstTerm) error {
+	switch keywordConstTerm.KeyWord {
+	case token.NULL, token.FALSE:
+		ce.WritePush(vmwriter.CONST, 0)
+		return nil
+	case token.TRUE:
+		ce.WritePush(vmwriter.CONST, 1)
+		ce.WriteArithmetic(vmwriter.NEG)
+		return nil
+		// case token.THIS: TODO: Implement !
+		// 	return nil
+	}
+	return nil // TODO: Error
 }
 
 func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) error {
