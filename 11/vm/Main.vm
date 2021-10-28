@@ -20,6 +20,8 @@ pop temp 0
 push constant 0
 return
 function Main.convert 3
+push constant 1
+neg
 pop local 2
 label WHILELOOP1
 push local 2
@@ -63,6 +65,7 @@ pop temp 0
 label ENDIF3
 goto ENDIF2
 label ELSE2
+push constant 0
 pop local 2
 label ENDIF2
 goto WHILELOOP1
