@@ -45,6 +45,8 @@ func New() *SymbolTable {
 // TODO: TDD!
 func (st *SymbolTable) StartSubroutine() {
 	st.MethodScopeSymbolTable = map[string]Symbol{}
+	st.currentArgumentIdx = 0
+	st.currentVarIdx = 0
 	st.Scope = SubroutineScope
 }
 

@@ -87,6 +87,7 @@ func (ce *CompilationEngine) CompileSubroutineDecStatement(subroutineDecStmtAst 
 	ce.StartSubroutine()
 	ce.CompileParameterListStatement(subroutineDecStmtAst.ParameterList)
 	ce.CompileSubroutineBodyStatement(subroutineDecStmtAst.SubroutineBody)
+	fmt.Println(ce.SymbolTable.MethodScopeSymbolTable)
 	return nil
 }
 
@@ -243,6 +244,8 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 		return ce.CompileSubroutineCallTerm(c)
 	case *ast.ArrayElementTerm:
 		return ce.CompileArrayElementTerm(c)
+	case *ast.PrefixTerm:
+		return ce.CompilePrefixTerm(c)
 	}
 	return nil
 }
