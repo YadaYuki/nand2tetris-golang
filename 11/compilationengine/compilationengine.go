@@ -138,15 +138,14 @@ func (ce *CompilationEngine) CompileLetArrayElementStatement(letStatement *ast.L
 	varKind := ce.KindOf(letStatement.Name.Literal)
 	indexOf := ce.IndexOf(letStatement.Name.Literal)
 	switch varKind {
-	// case symboltable.ARGUMENT:
-	// 	ce.WritePush(vmwriter.ARG, indexOf)
-	// 	return nil
+	case symboltable.ARGUMENT:
+		ce.WritePush(vmwriter.ARG, indexOf)
 	// case symboltable.STATIC:
 	// 	ce.WritePush(vmwriter.STATIC, indexOf)
-	// 	return nil
+	//
 	// case symboltable.FIELD:
 	// 	ce.WritePush(vmwriter.THIS, indexOf)
-	// 	return nil
+	//
 	case symboltable.VAR:
 		ce.WritePush(vmwriter.LOCAL, indexOf)
 	default:
@@ -155,9 +154,12 @@ func (ce *CompilationEngine) CompileLetArrayElementStatement(letStatement *ast.L
 	// (addr + idx)
 	ce.CompileExpression(letStatement.Idx)
 	ce.WriteArithmetic(vmwriter.ADD)
+	// NOTE: CompileExpressionで配列の値参照が生じた際、pointer 0の値が書き換えられてしまうので、代入先であるアドレスを一時的にtempに保存する。
+	ce.WritePop(vmwriter.TEMP, 0)
+	ce.CompileExpression(letStatement.Value)
+	ce.WritePush(vmwriter.TEMP, 0)
 
 	ce.WritePop(vmwriter.POINTER, 1)
-	ce.CompileExpression(letStatement.Value)
 	ce.WritePop(vmwriter.THAT, 0)
 	return nil // TODO:Error,fmt.Errorf("Identifier ...")
 }
