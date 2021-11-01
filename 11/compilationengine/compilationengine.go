@@ -256,8 +256,8 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 func (ce *CompilationEngine) CompileIntergerConstTerm(intergerConstTerm *ast.IntergerConstTerm) error {
 	ce.WritePush(vmwriter.CONST, int(intergerConstTerm.Value))
 	return nil
-
 }
+
 func (ce *CompilationEngine) CompileSubroutineCallTerm(subroutineCallTerm *ast.SubroutineCallTerm) error {
 	ce.CompileExpressionListStatement(subroutineCallTerm.ExpressionListStmt)
 	ce.WriteCall(fmt.Sprintf("%s.%s", subroutineCallTerm.ClassName.String(), subroutineCallTerm.SubroutineName.String()), len(subroutineCallTerm.ExpressionListStmt.ExpressionList))
@@ -272,8 +272,8 @@ func (ce *CompilationEngine) CompileArrayElementTerm(arrayElementTerm *ast.Array
 	varKind := ce.KindOf(arrayElementTerm.TokenLiteral())
 	indexOf := ce.IndexOf(arrayElementTerm.TokenLiteral())
 	switch varKind {
-	// case symboltable.ARGUMENT:
-	// 	ce.WritePush(vmwriter.ARG, indexOf)
+	case symboltable.ARGUMENT:
+		ce.WritePush(vmwriter.ARG, indexOf)
 	// case symboltable.STATIC:
 	// 	ce.WritePush(vmwriter.STATIC, indexOf)
 	// case symboltable.FIELD:
@@ -395,10 +395,8 @@ func (ce *CompilationEngine) CompileWhileStatement(whileStatement *ast.WhileStat
 	for _, stmt := range whileStatement.Statements.Statements {
 		ce.CompileStatement(stmt)
 	}
-
 	ce.WriteGoto(WHILE_LOOP_LABEL)
 	ce.WriteLabel(WHILE_END_LABEL)
-
 	return nil
 }
 

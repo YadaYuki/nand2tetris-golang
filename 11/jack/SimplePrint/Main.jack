@@ -1,0 +1,8 @@
+class Main{
+    function void main() {
+        var SimplePrint sp;
+        do sp.PrintArg(100);
+        do sp.PrintArg(200);
+        return;
+    }
+}

@@ -1,0 +1,10 @@
+class SimplePrint {
+	 
+    constructor SimplePrint new(){
+        return this;
+    }
+
+	method void PrintArg(int num){
+		do Output.PrintInt(num);
+	}
+}
