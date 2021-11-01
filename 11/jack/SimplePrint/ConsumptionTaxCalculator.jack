@@ -1,0 +1,13 @@
+class ConsumptionTaxCalculator {
+	
+    field int taxRate;
+
+    constructor SimplePrint new(int aTaxRate){
+        let taxRate = aTaxRate;
+        return this;
+    }
+
+	method void getTax(int num){
+		return num * this.taxRate;
+	}
+}
