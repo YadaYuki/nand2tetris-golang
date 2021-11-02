@@ -77,6 +77,29 @@ func (ce *CompilationEngine) CompileClassStatement(statementAst *ast.ClassStatem
 	return nil
 }
 
+func (ce *CompilationEngine) CompileSubroutineDecConstructorStatement(subroutineDecStmtAst *ast.SubroutineDecStatement) error {
+	// ローカル変数の数を計算する
+	localVarCount := 0
+	for _, varDec := range subroutineDecStmtAst.SubroutineBody.VarDecList {
+		localVarCount += len(varDec.Identifiers)
+	}
+	// thisポインタをローカル変数として扱うため、その分加算する。
+	localVarCount += 1
+	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, subroutineDecStmtAst.Name.Literal), localVarCount)
+
+	// フィールド変数分だけ、メモリを確保し → thisポインタにオブジェクトの先頭アドレスを格納する。
+	fieldVarCount := ce.VarCount(symboltable.FIELD)
+	ce.WritePush(vmwriter.CONST, fieldVarCount)
+	ce.WriteCall("Memory.alloc", 1)
+	ce.WritePop(vmwriter.LOCAL, 0)
+
+	ce.StartSubroutine()
+	ce.Define(string(token.THIS), ce.ClassName, symboltable.VAR)
+	ce.CompileParameterListStatement(subroutineDecStmtAst.ParameterList)
+	ce.CompileSubroutineBodyStatement(subroutineDecStmtAst.SubroutineBody)
+	return nil
+}
+
 func (ce *CompilationEngine) CompileSubroutineDecStatement(subroutineDecStmtAst *ast.SubroutineDecStatement) error {
 	// ローカル変数の数を計算する
 	localVarCount := 0
@@ -84,8 +107,10 @@ func (ce *CompilationEngine) CompileSubroutineDecStatement(subroutineDecStmtAst 
 		localVarCount += len(varDec.Identifiers)
 	}
 	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, subroutineDecStmtAst.Name.Literal), localVarCount)
+
 	ce.StartSubroutine()
 	ce.CompileParameterListStatement(subroutineDecStmtAst.ParameterList)
+
 	ce.CompileSubroutineBodyStatement(subroutineDecStmtAst.SubroutineBody)
 	return nil
 }
@@ -343,8 +368,17 @@ func (ce *CompilationEngine) CompileKeywordConstTerm(keywordConstTerm *ast.Keywo
 		ce.WritePush(vmwriter.CONST, 1)
 		ce.WriteArithmetic(vmwriter.NEG)
 		return nil
-		// case token.THIS: TODO: Implement !
-		// 	return nil
+	case token.THIS:
+		varKind := ce.KindOf(string(token.THIS))
+		indexOf := ce.IndexOf(string(token.THIS))
+		switch varKind {
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, indexOf)
+			return nil
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, indexOf)
+			return nil
+		}
 	}
 	return nil // TODO: Error
 }

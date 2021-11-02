@@ -203,7 +203,7 @@ func TestLetStatement(t *testing.T) {
 		vmCode  string
 	}{
 		{"let a=1;", "int", symboltable.VAR, "push constant 1" + value.NEW_LINE + "pop local 0" + value.NEW_LINE},
-		{"let a[1]=1;", "int", symboltable.VAR, "push local 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "add" + value.NEW_LINE + "pop pointer 1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "pop that 0" + value.NEW_LINE},
+		{"let a[1]=1;", "int", symboltable.VAR, "push local 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "add" + value.NEW_LINE + "pop temp 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "push temp 0" + value.NEW_LINE + "pop pointer 1" + value.NEW_LINE + "pop that 0" + value.NEW_LINE},
 	}
 	for _, tt := range testCases {
 		p := newParser(tt.input)
@@ -225,7 +225,7 @@ func TestLetArrayElementStatement(t *testing.T) {
 		varKind symboltable.VarKind
 		vmCode  string
 	}{
-		{"let a[1]=1;", "int", symboltable.VAR, "push local 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "add" + value.NEW_LINE + "pop pointer 1" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "pop that 0" + value.NEW_LINE},
+		{"let a[1]=1;", "int", symboltable.VAR, "push local 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "add" + value.NEW_LINE + "pop temp 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "push temp 0" + value.NEW_LINE + "pop pointer 1" + value.NEW_LINE + "pop that 0" + value.NEW_LINE},
 	}
 	for _, tt := range testCases {
 		p := newParser(tt.input)
@@ -275,6 +275,24 @@ func TestSubroutineDecStatement(t *testing.T) {
 		ast := p.ParseSubroutineDecStatement()
 		ce := newCompilationEngine("Main")
 		ce.CompileSubroutineDecStatement(ast)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("subroutineDecStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
+func TestSubroutineDecConstructorStatement(t *testing.T) {
+	testCases := []struct {
+		expressionInput string
+		vmCode          string
+	}{
+		{"constructor Main new (){return this;}", "function Main.new 1" + value.NEW_LINE + "push constant 0" + value.NEW_LINE + "call Memory.alloc 1" + value.NEW_LINE + "pop local 0" + value.NEW_LINE + "push local 0" + value.NEW_LINE + "return" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.expressionInput)
+		ast := p.ParseSubroutineDecStatement()
+		ce := newCompilationEngine("Main")
+		ce.CompileSubroutineDecConstructorStatement(ast)
 		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
 			t.Fatalf("subroutineDecStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
 		}

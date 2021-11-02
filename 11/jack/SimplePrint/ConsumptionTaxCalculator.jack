@@ -1,8 +1,8 @@
 class ConsumptionTaxCalculator {
-	
+
     field int taxRate;
 
-    constructor SimplePrint new(int aTaxRate){
+    constructor ConsumptionTaxCalculator new(int aTaxRate){
         let taxRate = aTaxRate;
         return this;
     }
@@ -10,4 +10,5 @@ class ConsumptionTaxCalculator {
 	method void getTax(int num){
 		return num * this.taxRate;
 	}
+
 }
