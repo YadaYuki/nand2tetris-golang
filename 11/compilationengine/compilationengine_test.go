@@ -218,6 +218,31 @@ func TestLetStatement(t *testing.T) {
 	}
 }
 
+func TestLetFieldStatement(t *testing.T) {
+	testCases := []struct {
+		input       string
+		varType     string
+		thisVarKind symboltable.VarKind // thisを一つ目のローカル変数として定義する(コンストラクタ)か、一つ目の関数の引数(メソッド)として定義するか。
+		varKind     symboltable.VarKind
+		vmCode      string
+	}{
+		{"let a=1;", "int", symboltable.VAR, symboltable.FIELD, "push constant 1" + value.NEW_LINE + "push local 0" + value.NEW_LINE + "push constant 0" + value.NEW_LINE + "add" + value.NEW_LINE + "pop pointer 0" + value.NEW_LINE + "pop this 0" + value.NEW_LINE},
+		{"let a=1;", "int", symboltable.ARGUMENT, symboltable.FIELD, "push constant 1" + value.NEW_LINE + "push argument 0" + value.NEW_LINE + "push constant 0" + value.NEW_LINE + "add" + value.NEW_LINE + "pop pointer 0" + value.NEW_LINE + "pop this 0" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.input)
+		letStatementAst := p.ParseLetStatement()
+		ce := newCompilationEngine("Main")
+		ce.Define(letStatementAst.Name.Literal, tt.varType, tt.varKind)
+		ce.StartSubroutine()
+		ce.Define("this", "Main", tt.thisVarKind)
+		ce.CompileLetStatement(letStatementAst)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("LetStatementAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
 func TestLetArrayElementStatement(t *testing.T) {
 	testCases := []struct {
 		input   string

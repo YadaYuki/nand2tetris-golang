@@ -154,7 +154,20 @@ func (ce *CompilationEngine) CompileLetStatement(letStatement *ast.LetStatement)
 		ce.WritePop(vmwriter.STATIC, indexOf)
 		return nil
 	case symboltable.FIELD:
-		ce.WritePop(vmwriter.THIS, indexOf)
+		thisVarKind := ce.KindOf(string(token.THIS))
+		thisIndexOf := ce.IndexOf(string(token.THIS))
+		switch thisVarKind {
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, thisIndexOf)
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, thisIndexOf)
+		default:
+			return nil // TODO:Error,fmt.Errorf("Identifier ...")
+		}
+		ce.WritePush(vmwriter.CONST, indexOf)
+		ce.WriteArithmetic(vmwriter.ADD)
+		ce.WritePop(vmwriter.POINTER, 0)
+		ce.WritePop(vmwriter.THIS, 0)
 		return nil
 	case symboltable.VAR:
 		ce.WritePop(vmwriter.LOCAL, indexOf)
