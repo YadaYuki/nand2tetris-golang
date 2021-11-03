@@ -68,9 +68,14 @@ func (ce *CompilationEngine) CompileReturnStatement(statementAst *ast.ReturnStat
 }
 
 func (ce *CompilationEngine) CompileClassStatement(statementAst *ast.ClassStatement) error {
-	_, subroutineDecList := statementAst.ClassVarDecList, statementAst.SubroutineDecList
-	// for range varDecList {
-	// }
+	varDecList, subroutineDecList := statementAst.ClassVarDecList, statementAst.SubroutineDecList
+	for _, varDec := range varDecList {
+		varKind := symboltable.VarKind(varDec.Token.Literal)
+		for _, ident := range varDec.Identifiers {
+			ce.Define(ident.Literal, varDec.ValueType.Literal, varKind)
+		}
+	}
+
 	for _, subroutineDec := range subroutineDecList {
 		ce.CompileSubroutineDecStatement(&subroutineDec)
 	}
