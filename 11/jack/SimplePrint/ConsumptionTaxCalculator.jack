@@ -7,8 +7,8 @@ class ConsumptionTaxCalculator {
         return this;
     }
 
-	method void getTax(int num){
-		return num * this.taxRate;
+	method int getTax(int num){
+		return num * taxRate;
 	}
 
 }

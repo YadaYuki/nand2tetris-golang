@@ -144,6 +144,7 @@ func TestCompileSubroutineCallTerm(t *testing.T) {
 	}{
 		{"Main.add()", "call Main.add 0" + value.NEW_LINE},
 		{"Main.add(1,2)", "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Main.add 2" + value.NEW_LINE},
+		{"Main.add(1,2)", "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Main.add 2" + value.NEW_LINE},
 	}
 	for _, tt := range testCases {
 		p := newParser(tt.subroutineCallTermInput)
@@ -155,6 +156,25 @@ func TestCompileSubroutineCallTerm(t *testing.T) {
 		}
 	}
 }
+
+// func TestCompileSubroutineCallMethodTerm(t *testing.T) {
+// 	testCases := []struct {
+// 		subroutineCallTermInput string
+// 		vmCode                  string
+// 	}{
+// 		{"main1.add()", "call Main.add 1" + value.NEW_LINE},
+// 		{"main2.add(1,2)", "call Main.add 3" + value.NEW_LINE},
+// 	}
+// 	for _, tt := range testCases {
+// 		p := newParser(tt.subroutineCallTermInput)
+// 		subroutineCallTermAst := p.ParseSubroutineCallTerm()
+// 		ce := newCompilationEngine("Main")
+// 		ce.CompileSubroutineCallTerm(subroutineCallTermAst)
+// 		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+// 			t.Fatalf("identifierTermAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+// 		}
+// 	}
+// }
 
 func TestStringConstTerm(t *testing.T) {
 	testCases := []struct {
@@ -318,6 +338,33 @@ func TestSubroutineDecConstructorStatement(t *testing.T) {
 		ast := p.ParseSubroutineDecStatement()
 		ce := newCompilationEngine("Main")
 		ce.CompileSubroutineDecConstructorStatement(ast)
+		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
+			t.Fatalf("subroutineDecStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+		}
+	}
+}
+
+func TestSubroutineDecMethodStatement(t *testing.T) {
+	type Field struct {
+		typeName string
+		name     string
+	}
+	testCases := []struct {
+		expressionInput string
+		fields          []Field
+		vmCode          string
+	}{
+		{"method int getTax(int num){return num * taxRate;}", []Field{{"int", "taxRate"}}, "function Main.getTax 0" + value.NEW_LINE + "push argument 1" + value.NEW_LINE + "push argument 0" + value.NEW_LINE + "pop pointer 0" + value.NEW_LINE + "push this 0" + value.NEW_LINE + "call Math.multiply 2" + value.NEW_LINE + "return" + value.NEW_LINE},
+	}
+	for _, tt := range testCases {
+		p := newParser(tt.expressionInput)
+		ast := p.ParseSubroutineDecStatement()
+		ce := newCompilationEngine("Main")
+		// define fields in ClassScope
+		for _, field := range tt.fields {
+			ce.Define(field.name, field.typeName, symboltable.FIELD)
+		}
+		ce.CompileSubroutineDecMethodStatement(ast)
 		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
 			t.Fatalf("subroutineDecStatement VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
 		}
