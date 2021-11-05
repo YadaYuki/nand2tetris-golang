@@ -194,10 +194,8 @@ func (ce *CompilationEngine) CompileLetStatement(letStatement *ast.LetStatement)
 		default:
 			return nil // TODO:Error,fmt.Errorf("Identifier ...")
 		}
-		ce.WritePush(vmwriter.CONST, indexOf)
-		ce.WriteArithmetic(vmwriter.ADD)
 		ce.WritePop(vmwriter.POINTER, 0)
-		ce.WritePop(vmwriter.THIS, 0)
+		ce.WritePop(vmwriter.THIS, indexOf)
 		return nil
 	case symboltable.VAR:
 		ce.WritePop(vmwriter.LOCAL, indexOf)
@@ -336,8 +334,12 @@ func (ce *CompilationEngine) CompileSubroutineCallTerm(subroutineCallTerm *ast.S
 	argumentNum := len(subroutineCallTerm.ExpressionListStmt.ExpressionList)
 	// method呼び出しの場合は、インスタンスのアドレスを第一引数としてpushする
 	if ce.IndexOf(subroutineCallTerm.ClassName.Literal) != -1 {
+		typeOf := ce.TypeOf(subroutineCallTerm.ClassName.Literal)
 		ce.CompileIdentifierTerm(&ast.IdentifierTerm{Token: subroutineCallTerm.ClassName, Value: subroutineCallTerm.ClassName.Literal})
 		argumentNum += 1
+		ce.CompileExpressionListStatement(subroutineCallTerm.ExpressionListStmt)
+		ce.WriteCall(fmt.Sprintf("%s.%s", typeOf, subroutineCallTerm.SubroutineName.String()), argumentNum)
+		return nil
 	}
 	ce.CompileExpressionListStatement(subroutineCallTerm.ExpressionListStmt)
 	ce.WriteCall(fmt.Sprintf("%s.%s", subroutineCallTerm.ClassName.String(), subroutineCallTerm.SubroutineName.String()), argumentNum)
@@ -349,6 +351,7 @@ func (ce *CompilationEngine) CompileBracketTerm(bracketTerm *ast.BracketTerm) er
 }
 
 func (ce *CompilationEngine) CompileArrayElementTerm(arrayElementTerm *ast.ArrayElementTerm) error {
+	// 配列の先頭アドレスをpushする
 	varKind := ce.KindOf(arrayElementTerm.TokenLiteral())
 	indexOf := ce.IndexOf(arrayElementTerm.TokenLiteral())
 	switch varKind {
@@ -363,6 +366,8 @@ func (ce *CompilationEngine) CompileArrayElementTerm(arrayElementTerm *ast.Array
 	default:
 		return nil // TODO:Error
 	}
+
+	// [先頭アドレス + idx]にアクセス.
 	ce.CompileExpression(arrayElementTerm.Idx)
 	ce.WriteArithmetic(vmwriter.ADD)
 	ce.WritePop(vmwriter.POINTER, 1)

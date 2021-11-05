@@ -31,7 +31,6 @@ func main() {
 	vm := vmwriter.New(fmt.Sprintf("vm/%s.vm", className), 0644)
 	st := symboltable.New()
 	ce := compilationengine.New(className, vm, st)
-	ce.CompileInit()
 	ce.CompileProgram(programAst)
 	ce.Close()
 }

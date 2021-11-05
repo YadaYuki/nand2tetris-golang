@@ -6,9 +6,7 @@ class ConsumptionTaxCalculator {
         let taxRate = aTaxRate;
         return this;
     }
-
 	method int getTax(int num){
 		return num * taxRate;
 	}
-
 }

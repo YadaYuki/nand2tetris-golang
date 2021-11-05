@@ -1,22 +1,16 @@
-call Math.init 0
-call Output.init 0
-call Keyboard.init 0
-call Memory.init 0
-call Screen.init 0
-call Sys.init 0
 function Main.main 1
 push constant 2
 call ConsumptionTaxCalculator.new 1
 pop local 0
 push local 0
 push constant 100
-call ctc.getTax 2
-call Output.PrintInt 1
+call ConsumptionTaxCalculator.getTax 2
+call Output.printInt 1
 pop temp 0
 push local 0
 push constant 200
-call ctc.getTax 2
-call Output.PrintInt 1
+call ConsumptionTaxCalculator.getTax 2
+call Output.printInt 1
 pop temp 0
 push constant 0
 return
