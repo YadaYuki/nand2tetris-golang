@@ -8,7 +8,6 @@ import (
 	"jack_compiler/value"
 	"jack_compiler/vmwriter"
 	"testing"
-	// "fmt"
 )
 
 func newParser(input string) *parser.Parser {

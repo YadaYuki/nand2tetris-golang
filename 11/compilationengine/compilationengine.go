@@ -214,9 +214,19 @@ func (ce *CompilationEngine) CompileLetArrayElementStatement(letStatement *ast.L
 	// case symboltable.STATIC:
 	// 	ce.WritePush(vmwriter.STATIC, indexOf)
 	//
-	// case symboltable.FIELD:
-	// 	ce.WritePush(vmwriter.THIS, indexOf)
-	//
+	case symboltable.FIELD:
+		thisVarKind := ce.KindOf(string(token.THIS))
+		thisIndexOf := ce.IndexOf(string(token.THIS))
+		switch thisVarKind {
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, thisIndexOf)
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, thisIndexOf)
+		default:
+			return nil // TODO:Error,fmt.Errorf("Identifier ...")
+		}
+		ce.WritePop(vmwriter.POINTER, 0)
+		ce.WritePush(vmwriter.THIS, indexOf)
 	case symboltable.VAR:
 		ce.WritePush(vmwriter.LOCAL, indexOf)
 	default:
@@ -359,8 +369,19 @@ func (ce *CompilationEngine) CompileArrayElementTerm(arrayElementTerm *ast.Array
 		ce.WritePush(vmwriter.ARG, indexOf)
 	// case symboltable.STATIC:
 	// 	ce.WritePush(vmwriter.STATIC, indexOf)
-	// case symboltable.FIELD:
-	// 	ce.WritePush(vmwriter.THIS, indexOf)
+	case symboltable.FIELD:
+		thisVarKind := ce.KindOf(string(token.THIS))
+		thisIndexOf := ce.IndexOf(string(token.THIS))
+		switch thisVarKind {
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, thisIndexOf)
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, thisIndexOf)
+		default:
+			return nil // TODO:Error,fmt.Errorf("Identifier ...")
+		}
+		ce.WritePop(vmwriter.POINTER, 0)
+		ce.WritePush(vmwriter.THIS, indexOf)
 	case symboltable.VAR:
 		ce.WritePush(vmwriter.LOCAL, indexOf)
 	default:
