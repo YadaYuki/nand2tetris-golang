@@ -1,9 +1,6 @@
-
 class SquareGame {
    field Square square;
    field int direction;
-                       
-
    
    constructor SquareGame new() {
       
@@ -44,11 +41,6 @@ class SquareGame {
          if (key = 133) { let direction = 2; }   
          if (key = 130) { let direction = 3; }   
          if (key = 132) { let direction = 4; }   
-
-         while (~(key = 0)) {
-            let key = Keyboard.keyPressed();
-            do moveSquare();
-         }
      } 
      return;
    }

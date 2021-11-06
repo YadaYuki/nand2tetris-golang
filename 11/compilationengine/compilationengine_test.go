@@ -139,19 +139,24 @@ func TestCompileArrayElementTerm(t *testing.T) {
 func TestCompileSubroutineCallTerm(t *testing.T) {
 	testCases := []struct {
 		subroutineCallTermInput string
+		thisVarKind             symboltable.VarKind
 		vmCode                  string
 	}{
-		{"Main.add()", "call Main.add 0" + value.NEW_LINE},
-		{"Main.add(1,2)", "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Main.add 2" + value.NEW_LINE},
-		{"Main.add(1,2)", "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Main.add 2" + value.NEW_LINE},
+		{"Main.add()", symboltable.ARGUMENT, "call Main.add 0" + value.NEW_LINE},
+		{"Main.add(1,2)", symboltable.ARGUMENT, "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Main.add 2" + value.NEW_LINE},
+		{"Main.add(1,2)", symboltable.ARGUMENT, "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Main.add 2" + value.NEW_LINE},
+		{"add(1,2)", symboltable.ARGUMENT, "push argument 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Main.add 3" + value.NEW_LINE},
+		{"add(1,2)", symboltable.VAR, "push local 0" + value.NEW_LINE + "push constant 1" + value.NEW_LINE + "push constant 2" + value.NEW_LINE + "call Main.add 3" + value.NEW_LINE},
 	}
 	for _, tt := range testCases {
 		p := newParser(tt.subroutineCallTermInput)
 		subroutineCallTermAst := p.ParseSubroutineCallTerm()
 		ce := newCompilationEngine("Main")
+		ce.StartSubroutine()
+		ce.Define("this", "Main", tt.thisVarKind)
 		ce.CompileSubroutineCallTerm(subroutineCallTermAst)
 		if !bytes.Equal([]byte(tt.vmCode), ce.VMCode) {
-			t.Fatalf("identifierTermAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
+			t.Fatalf("subroutineCallTermAst VMCode should be %s, got %s", tt.vmCode, ce.VMCode)
 		}
 	}
 }
@@ -245,8 +250,8 @@ func TestLetFieldStatement(t *testing.T) {
 		varKind     symboltable.VarKind
 		vmCode      string
 	}{
-		{"let a=1;", "int", symboltable.VAR, symboltable.FIELD, "push constant 1" + value.NEW_LINE + "push local 0" + value.NEW_LINE + "push constant 0" + value.NEW_LINE + "add" + value.NEW_LINE + "pop pointer 0" + value.NEW_LINE + "pop this 0" + value.NEW_LINE},
-		{"let a=1;", "int", symboltable.ARGUMENT, symboltable.FIELD, "push constant 1" + value.NEW_LINE + "push argument 0" + value.NEW_LINE + "push constant 0" + value.NEW_LINE + "add" + value.NEW_LINE + "pop pointer 0" + value.NEW_LINE + "pop this 0" + value.NEW_LINE},
+		{"let a=1;", "int", symboltable.VAR, symboltable.FIELD, "push constant 1" + value.NEW_LINE + "push local 0" + value.NEW_LINE + "pop pointer 0" + value.NEW_LINE + "pop this 0" + value.NEW_LINE},
+		{"let a=1;", "int", symboltable.ARGUMENT, symboltable.FIELD, "push constant 1" + value.NEW_LINE + "push argument 0" + value.NEW_LINE + "pop pointer 0" + value.NEW_LINE + "pop this 0" + value.NEW_LINE},
 	}
 	for _, tt := range testCases {
 		p := newParser(tt.input)

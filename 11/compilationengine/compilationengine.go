@@ -341,18 +341,31 @@ func (ce *CompilationEngine) CompileIntergerConstTerm(intergerConstTerm *ast.Int
 
 func (ce *CompilationEngine) CompileSubroutineCallTerm(subroutineCallTerm *ast.SubroutineCallTerm) error {
 
-	argumentNum := len(subroutineCallTerm.ExpressionListStmt.ExpressionList)
+	if subroutineCallTerm.ClassName.Literal == "" {
+		thisVarKind := ce.KindOf("this")
+		thisIndexOf := ce.IndexOf(string(token.THIS))
+		switch thisVarKind {
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, thisIndexOf)
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, thisIndexOf)
+		default:
+			return nil // TODO:Error,fmt.Errorf("Identifier ...")
+		}
+		ce.CompileExpressionListStatement(subroutineCallTerm.ExpressionListStmt)
+		ce.WriteCall(fmt.Sprintf("%s.%s", ce.ClassName, subroutineCallTerm.SubroutineName.String()), len(subroutineCallTerm.ExpressionListStmt.ExpressionList)+1)
+		return nil
+	}
 	// method呼び出しの場合は、インスタンスのアドレスを第一引数としてpushする
 	if ce.IndexOf(subroutineCallTerm.ClassName.Literal) != -1 {
 		typeOf := ce.TypeOf(subroutineCallTerm.ClassName.Literal)
 		ce.CompileIdentifierTerm(&ast.IdentifierTerm{Token: subroutineCallTerm.ClassName, Value: subroutineCallTerm.ClassName.Literal})
-		argumentNum += 1
 		ce.CompileExpressionListStatement(subroutineCallTerm.ExpressionListStmt)
-		ce.WriteCall(fmt.Sprintf("%s.%s", typeOf, subroutineCallTerm.SubroutineName.String()), argumentNum)
+		ce.WriteCall(fmt.Sprintf("%s.%s", typeOf, subroutineCallTerm.SubroutineName.String()), len(subroutineCallTerm.ExpressionListStmt.ExpressionList)+1)
 		return nil
 	}
 	ce.CompileExpressionListStatement(subroutineCallTerm.ExpressionListStmt)
-	ce.WriteCall(fmt.Sprintf("%s.%s", subroutineCallTerm.ClassName.String(), subroutineCallTerm.SubroutineName.String()), argumentNum)
+	ce.WriteCall(fmt.Sprintf("%s.%s", subroutineCallTerm.ClassName.String(), subroutineCallTerm.SubroutineName.String()), len(subroutineCallTerm.ExpressionListStmt.ExpressionList))
 	return nil
 }
 
@@ -476,8 +489,33 @@ func (ce *CompilationEngine) CompileKeywordConstTerm(keywordConstTerm *ast.Keywo
 }
 
 func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) error {
+	if doStatement.ClassName.Literal == "" {
+		thisVarKind := ce.KindOf("this")
+		thisIndexOf := ce.IndexOf(string(token.THIS))
+		switch thisVarKind {
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, thisIndexOf)
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, thisIndexOf)
+		default:
+			return nil // TODO:Error,fmt.Errorf("Identifier ...")
+		}
+		ce.CompileExpressionListStatement(doStatement.ExpressionListStmt)
+		ce.WriteCall(fmt.Sprintf("%s.%s", ce.ClassName, doStatement.SubroutineName.String()), len(doStatement.ExpressionListStmt.ExpressionList)+1)
+		ce.WritePop(vmwriter.TEMP, 0)
+		return nil
+	}
+	if ce.IndexOf(doStatement.ClassName.Literal) != -1 {
+		typeOf := ce.TypeOf(doStatement.ClassName.Literal)
+		ce.CompileIdentifierTerm(&ast.IdentifierTerm{Token: doStatement.ClassName, Value: doStatement.ClassName.Literal}) // インスタンスのアドレスをpushする。
+		ce.CompileExpressionListStatement(doStatement.ExpressionListStmt)
+		ce.WriteCall(fmt.Sprintf("%s.%s", typeOf, doStatement.SubroutineName.Literal), len(doStatement.ExpressionListStmt.ExpressionList)+1)
+		ce.WritePop(vmwriter.TEMP, 0)
+		return nil
+	}
+
 	ce.CompileExpressionListStatement(doStatement.ExpressionListStmt)
-	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.String(), doStatement.SubroutineName.String()), len(doStatement.ExpressionListStmt.ExpressionList))
+	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.Literal, doStatement.SubroutineName.String()), len(doStatement.ExpressionListStmt.ExpressionList))
 	ce.WritePop(vmwriter.TEMP, 0)
 	return nil
 }
