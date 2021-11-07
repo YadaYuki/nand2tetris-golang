@@ -75,7 +75,6 @@ func (ce *CompilationEngine) CompileClassStatement(statementAst *ast.ClassStatem
 			ce.Define(ident.Literal, varDec.ValueType.Literal, varKind)
 		}
 	}
-
 	for _, subroutineDec := range subroutineDecList {
 		ce.CompileSubroutineDecStatement(&subroutineDec)
 	}
@@ -211,9 +210,8 @@ func (ce *CompilationEngine) CompileLetArrayElementStatement(letStatement *ast.L
 	switch varKind {
 	case symboltable.ARGUMENT:
 		ce.WritePush(vmwriter.ARG, indexOf)
-	// case symboltable.STATIC:
-	// 	ce.WritePush(vmwriter.STATIC, indexOf)
-	//
+	case symboltable.STATIC:
+		ce.WritePush(vmwriter.STATIC, indexOf)
 	case symboltable.FIELD:
 		thisVarKind := ce.KindOf(string(token.THIS))
 		thisIndexOf := ce.IndexOf(string(token.THIS))
@@ -380,8 +378,8 @@ func (ce *CompilationEngine) CompileArrayElementTerm(arrayElementTerm *ast.Array
 	switch varKind {
 	case symboltable.ARGUMENT:
 		ce.WritePush(vmwriter.ARG, indexOf)
-	// case symboltable.STATIC:
-	// 	ce.WritePush(vmwriter.STATIC, indexOf)
+	case symboltable.STATIC:
+		ce.WritePush(vmwriter.STATIC, indexOf)
 	case symboltable.FIELD:
 		thisVarKind := ce.KindOf(string(token.THIS))
 		thisIndexOf := ce.IndexOf(string(token.THIS))
@@ -401,7 +399,7 @@ func (ce *CompilationEngine) CompileArrayElementTerm(arrayElementTerm *ast.Array
 		return nil // TODO:Error
 	}
 
-	// [先頭アドレス + idx]にアクセス.
+	// [先頭アドレス + idx]にアクセス.
 	ce.CompileExpression(arrayElementTerm.Idx)
 	ce.WriteArithmetic(vmwriter.ADD)
 	ce.WritePop(vmwriter.POINTER, 1)
@@ -417,9 +415,9 @@ func (ce *CompilationEngine) CompileIdentifierTerm(identifierTerm *ast.Identifie
 	case symboltable.ARGUMENT:
 		ce.WritePush(vmwriter.ARG, indexOf)
 		return nil
-	// case symboltable.STATIC:
-	// 	ce.WritePush(vmwriter.STATIC, indexOf)
-	// 	return nil
+	case symboltable.STATIC:
+		ce.WritePush(vmwriter.STATIC, indexOf)
+		return nil
 	case symboltable.FIELD:
 		thisVarKind := ce.KindOf(string(token.THIS))
 		thisIndexOf := ce.IndexOf(string(token.THIS))

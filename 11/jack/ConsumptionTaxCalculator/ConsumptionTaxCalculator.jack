@@ -1,12 +1,20 @@
 class ConsumptionTaxCalculator {
-
-    field int taxRate;
+    
+    field int a;
+    
+    field ConsumptionTaxTwo ctt;
 
     constructor ConsumptionTaxCalculator new(int aTaxRate){
-        let taxRate = aTaxRate;
+        let ctt=ConsumptionTaxTwo.new(aTaxRate);
         return this;
     }
-	method int getTax(int num){
-		return num * taxRate;
+	
+    method int getTax(int num){
+		return ctt.getTax(num);
 	}
+
+    method void printTaxRate(){
+        do ctt.printTaxRate();
+        return;
+    }
 }

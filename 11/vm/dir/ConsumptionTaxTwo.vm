@@ -1,0 +1,33 @@
+function ConsumptionTaxTwo.new 1
+push constant 1
+call Memory.alloc 1
+pop local 0
+push argument 0
+push local 0
+pop pointer 0
+pop this 0
+push local 0
+push constant 100
+call ConsumptionTaxTwo.getTax 2
+call Output.printInt 1
+pop temp 0
+push local 0
+call ConsumptionTaxTwo.printTaxRate 1
+pop temp 0
+push local 0
+return
+function ConsumptionTaxTwo.getTax 0
+push argument 1
+push argument 0
+pop pointer 0
+push this 0
+call Math.multiply 2
+return
+function ConsumptionTaxTwo.printTaxRate 0
+push argument 0
+pop pointer 0
+push this 0
+call Output.printInt 1
+pop temp 0
+push constant 0
+return

@@ -8,18 +8,16 @@
  */
 class PongGame {
 
-    static PongGame instance; // the singelton, a Pong game instance     
-    field Bat bat;            // the bat
-    field Ball ball;          // the ball
-    field int wall;           // the current wall that the ball is bouncing off of.
-    field boolean exit;       // true when the game is over
-    field int score;          // the current score.
-    field int lastWall;       // the last wall that the ball bounced off of.
+    static PongGame instance; 
+    field Bat bat;            
+    field Ball ball;          
+    field int wall;           
+    field boolean exit;       
+    field int score;          
+    field int lastWall;       
 
-    // The current width of the bat
+    
     field int batWidth;
-
-    /** Constructs a new Pong game. */
     constructor PongGame new() {
 	    do Screen.clearScreen();
         let batWidth = 50;  // initial bat size
