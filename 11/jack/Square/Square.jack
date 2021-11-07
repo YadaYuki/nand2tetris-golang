@@ -1,9 +1,7 @@
-
 class Square {
 
    field int x, y; 
    field int size; 
-
    
    constructor Square new(int Ax, int Ay, int Asize) {
       let x = Ax;
@@ -13,13 +11,11 @@ class Square {
       return this;
    }
 
-   
    method void dispose() {
       do Memory.deAlloc(this);
       return;
    }
 
-   
    method void draw() {
       do Screen.setColor(true);
       do Screen.drawRectangle(x, y, x + size, y + size);
@@ -41,6 +37,7 @@ class Square {
       }
       return;
    }
+
    method void decSize() {
       if (size > 2) {
          do erase();
@@ -72,7 +69,6 @@ class Square {
       return;
    }
 
-   
    method void moveLeft() {
       if (x > 1) {
          do Screen.setColor(false);
@@ -83,7 +79,7 @@ class Square {
       }
       return;
    }
-
+   
    method void moveRight() {
       if ((x + size) < 510) {
          do Screen.setColor(false);

@@ -3,7 +3,6 @@ class SquareGame {
    field int direction;
    
    constructor SquareGame new() {
-      
       let square = Square.new(0, 0, 30);
       let direction = 0;  
       return this;
@@ -19,7 +18,7 @@ class SquareGame {
       if (direction = 2) { do square.moveDown(); }
       if (direction = 3) { do square.moveLeft(); }
       if (direction = 4) { do square.moveRight(); }
-      do Sys.wait(5); 
+      do Sys.wait(1); 
       return;
    }
 
@@ -41,6 +40,10 @@ class SquareGame {
          if (key = 133) { let direction = 2; }   
          if (key = 130) { let direction = 3; }   
          if (key = 132) { let direction = 4; }   
+         while (~(key = 0)) {
+            let key = Keyboard.keyPressed();
+            do moveSquare();
+         }
      } 
      return;
    }

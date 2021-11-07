@@ -4,6 +4,7 @@ class Main{
         let ctc = ConsumptionTaxCalculator.new(2);
         do Output.printInt(ctc.getTax(100));
         do Output.printInt(ctc.getTax(200));
+        do ctc.printTaxRate();
         return;
     }
 }
