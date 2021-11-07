@@ -28,7 +28,7 @@ func main() {
 	}
 	className := classStmt.Name.Literal
 
-	vm := vmwriter.New(fmt.Sprintf("vm/%s.vm", className), 0644)
+	vm := vmwriter.New(fmt.Sprintf("vm/program/%s.vm", className), 0644)
 	st := symboltable.New()
 	ce := compilationengine.New(className, vm, st)
 	ce.CompileProgram(programAst)
