@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
+	"jack_compiler/ast"
 	"jack_compiler/compilationengine"
 	"jack_compiler/parser"
 	"jack_compiler/symboltable"
@@ -19,11 +21,16 @@ func main() {
 	}
 	jt := tokenizer.New(string(jackCode))
 	parser := parser.New(jt)
-	ast := parser.ParseProgram()
-	vm := vmwriter.New("vm/Main.vm", 0644)
+	programAst := parser.ParseProgram()
+	classStmt, ok := programAst.Statements[0].(*ast.ClassStatement)
+	if !ok {
+		panic(fmt.Sprintf("Statement[0] should be ClassStatement, but got %T", classStmt))
+	}
+	className := classStmt.Name.Literal
+
+	vm := vmwriter.New(fmt.Sprintf("vm/%s.vm", className), 0644)
 	st := symboltable.New()
-	ce := compilationengine.New("Main", vm, st)
-	ce.CompileInit()
-	ce.CompileProgram(ast)
+	ce := compilationengine.New(className, vm, st)
+	ce.CompileProgram(programAst)
 	ce.Close()
 }

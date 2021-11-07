@@ -1,0 +1,10 @@
+class Main{
+    function void main() {
+        var ConsumptionTaxCalculator ctc;
+        let ctc = ConsumptionTaxCalculator.new(2);
+        do Output.printInt(ctc.getTax(100));
+        do Output.printInt(ctc.getTax(200));
+        return;
+    }
+}
+

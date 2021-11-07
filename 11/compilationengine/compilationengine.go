@@ -68,9 +68,14 @@ func (ce *CompilationEngine) CompileReturnStatement(statementAst *ast.ReturnStat
 }
 
 func (ce *CompilationEngine) CompileClassStatement(statementAst *ast.ClassStatement) error {
-	_, subroutineDecList := statementAst.ClassVarDecList, statementAst.SubroutineDecList
-	// for range varDecList {
-	// }
+	varDecList, subroutineDecList := statementAst.ClassVarDecList, statementAst.SubroutineDecList
+	for _, varDec := range varDecList {
+		varKind := symboltable.VarKind(varDec.Token.Literal)
+		for _, ident := range varDec.Identifiers {
+			ce.Define(ident.Literal, varDec.ValueType.Literal, varKind)
+		}
+	}
+
 	for _, subroutineDec := range subroutineDecList {
 		ce.CompileSubroutineDecStatement(&subroutineDec)
 	}
@@ -78,14 +83,69 @@ func (ce *CompilationEngine) CompileClassStatement(statementAst *ast.ClassStatem
 }
 
 func (ce *CompilationEngine) CompileSubroutineDecStatement(subroutineDecStmtAst *ast.SubroutineDecStatement) error {
+	switch subroutineDecStmtAst.Token.Literal {
+	case string(token.CONSTRUCTOR):
+		return ce.CompileSubroutineDecConstructorStatement(subroutineDecStmtAst)
+	case string(token.METHOD):
+		return ce.CompileSubroutineDecMethodStatement(subroutineDecStmtAst)
+	case string(token.FUNCTION):
+		return ce.CompileSubroutineDecFunctionStatement(subroutineDecStmtAst)
+	}
+	return nil // TODO:error
+}
+
+func (ce *CompilationEngine) CompileSubroutineDecConstructorStatement(subroutineDecStmtAst *ast.SubroutineDecStatement) error {
+	// ローカル変数の数を計算する
+	localVarCount := 0
+	for _, varDec := range subroutineDecStmtAst.SubroutineBody.VarDecList {
+		localVarCount += len(varDec.Identifiers)
+	}
+	// thisポインタをローカル変数として扱うため、その分加算する。
+	localVarCount += 1
+	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, subroutineDecStmtAst.Name.Literal), localVarCount)
+
+	// フィールド変数分だけ、メモリを確保し → thisポインタにオブジェクトの先頭アドレスを格納する。
+	fieldVarCount := ce.VarCount(symboltable.FIELD)
+	ce.WritePush(vmwriter.CONST, fieldVarCount)
+	ce.WriteCall("Memory.alloc", 1)
+	ce.WritePop(vmwriter.LOCAL, 0)
+
+	ce.StartSubroutine()
+	ce.Define(string(token.THIS), ce.ClassName, symboltable.VAR)
+	ce.CompileParameterListStatement(subroutineDecStmtAst.ParameterList)
+	ce.CompileSubroutineBodyStatement(subroutineDecStmtAst.SubroutineBody)
+	return nil
+}
+
+func (ce *CompilationEngine) CompileSubroutineDecMethodStatement(subroutineDecStmtAst *ast.SubroutineDecStatement) error {
 	// ローカル変数の数を計算する
 	localVarCount := 0
 	for _, varDec := range subroutineDecStmtAst.SubroutineBody.VarDecList {
 		localVarCount += len(varDec.Identifiers)
 	}
 	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, subroutineDecStmtAst.Name.Literal), localVarCount)
+
+	ce.StartSubroutine()
+	// thisを第一引数として定義
+	ce.Define(string(token.THIS), ce.ClassName, symboltable.ARGUMENT)
+
+	ce.CompileParameterListStatement(subroutineDecStmtAst.ParameterList)
+	ce.CompileSubroutineBodyStatement(subroutineDecStmtAst.SubroutineBody)
+
+	return nil
+}
+
+func (ce *CompilationEngine) CompileSubroutineDecFunctionStatement(subroutineDecStmtAst *ast.SubroutineDecStatement) error {
+	// ローカル変数の数を計算する
+	localVarCount := 0
+	for _, varDec := range subroutineDecStmtAst.SubroutineBody.VarDecList {
+		localVarCount += len(varDec.Identifiers)
+	}
+	ce.WriteFunction(fmt.Sprintf("%s.%s", ce.ClassName, subroutineDecStmtAst.Name.Literal), localVarCount)
+
 	ce.StartSubroutine()
 	ce.CompileParameterListStatement(subroutineDecStmtAst.ParameterList)
+
 	ce.CompileSubroutineBodyStatement(subroutineDecStmtAst.SubroutineBody)
 	return nil
 }
@@ -124,6 +184,17 @@ func (ce *CompilationEngine) CompileLetStatement(letStatement *ast.LetStatement)
 		ce.WritePop(vmwriter.STATIC, indexOf)
 		return nil
 	case symboltable.FIELD:
+		thisVarKind := ce.KindOf(string(token.THIS))
+		thisIndexOf := ce.IndexOf(string(token.THIS))
+		switch thisVarKind {
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, thisIndexOf)
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, thisIndexOf)
+		default:
+			return nil // TODO:Error,fmt.Errorf("Identifier ...")
+		}
+		ce.WritePop(vmwriter.POINTER, 0)
 		ce.WritePop(vmwriter.THIS, indexOf)
 		return nil
 	case symboltable.VAR:
@@ -143,9 +214,19 @@ func (ce *CompilationEngine) CompileLetArrayElementStatement(letStatement *ast.L
 	// case symboltable.STATIC:
 	// 	ce.WritePush(vmwriter.STATIC, indexOf)
 	//
-	// case symboltable.FIELD:
-	// 	ce.WritePush(vmwriter.THIS, indexOf)
-	//
+	case symboltable.FIELD:
+		thisVarKind := ce.KindOf(string(token.THIS))
+		thisIndexOf := ce.IndexOf(string(token.THIS))
+		switch thisVarKind {
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, thisIndexOf)
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, thisIndexOf)
+		default:
+			return nil // TODO:Error,fmt.Errorf("Identifier ...")
+		}
+		ce.WritePop(vmwriter.POINTER, 0)
+		ce.WritePush(vmwriter.THIS, indexOf)
 	case symboltable.VAR:
 		ce.WritePush(vmwriter.LOCAL, indexOf)
 	default:
@@ -256,9 +337,33 @@ func (ce *CompilationEngine) CompileTerm(termAst ast.Term) error {
 func (ce *CompilationEngine) CompileIntergerConstTerm(intergerConstTerm *ast.IntergerConstTerm) error {
 	ce.WritePush(vmwriter.CONST, int(intergerConstTerm.Value))
 	return nil
-
 }
+
 func (ce *CompilationEngine) CompileSubroutineCallTerm(subroutineCallTerm *ast.SubroutineCallTerm) error {
+
+	if subroutineCallTerm.ClassName.Literal == "" {
+		thisVarKind := ce.KindOf("this")
+		thisIndexOf := ce.IndexOf(string(token.THIS))
+		switch thisVarKind {
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, thisIndexOf)
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, thisIndexOf)
+		default:
+			return nil // TODO:Error,fmt.Errorf("Identifier ...")
+		}
+		ce.CompileExpressionListStatement(subroutineCallTerm.ExpressionListStmt)
+		ce.WriteCall(fmt.Sprintf("%s.%s", ce.ClassName, subroutineCallTerm.SubroutineName.String()), len(subroutineCallTerm.ExpressionListStmt.ExpressionList)+1)
+		return nil
+	}
+	// method呼び出しの場合は、インスタンスのアドレスを第一引数としてpushする
+	if ce.IndexOf(subroutineCallTerm.ClassName.Literal) != -1 {
+		typeOf := ce.TypeOf(subroutineCallTerm.ClassName.Literal)
+		ce.CompileIdentifierTerm(&ast.IdentifierTerm{Token: subroutineCallTerm.ClassName, Value: subroutineCallTerm.ClassName.Literal})
+		ce.CompileExpressionListStatement(subroutineCallTerm.ExpressionListStmt)
+		ce.WriteCall(fmt.Sprintf("%s.%s", typeOf, subroutineCallTerm.SubroutineName.String()), len(subroutineCallTerm.ExpressionListStmt.ExpressionList)+1)
+		return nil
+	}
 	ce.CompileExpressionListStatement(subroutineCallTerm.ExpressionListStmt)
 	ce.WriteCall(fmt.Sprintf("%s.%s", subroutineCallTerm.ClassName.String(), subroutineCallTerm.SubroutineName.String()), len(subroutineCallTerm.ExpressionListStmt.ExpressionList))
 	return nil
@@ -269,20 +374,34 @@ func (ce *CompilationEngine) CompileBracketTerm(bracketTerm *ast.BracketTerm) er
 }
 
 func (ce *CompilationEngine) CompileArrayElementTerm(arrayElementTerm *ast.ArrayElementTerm) error {
+	// 配列の先頭アドレスをpushする
 	varKind := ce.KindOf(arrayElementTerm.TokenLiteral())
 	indexOf := ce.IndexOf(arrayElementTerm.TokenLiteral())
 	switch varKind {
-	// case symboltable.ARGUMENT:
-	// 	ce.WritePush(vmwriter.ARG, indexOf)
+	case symboltable.ARGUMENT:
+		ce.WritePush(vmwriter.ARG, indexOf)
 	// case symboltable.STATIC:
 	// 	ce.WritePush(vmwriter.STATIC, indexOf)
-	// case symboltable.FIELD:
-	// 	ce.WritePush(vmwriter.THIS, indexOf)
+	case symboltable.FIELD:
+		thisVarKind := ce.KindOf(string(token.THIS))
+		thisIndexOf := ce.IndexOf(string(token.THIS))
+		switch thisVarKind {
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, thisIndexOf)
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, thisIndexOf)
+		default:
+			return nil // TODO:Error,fmt.Errorf("Identifier ...")
+		}
+		ce.WritePop(vmwriter.POINTER, 0)
+		ce.WritePush(vmwriter.THIS, indexOf)
 	case symboltable.VAR:
 		ce.WritePush(vmwriter.LOCAL, indexOf)
 	default:
 		return nil // TODO:Error
 	}
+
+	// [先頭アドレス + idx]にアクセス.
 	ce.CompileExpression(arrayElementTerm.Idx)
 	ce.WriteArithmetic(vmwriter.ADD)
 	ce.WritePop(vmwriter.POINTER, 1)
@@ -298,10 +417,21 @@ func (ce *CompilationEngine) CompileIdentifierTerm(identifierTerm *ast.Identifie
 	case symboltable.ARGUMENT:
 		ce.WritePush(vmwriter.ARG, indexOf)
 		return nil
-	case symboltable.STATIC:
-		ce.WritePush(vmwriter.STATIC, indexOf)
-		return nil
+	// case symboltable.STATIC:
+	// 	ce.WritePush(vmwriter.STATIC, indexOf)
+	// 	return nil
 	case symboltable.FIELD:
+		thisVarKind := ce.KindOf(string(token.THIS))
+		thisIndexOf := ce.IndexOf(string(token.THIS))
+		switch thisVarKind {
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, thisIndexOf)
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, thisIndexOf)
+		default:
+			return nil // TODO:Error,fmt.Errorf("Identifier ...")
+		}
+		ce.WritePop(vmwriter.POINTER, 0)
 		ce.WritePush(vmwriter.THIS, indexOf)
 		return nil
 	case symboltable.VAR:
@@ -343,15 +473,49 @@ func (ce *CompilationEngine) CompileKeywordConstTerm(keywordConstTerm *ast.Keywo
 		ce.WritePush(vmwriter.CONST, 1)
 		ce.WriteArithmetic(vmwriter.NEG)
 		return nil
-		// case token.THIS: TODO: Implement !
-		// 	return nil
+	case token.THIS:
+		varKind := ce.KindOf(string(token.THIS))
+		indexOf := ce.IndexOf(string(token.THIS))
+		switch varKind {
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, indexOf)
+			return nil
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, indexOf)
+			return nil
+		}
 	}
 	return nil // TODO: Error
 }
 
 func (ce *CompilationEngine) CompileDoStatement(doStatement *ast.DoStatement) error {
+	if doStatement.ClassName.Literal == "" {
+		thisVarKind := ce.KindOf("this")
+		thisIndexOf := ce.IndexOf(string(token.THIS))
+		switch thisVarKind {
+		case symboltable.ARGUMENT:
+			ce.WritePush(vmwriter.ARG, thisIndexOf)
+		case symboltable.VAR:
+			ce.WritePush(vmwriter.LOCAL, thisIndexOf)
+		default:
+			return nil // TODO:Error,fmt.Errorf("Identifier ...")
+		}
+		ce.CompileExpressionListStatement(doStatement.ExpressionListStmt)
+		ce.WriteCall(fmt.Sprintf("%s.%s", ce.ClassName, doStatement.SubroutineName.String()), len(doStatement.ExpressionListStmt.ExpressionList)+1)
+		ce.WritePop(vmwriter.TEMP, 0)
+		return nil
+	}
+	if ce.IndexOf(doStatement.ClassName.Literal) != -1 {
+		typeOf := ce.TypeOf(doStatement.ClassName.Literal)
+		ce.CompileIdentifierTerm(&ast.IdentifierTerm{Token: doStatement.ClassName, Value: doStatement.ClassName.Literal}) // インスタンスのアドレスをpushする。
+		ce.CompileExpressionListStatement(doStatement.ExpressionListStmt)
+		ce.WriteCall(fmt.Sprintf("%s.%s", typeOf, doStatement.SubroutineName.Literal), len(doStatement.ExpressionListStmt.ExpressionList)+1)
+		ce.WritePop(vmwriter.TEMP, 0)
+		return nil
+	}
+
 	ce.CompileExpressionListStatement(doStatement.ExpressionListStmt)
-	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.String(), doStatement.SubroutineName.String()), len(doStatement.ExpressionListStmt.ExpressionList))
+	ce.WriteCall(fmt.Sprintf("%s.%s", doStatement.ClassName.Literal, doStatement.SubroutineName.String()), len(doStatement.ExpressionListStmt.ExpressionList))
 	ce.WritePop(vmwriter.TEMP, 0)
 	return nil
 }
@@ -395,10 +559,8 @@ func (ce *CompilationEngine) CompileWhileStatement(whileStatement *ast.WhileStat
 	for _, stmt := range whileStatement.Statements.Statements {
 		ce.CompileStatement(stmt)
 	}
-
 	ce.WriteGoto(WHILE_LOOP_LABEL)
 	ce.WriteLabel(WHILE_END_LABEL)
-
 	return nil
 }
 

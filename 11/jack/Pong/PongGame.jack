@@ -34,7 +34,7 @@ class PongGame {
 	    let score = 0;
 	    let wall = 0;
 	    let lastWall = 0;
-
+        
         return this;
     }
 

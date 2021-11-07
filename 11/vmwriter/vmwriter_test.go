@@ -10,7 +10,6 @@ import (
 var filename = "test.vm"
 
 func TestClose(t *testing.T) {
-
 	vmCode := []byte("Hello,World")
 	vmWriter := &VMWriter{
 		VMCode: vmCode, Filename: filename, perm: 0644,
@@ -22,7 +21,6 @@ func TestClose(t *testing.T) {
 	}
 }
 func TestWriteData(t *testing.T) {
-
 	vmCode := "Hello,World."
 	vmWriter := &VMWriter{
 		VMCode: []byte(vmCode), Filename: filename, perm: 0644,
