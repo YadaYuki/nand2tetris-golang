@@ -1,28 +1,19 @@
-// This file is part of www.nand2tetris.org
-// and the book "The Elements of Computing Systems"
-// by Nisan and Schocken, MIT Press.
-// File name: projects/11/Pong/PongGame.jack
 
-/**
- * Represents a Pong game.
- */
 class PongGame {
 
-    static PongGame instance; // the singelton, a Pong game instance     
-    field Bat bat;            // the bat
-    field Ball ball;          // the ball
-    field int wall;           // the current wall that the ball is bouncing off of.
-    field boolean exit;       // true when the game is over
-    field int score;          // the current score.
-    field int lastWall;       // the last wall that the ball bounced off of.
+    static PongGame instance; 
+    field Bat bat;            
+    field Ball ball;          
+    field int wall;           
+    field boolean exit;       
+    field int score;          
+    field int lastWall;       
 
-    // The current width of the bat
+    
     field int batWidth;
-
-    /** Constructs a new Pong game. */
     constructor PongGame new() {
 	    do Screen.clearScreen();
-        let batWidth = 50;  // initial bat size
+        let batWidth = 50; 
         let bat = Bat.new(230, 229, batWidth, 7);
         let ball = Ball.new(253, 222, 0, 511, 0, 229);
         do ball.setDestination(400,0);
@@ -34,11 +25,11 @@ class PongGame {
 	    let score = 0;
 	    let wall = 0;
 	    let lastWall = 0;
-
+        
         return this;
     }
 
-    /** Deallocates the object's memory. */
+    
     method void dispose() {
         do bat.dispose();
 	    do ball.dispose();
@@ -46,24 +37,24 @@ class PongGame {
         return;
     }
 
-    /** Creates an instance of Pong game, and stores it. */
+    
     function void newInstance() {
         let instance = PongGame.new();
         return;
     }
     
-    /** Returns the single instance of this Pong game. */
+    
     function PongGame getInstance() {
         return instance;
     }
 
-    /** Starts the game, and andles inputs from the user that control
-     *  the bat's movement direction. */
+    
+     
     method void run() {
         var char key;
 
         while (~exit) {
-            // waits for a key to be pressed.
+            
             while ((key = 0) & (~exit)) {
                 let key = Keyboard.keyPressed();
                 do bat.move();
@@ -79,7 +70,7 @@ class PongGame {
 		        }
             }
 
-            // Waits for the key to be released.
+            
             while ((~(key = 0)) & (~exit)) {
                 let key = Keyboard.keyPressed();
                 do bat.move();
@@ -96,12 +87,7 @@ class PongGame {
         return;
     }
 
-    /**
-     * Handles ball movement, including bouncing.
-     * If the ball bounces off a wall, finds its new direction.
-     * If the ball bounces off the bat, increases the score by one
-     * and shrinks the bat's size, to make the game more challenging. 
-     */
+
     method void moveBall() {
         var int bouncingDirection, batLeft, batRight, ballLeft, ballRight;
 

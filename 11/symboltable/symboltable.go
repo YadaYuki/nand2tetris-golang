@@ -45,6 +45,8 @@ func New() *SymbolTable {
 // TODO: TDD!
 func (st *SymbolTable) StartSubroutine() {
 	st.MethodScopeSymbolTable = map[string]Symbol{}
+	st.currentArgumentIdx = 0
+	st.currentVarIdx = 0
 	st.Scope = SubroutineScope
 }
 
@@ -101,46 +103,37 @@ func (st *SymbolTable) VarCount(varKind VarKind) int {
 }
 
 func (st *SymbolTable) KindOf(name string) VarKind {
-	table := map[string]Symbol{}
-	switch st.Scope {
-	case SubroutineScope:
-		table = st.MethodScopeSymbolTable
-	case ClassScope:
-		table = st.ClassScopeSymbolTable
+	symbol, ok := st.MethodScopeSymbolTable[name]
+	if ok {
+		return symbol.VarKind
 	}
-	symbol, ok := table[name]
-	if !ok {
-		return ""
+	symbol, ok = st.ClassScopeSymbolTable[name]
+	if ok {
+		return symbol.VarKind
 	}
-	return symbol.VarKind
+	return ""
 }
 
 func (st *SymbolTable) TypeOf(name string) string {
-	table := map[string]Symbol{}
-	switch st.Scope {
-	case SubroutineScope:
-		table = st.MethodScopeSymbolTable
-	case ClassScope:
-		table = st.ClassScopeSymbolTable
+	symbol, ok := st.MethodScopeSymbolTable[name]
+	if ok {
+		return symbol.VarType
 	}
-	symbol, ok := table[name]
-	if !ok {
-		return ""
+	symbol, ok = st.ClassScopeSymbolTable[name]
+	if ok {
+		return symbol.VarType
 	}
-	return symbol.VarType
+	return ""
 }
 
 func (st *SymbolTable) IndexOf(name string) int {
-	table := map[string]Symbol{}
-	switch st.Scope {
-	case SubroutineScope:
-		table = st.MethodScopeSymbolTable
-	case ClassScope:
-		table = st.ClassScopeSymbolTable
+	symbol, ok := st.MethodScopeSymbolTable[name]
+	if ok {
+		return symbol.Idx
 	}
-	symbol, ok := table[name]
-	if !ok {
-		return -1
+	symbol, ok = st.ClassScopeSymbolTable[name]
+	if ok {
+		return symbol.Idx
 	}
-	return symbol.Idx
+	return -1
 }
