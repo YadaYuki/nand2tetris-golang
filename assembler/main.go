@@ -7,8 +7,11 @@ import (
 	"assembler/symboltable"
 	"assembler/value"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -63,8 +66,16 @@ func AssembleAsmFile(asmFilename string, hackFilename string) error {
 	return nil
 }
 
+func removeExt(filename string) string {
+	return strings.Trim(filename, filepath.Ext(filename))
+}
+
 func main() {
-	asmFilename, hackFilename := flag.String("asm", "add/Add.asm", "filename of asm"), flag.String("hack", "Main.hack", "filename of hack")
+
 	flag.Parse()
-	AssembleAsmFile(*asmFilename, *hackFilename)
+	pathToAsm := flag.Args()[0]
+	asmDirName, asmFilename := path.Dir(pathToAsm), path.Base(pathToAsm)
+	hackFilename := fmt.Sprintf("%s.hack", removeExt(asmFilename))
+	pathToHack := path.Join(asmDirName, hackFilename)
+	AssembleAsmFile(pathToAsm, pathToHack)
 }
