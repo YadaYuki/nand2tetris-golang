@@ -71,7 +71,6 @@ func removeExt(filename string) string {
 }
 
 func main() {
-
 	flag.Parse()
 	pathToAsm := flag.Args()[0]
 	asmDirName, asmFilename := path.Dir(pathToAsm), path.Base(pathToAsm)
