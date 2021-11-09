@@ -1,8 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
+	"path"
 	"path/filepath"
 	"strings"
 	"vmtranslator/ast"
@@ -24,8 +26,12 @@ func removeExt(filename string) string {
 }
 
 func main() {
-	vmMainClassName := "HelloWorld"
-	vmFileList, err := getVmFileListInDir(fmt.Sprintf("FunctionCalls/%s", vmMainClassName))
+
+	flag.Parse()
+	pathToVmDir := flag.Args()[0]
+	asmFilename := fmt.Sprintf("%s.asm", path.Base(pathToVmDir))
+
+	vmFileList, err := getVmFileListInDir(pathToVmDir)
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +46,7 @@ func main() {
 		vmClassNameList = append(vmClassNameList, removeExt(filename))
 		vmCodeList = append(vmCodeList, string(vmCode))
 	}
-	codeWriter := codewriter.New(fmt.Sprintf("FunctionCalls/%s/%s.asm", vmMainClassName, vmMainClassName))
+	codeWriter := codewriter.New(path.Join(pathToVmDir, asmFilename))
 	// writeInit
 	codeWriter.WriteInit()
 	for i := range vmCodeList {
