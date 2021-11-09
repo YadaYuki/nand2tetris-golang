@@ -32,9 +32,17 @@ You can generate assembly from intermediate code by running:
 $ go run main.go {path to vm dir}
 ```
 
-Executing this command, assembly(.asm) program will be generated in the directory passed by argument
+Executing this command, assembly(.hack) program will be generated in the directory passed by argument
 
 **※You must pass path to directory which has vm files not path to vm file.(even if the target vm file is single)**
+
+For example, to translate `vm/BasicLoop` program which stores the result of 1 + 2 + ... + n (n is initialized by manipulating virtual machine manually) to assembly, execute below:
+
+```
+$ go run main.go vm/BasicLoop
+```
+
+Executing this command, you can confirm that assembly program file(`BasicLoop.asm`) is generated in dir `vm/BasicLoop`  
 
 
 ## Reference
