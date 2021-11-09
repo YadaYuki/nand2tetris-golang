@@ -1,0 +1,106 @@
+function Main.main 1
+push constant 8001
+push constant 16
+push constant 1
+neg
+call Main.fillMemory 3
+pop temp 0
+push constant 8000
+call Memory.peek 1
+pop local 0
+push local 0
+call Main.convert 1
+pop temp 0
+push constant 0
+return
+function Main.convert 3
+push constant 1
+neg
+pop local 2
+label WHILELOOP1
+push local 2
+not
+if-goto WHILEEND1
+push local 1
+push constant 1
+add
+pop local 1
+push local 0
+call Main.nextMask 1
+pop local 0
+push local 1
+push constant 16
+gt
+not
+not
+if-goto ELSE2
+push argument 0
+push local 0
+and
+push constant 0
+eq
+not
+not
+if-goto ELSE3
+push constant 8000
+push local 1
+add
+push constant 1
+call Memory.poke 2
+pop temp 0
+goto ENDIF3
+label ELSE3
+push constant 8000
+push local 1
+add
+push constant 0
+call Memory.poke 2
+pop temp 0
+label ENDIF3
+goto ENDIF2
+label ELSE2
+push constant 0
+pop local 2
+label ENDIF2
+goto WHILELOOP1
+label WHILEEND1
+push constant 0
+return
+function Main.nextMask 0
+push argument 0
+push constant 0
+eq
+not
+if-goto ELSE4
+push constant 1
+return
+goto ENDIF4
+label ELSE4
+push argument 0
+push constant 2
+call Math.multiply 2
+return
+label ENDIF4
+function Main.fillMemory 0
+label WHILELOOP5
+push argument 1
+push constant 0
+gt
+not
+if-goto WHILEEND5
+push argument 0
+push argument 2
+call Memory.poke 2
+pop temp 0
+push argument 1
+push constant 1
+sub
+pop argument 1
+push argument 0
+push constant 1
+add
+pop argument 0
+goto WHILELOOP5
+label WHILEEND5
+push constant 0
+return

@@ -1,0 +1,6 @@
+class Main {
+		function void main() {
+			 do Output.printString("Test 1: expected result: 5; actual result: ");
+			 return;
+		}
+ }
