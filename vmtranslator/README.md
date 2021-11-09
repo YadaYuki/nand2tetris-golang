@@ -10,7 +10,7 @@
 
 - Go==1.16
 
-### Intermediate language
+## Intermediate language
 
 Intermediate code runs on virtual machine. 
 
