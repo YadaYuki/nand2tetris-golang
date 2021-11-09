@@ -5,7 +5,6 @@
 - Assembler implementation by Golang ʕ◔ϖ◔ʔ.
 - Assembler translates assembly to machine language.
 - This package corresponds to chapter 6 of 「Building a Modern Computer from First Principles」
-       
 
 ## Requirements
 

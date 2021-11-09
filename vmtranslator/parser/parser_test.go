@@ -2,7 +2,7 @@ package parser
 
 import (
 	"testing"
-	"vm_translator/ast"
+	"vmtranslator/ast"
 )
 
 func TestHasMoreCommand(t *testing.T) {
