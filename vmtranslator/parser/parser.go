@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"vm_translator/ast"
-	"vm_translator/value"
+	"vmtranslator/ast"
+	"vmtranslator/value"
 )
 
 type Parser struct {

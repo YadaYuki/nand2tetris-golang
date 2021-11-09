@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"strconv"
-	"vm_translator/ast"
-	"vm_translator/value"
+	"vmtranslator/ast"
+	"vmtranslator/value"
 )
 
 type CodeWriter struct {

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"testing"
-	"vm_translator/ast"
+	"vmtranslator/ast"
 )
 
 func TestClose(t *testing.T) {

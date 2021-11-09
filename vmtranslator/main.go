@@ -1,14 +1,13 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
-	"vm_translator/ast"
-	"vm_translator/codewriter"
-	"vm_translator/parser"
+	"vmtranslator/ast"
+	"vmtranslator/codewriter"
+	"vmtranslator/parser"
 )
 
 func getVmFileListInDir(dirPath string) ([]string, error) {
@@ -24,8 +23,9 @@ func removeExt(filename string) string {
 	return strings.Trim(filename, filepath.Ext(filename))
 }
 
-func translateVm(className string, vmDirname string, asmDirname string) {
-	vmFileList, err := getVmFileListInDir(vmDirname)
+func main() {
+	vmMainClassName := "HelloWorld"
+	vmFileList, err := getVmFileListInDir(fmt.Sprintf("FunctionCalls/%s", vmMainClassName))
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +40,7 @@ func translateVm(className string, vmDirname string, asmDirname string) {
 		vmClassNameList = append(vmClassNameList, removeExt(filename))
 		vmCodeList = append(vmCodeList, string(vmCode))
 	}
-	codeWriter := codewriter.New(fmt.Sprintf("%s/%s.asm", asmDirname, className))
+	codeWriter := codewriter.New(fmt.Sprintf("FunctionCalls/%s/%s.asm", vmMainClassName, vmMainClassName))
 	// writeInit
 	codeWriter.WriteInit()
 	for i := range vmCodeList {
@@ -80,11 +80,4 @@ func translateVm(className string, vmDirname string, asmDirname string) {
 		}
 	}
 	codeWriter.Close()
-
-}
-
-func main() {
-	className, vmDirname, asmDirname := flag.String("class", "SimpleFunction", "name of vm class"), flag.String("vm-dir", "FunctionCalls/SimpleFunction", "dirname of vm"), flag.String("asm-dir", "FunctionCalls/SimpleFunction", "dirname of asm")
-	flag.Parse()
-	translateVm(*className, *vmDirname, *asmDirname)
 }
