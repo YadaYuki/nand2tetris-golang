@@ -2,9 +2,9 @@ package parser
 
 import (
 	"fmt"
-	"jack_compiler/ast"
-	"jack_compiler/token"
-	"jack_compiler/tokenizer"
+	"jackcompiler/ast"
+	"jackcompiler/token"
+	"jackcompiler/tokenizer"
 	"strconv"
 )
 

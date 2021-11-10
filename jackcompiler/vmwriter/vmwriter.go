@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"io/ioutil"
-	"jack_compiler/value"
+	"jackcompiler/value"
 )
 
 type VMWriter struct {

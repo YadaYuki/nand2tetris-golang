@@ -4,12 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"jack_compiler/ast"
-	"jack_compiler/compilationengine"
-	"jack_compiler/parser"
-	"jack_compiler/symboltable"
-	"jack_compiler/tokenizer"
-	"jack_compiler/vmwriter"
+	"jackcompiler/ast"
+	"jackcompiler/compilationengine"
+	"jackcompiler/parser"
+	"jackcompiler/symboltable"
+	"jackcompiler/tokenizer"
+	"jackcompiler/vmwriter"
 )
 
 func main() {

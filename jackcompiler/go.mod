@@ -1,3 +1,3 @@
-module jack_compiler
+module jackcompiler
 
 go 1.16

@@ -3,7 +3,7 @@ package vmwriter
 import (
 	"bytes"
 	"io/ioutil"
-	"jack_compiler/value"
+	"jackcompiler/value"
 	"testing"
 )
 

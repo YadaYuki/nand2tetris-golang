@@ -1,7 +1,7 @@
 package tokenizer
 
 import (
-	"jack_compiler/token"
+	"jackcompiler/token"
 	"testing"
 )
 

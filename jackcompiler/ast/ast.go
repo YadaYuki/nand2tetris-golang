@@ -4,7 +4,7 @@ package ast
 
 import (
 	"bytes"
-	"jack_compiler/token"
+	"jackcompiler/token"
 	"strconv"
 	"strings"
 )

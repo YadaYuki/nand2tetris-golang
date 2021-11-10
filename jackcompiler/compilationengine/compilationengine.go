@@ -3,10 +3,10 @@ package compilationengine
 import (
 	"errors"
 	"fmt"
-	"jack_compiler/ast"
-	"jack_compiler/symboltable"
-	"jack_compiler/token"
-	"jack_compiler/vmwriter"
+	"jackcompiler/ast"
+	"jackcompiler/symboltable"
+	"jackcompiler/token"
+	"jackcompiler/vmwriter"
 )
 
 // CompilationEngine is struct

@@ -2,11 +2,11 @@ package compilationengine
 
 import (
 	"bytes"
-	"jack_compiler/parser"
-	"jack_compiler/symboltable"
-	"jack_compiler/tokenizer"
-	"jack_compiler/value"
-	"jack_compiler/vmwriter"
+	"jackcompiler/parser"
+	"jackcompiler/symboltable"
+	"jackcompiler/tokenizer"
+	"jackcompiler/value"
+	"jackcompiler/vmwriter"
 	"testing"
 )
 
