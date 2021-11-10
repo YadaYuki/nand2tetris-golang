@@ -1,189 +1,27 @@
+
+<div align="center">
+<img src="https://static.wixstatic.com/media/44046b_387f62dae530480dac9b1fa8f731bebf~mv2.png/v1/fill/w_415,h_144,al_c,q_85,usm_0.66_1.00_0.01/44046b_387f62dae530480dac9b1fa8f731bebf~mv2.webp)" alt="レシピページのDemo Gif" />
+</div>
+
 # Nand2Tetris :smiley_cat:
 
-Implmentation of Nand2Tetris by Golang ʕ◔ϖ◔ʔ
+Implmentation of Nand2Tetris :smiley_cat:
 
-# How To Work
+## What is Nand2tetris?
 
-## CPU & Logic Circuit
+- 　Implement a computer and programming language that allows Tetris to operate from the smallest element, the Nand gate.
 
-01/ ~ 05/ are implementation of Logic Circuit and CPU.
+- Through their implementation, we will understand the mechanisms and theories that support modern computers, such as hardware, compilers, and assembly.
 
-You can emulate them by using [Hardware Simulator](https://www.nand2tetris.org/software).
+## Directories
 
-![image](https://user-images.githubusercontent.com/57289763/128625790-8b70d3a0-bc7d-46cd-94f7-131c240742b3.png)
+- **hardware/** ... Hardware (chapter 1 ~ 5)
+- **assembler/** ... Assembler which translate assembly to machine language by Golang ʕ◔ϖ◔ʔ(chapter 6)
+- **vmtranslator/** ... VMtranslator which translate intermediate code to assembly by Golang ʕ◔ϖ◔ʔ(chapter 7/8)
+- **jackcompiler/** ... Jack Compiler which translate high-level programming language Jack to intermediate code by Golang ʕ◔ϖ◔ʔ(chapter 10/11)
 
-## Assembly
 
-[Assembler](https://github.com/YadaYuki/nand2tetris/tree/main/assembler) convert assembly( \*.asm ) to machine leannguage ( \*.hack)
-
-You can assemble \*.asm by running command:
-
-```
-go run main.go -asm {path to assembly} -hack {path to hack(output file)}
-```
-
-For example, create a assembly file Add/add.asm:
-
-```
-@2
-D=A
-@3
-D=D+A
-@0
-D=M
-```
-
-Then, run command:
-
-```
-go run main.go -asm add/Add.asm -hack add/Add.hack
-```
-
-After that, machine language file Add/add.hack will be created.
-
-```
-0000000000000010
-1110110000010000
-0000000000000011
-1110000010010000
-0000000000000000
-1111110000010000
-```
-
-## VMTranslator
-
-[VMTranslator](https://github.com/YadaYuki/nand2tetris/tree/main/vm_translator) convert intermediate code ( \*.vm ) to assembly ( \*.asm)
-
-You can translate \*.vm to assembly by running command:
-
-```
-go run main.go -class={classname} -vm-dir={vm dir name} -asm-dir={asm dir name}
-```
-
-For example, create a assembly file SimpleAdd/SimpleAdd.vm:
-
-```
-push constant 7
-push constant 8
-add
-```
-
-Then, run command:
-
-```
-go run main.go -class=Main -vm-dir=SimpleAdd -asm-dir=SimpleAdd
-```
-
-After that, assembly file SimpleAdd/Main.asm will be created.
-
-```
-@7
-D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
-@8
-D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
-@SP
-A=M
-A=A-1
-D=M
-A=A-1
-M=M+D
-@SP
-M=M-1
-```
-
-## JackCompiler ( Now Under Development ... )
-
-[JackCompiler](https://github.com/YadaYuki/nand2tetris/tree/main/jack_compiler) is compiler for programming language 「Jack」.
-
-### Example
-
-"Hello,World" in Jack:
-
-```
-class Main {
-  function void main() {
-    do Output.printString("Hello,World");
-    return;
-  }
-}
-```
-
-JackCompiler convert Jack Program( \*.jack ) to intermediate code( *\.vm ).
-
-You can translate \*.jack to intermediate code by running command:
-
-```
-go run main.go {path to jack file} 
-```
-
-For example, create a jack file HelloWorld/Main.jack:
-
-```
-class Main {
-  function void main() {
-    do Output.printString("Hello,World");
-    return;
-  }
-}
-```
-
-Then, run command:
-
-```
-go run main.go HelloWorld/Main.jack:
-```
-
-After that, vm file Main.vm will be created.
-
-```
-call Math.init 0
-call Output.init 0
-call Keyboard.init 0
-call Memory.init 0
-call Screen.init 0
-call Sys.init 0
-function Main.main 0
-push constant 11
-call String.new 1
-push constant 72
-call String.appendChar 2
-push constant 101
-call String.appendChar 2
-push constant 108
-call String.appendChar 2
-push constant 108
-call String.appendChar 2
-push constant 111
-call String.appendChar 2
-push constant 44
-call String.appendChar 2
-push constant 87
-call String.appendChar 2
-push constant 111
-call String.appendChar 2
-push constant 114
-call String.appendChar 2
-push constant 108
-call String.appendChar 2
-push constant 100
-call String.appendChar 2
-call Output.printString 1
-pop temp 0
-push constant 0
-return
-```
-
-# Reference
+## Reference
 
 - [「Nand2Tetris Official Site」](https://www.nand2tetris.org/)
 
