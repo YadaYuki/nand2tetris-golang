@@ -1,0 +1,183 @@
+
+class Ball {
+
+    field int x, y;               
+    field int lengthx, lengthy;   
+
+    field int d, straightD, diagonalD;           
+    field boolean invert, positivex, positivey;  
+   
+    field int leftWall, rightWall, topWall, bottomWall; 
+   
+    field int wall; 
+
+    
+    constructor Ball new(int Ax, int Ay,
+                         int AleftWall, int ArightWall, int AtopWall, int AbottomWall) {    	
+	    let x = Ax;		
+	    let y = Ay;
+	    let leftWall = AleftWall;
+	    let rightWall = ArightWall - 6;    
+	    let topWall = AtopWall; 
+	    let bottomWall = AbottomWall - 6;  
+	    let wall = 0;
+        do show();
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    
+    method void show() {
+        do Screen.setColor(true);
+        do draw();
+        return;
+    }
+
+    
+    method void hide() {
+        do Screen.setColor(false);
+	    do draw();
+        return;
+    }
+
+    
+    method void draw() {
+	    do Screen.drawRectangle(x, y, x + 5, y + 5);
+	    return;
+    }
+
+    
+    method int getLeft() {
+        return x;
+    }
+
+    
+    method int getRight() {
+        return x + 5;
+    }
+
+    
+    method void setDestination(int destx, int desty) {
+        var int dx, dy, temp;
+  	    let lengthx = destx - x;
+	    let lengthy = desty - y;
+        let dx = Math.abs(lengthx);
+        let dy = Math.abs(lengthy);
+        let invert = (dx < dy);
+
+        if (invert) {
+            let temp = dx; 
+            let dx = dy;
+            let dy = temp;
+   	        let positivex = (y < desty);
+            let positivey = (x < destx);
+        }
+        else {
+	        let positivex = (x < destx);
+            let positivey = (y < desty);
+        }
+
+        let d = (2 * dy) - dx;
+        let straightD = 2 * dy;
+        let diagonalD = 2 * (dy - dx);
+
+	    return;
+    }
+
+
+    method int move() {
+
+	    do hide();
+
+        if (d < 0) { let d = d + straightD; }
+        else {
+            let d = d + diagonalD;
+
+            if (positivey) {
+                if (invert) { let x = x + 4; }
+                else { let y = y + 4; }
+            }
+            else {
+                if (invert) { let x = x - 4; }
+                else { let y = y - 4; }
+            }
+	    }
+
+        if (positivex) {
+            if (invert) { let y = y + 4; }
+            else { let x = x + 4; }
+	    }
+	    else {
+            if (invert) { let y = y - 4; }
+            else { let x = x - 4; }
+	    }
+
+	    if (~(x > leftWall)) {
+	        let wall = 1;    
+	        let x = leftWall;
+	    }
+        if (~(x < rightWall)) {
+	        let wall = 2;    
+	        let x = rightWall;
+	    }
+        if (~(y > topWall)) {
+            let wall = 3;    
+	        let y = topWall;
+        }
+        if (~(y < bottomWall)) {
+            let wall = 4;    
+	        let y = bottomWall;
+        }
+
+	    do show();
+
+	    return wall;
+    }
+
+    method void bounce(int bouncingDirection) {
+        var int newx, newy, divLengthx, divLengthy, factor;
+
+	  
+        let divLengthx = lengthx / 10;
+        let divLengthy = lengthy / 10;
+	    if (bouncingDirection = 0) { let factor = 10; }
+	    else {
+	        if (((~(lengthx < 0)) & (bouncingDirection = 1)) | ((lengthx < 0) & (bouncingDirection = (-1)))) {
+                let factor = 20; 
+            }
+	        else { let factor = 5; }
+	    }
+
+	    if (wall = 1) {
+	        let newx = 506;
+	        let newy = (divLengthy * (-50)) / divLengthx;
+            let newy = y + (newy * factor);
+	    }
+        else {
+            if (wall = 2) {
+                let newx = 0;
+                let newy = (divLengthy * 50) / divLengthx;
+                let newy = y + (newy * factor);
+	        }
+	        else {
+                if (wall = 3) {
+		            let newy = 250;
+		            let newx = (divLengthx * (-25)) / divLengthy;
+                    let newx = x + (newx * factor);
+		        }
+                else { 
+		            let newy = 0;
+		            let newx = (divLengthx * 25) / divLengthy;
+                    let newx = x + (newx * factor);
+		        }
+            }
+        }
+
+        do setDestination(newx, newy);
+        return;
+    }
+}
