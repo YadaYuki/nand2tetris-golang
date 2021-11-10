@@ -9,7 +9,7 @@ Implmentation of Nand2Tetris :smiley_cat:
 
 ## What is Nand2tetris?
 
-- 　Implement a computer and programming language that allows Tetris to operate from the smallest element, the Nand gate.
+- Implement a computer and programming language that allows Tetris to operate from the smallest element, the Nand gate.
 
 - Through their implementation, we will understand the mechanisms and theories that support modern computers, such as hardware, compilers, and assembly.
 
