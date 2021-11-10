@@ -1,4 +1,3 @@
-
 class Main {
    function void main() {
      var Array a; 
