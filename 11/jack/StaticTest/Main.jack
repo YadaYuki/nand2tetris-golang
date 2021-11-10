@@ -1,6 +1,0 @@
-class Main {
-    function void main() {
-        do StaticTest.printWord();
-        return;
-    }
-}
