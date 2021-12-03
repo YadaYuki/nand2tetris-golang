@@ -18,7 +18,7 @@ Implmentation of Nand2Tetris :smiley_cat:
 - **hardware/** ... Hardware (chapter 1 ~ 5)
 - **assembler/** ... Assembler which translate assembly to machine language by Golang ʕ◔ϖ◔ʔ(chapter 6)
 - **vmtranslator/** ... VMtranslator which translate intermediate code to assembly by Golang ʕ◔ϖ◔ʔ(chapter 7/8)
-- **jackcompiler/** ... Jack Compiler which translate high-level programming language Jack to intermediate code by Golang ʕ◔ϖ◔ʔ(chapter 10/11)
+- **jackcompiler/** ... Jack Compiler which compiles **Jack(Object oriented language like Java,C#)** to intermediate language code by Golang ʕ◔ϖ◔ʔ(chapter 10/11)
 
 
 ## Reference
