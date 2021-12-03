@@ -52,9 +52,9 @@ In addition, Jack includes the following language features
 
 ## How to work
 
-### Generate  intermediate code from Jack Program
+### Compile Jack Program to intermediate language code.
 
-You can generate intermediate code from jack program by running:
+You can compile jack program by running:
 
 ```
 $ go run main.go {path to Jack File or Dir} 
