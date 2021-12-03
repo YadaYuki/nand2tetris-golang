@@ -2,8 +2,8 @@
 
 ## Overview
 
-- Jack Compiler implementation by Golang ʕ◔ϖ◔ʔ.
-- Jack Compiler translates Jack to intermediate language code.
+- **Compiler implementation by Golang ʕ◔ϖ◔ʔ**.
+- Jack Compiler compiles **Jack(Object oriented language like Java,C#)** to intermediate language code.
 - This package corresponds to chapter 10,11 of 「Building a Modern Computer from First Principles」
 
 ## Requirements
@@ -62,7 +62,7 @@ $ go run main.go {path to Jack File or Dir}
 
 Executing this command,  single jack file or jack files in the dir passed by argument will be translated to intermediate code(.vm). Intermediate code(.vm) is generated in vm/program directory
 
-For example, to translate `vm/HelloWorld/Main.jack` program which display "Hello,world" to screen, execute below:
+For example, to compile `jack/HelloWorld/Main.jack` program which display "Hello,world" to screen, execute below:
 
 ```
 $ go run main.go jack/HelloWorld
