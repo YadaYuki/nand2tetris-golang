@@ -8,7 +8,7 @@
 
 ## Requirements
 
-- Go==1.16
+- Go==1.16+
 
 ## Jack ( High-level Programming Language )
 
